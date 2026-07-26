@@ -1,0 +1,1396 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<meta name="design_doc_mode" content="canvas">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Newsreader:ital,opsz,wght@0,6..72,400;0,6..72,500;0,6..72,600;1,6..72,400&family=IBM+Plex+Sans:wght@400;500;600;700&family=Instrument+Serif:ital@0;1&family=Instrument+Sans:wght@400;500;600;700&family=Archivo:wght@400;500;600;700;800&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<script src="./image-slot.js"></script>
+<style>
+  body { margin: 0; background: #DFDCD5; }
+  a { color: inherit; text-decoration: none; }
+  a:hover { text-decoration: underline; }
+</style>
+</helmet>
+
+<section style="padding:64px 56px 40px; display:flex; flex-direction:column; gap:40px; font-family:'IBM Plex Sans',sans-serif;">
+  <div style="display:flex; flex-direction:column; gap:10px; max-width:920px;">
+    <div style="font-size:12px; letter-spacing:.16em; text-transform:uppercase; color:#7A756B;">Turn 2 · Five-section IA</div>
+    <div style="font-size:38px; line-height:1.1; color:#1C1917; letter-spacing:-0.02em;">Rebuilt on Arrive · The Cottage · Around Here · Explore SF · Help</div>
+    <div style="font-size:16px; line-height:1.6; color:#5C574F; text-wrap:pretty;">Home stays the stay-phase screen; the five sections sit in the tab bar and the quick-actions strip pins WiFi, code, Keith and departures above everything, so nothing is more than one tap deep. Each phone below is clickable through all six screens. Turn 1 (the 15-section version) is preserved underneath.</div>
+  </div>
+
+  <div style="display:flex; flex-wrap:wrap; gap:56px; align-items:flex-start;">
+    <div id="2a" style="display:flex; flex-direction:column; gap:14px;">
+      <div style="display:flex; align-items:baseline; gap:14px;">
+        <div style="background:#1C1917; color:#F7F2E9; font-size:13px; font-weight:600; padding:5px 11px; border-radius:999px;">2a</div>
+        <div style="font-family:'Newsreader',serif; font-size:28px; color:#1C1917;">Harold</div>
+        <div style="font-size:13px; color:#6B6660;">Warm editorial</div>
+      </div>
+      <div style="width:390px; height:844px; background:#F7F2E9; border-radius:38px; border:1px solid #D8CFC0; box-shadow:0 24px 60px rgba(28,25,23,.16); overflow:hidden; display:flex; flex-direction:column; font-family:'IBM Plex Sans',sans-serif; color:#1C1917;">
+        <div style="display:flex; justify-content:space-between; padding:14px 26px 6px; font-size:13px; font-weight:600;"><span>9:41</span><span style="color:#8B8175;">5G ▮</span></div>
+
+        <div style="display:grid; grid-template-columns:repeat(4,1fr); gap:7px; padding:6px 16px 12px;">
+          <div style="background:#B3532E; color:#FFF7EE; border-radius:12px; padding:9px 6px; text-align:center;"><div style="font-size:10px; opacity:.8; letter-spacing:.1em;">CODE</div><div style="font-size:15px; font-weight:600; letter-spacing:.1em;">4821</div></div>
+          <div style="background:#FFFFFF; border:1px solid #E4DCCF; border-radius:12px; padding:9px 6px; text-align:center;"><div style="font-size:10px; color:#8B8175; letter-spacing:.1em;">WIFI</div><div style="font-size:13px; font-weight:600;">Copy</div></div>
+          <div style="background:#FFFFFF; border:1px solid #E4DCCF; border-radius:12px; padding:9px 6px; text-align:center;"><div style="font-size:10px; color:#8B8175; letter-spacing:.1em;">HOST</div><div style="font-size:13px; font-weight:600;">Keith</div></div>
+          <div style="background:#FFFFFF; border:1px solid #E4DCCF; border-radius:12px; padding:9px 6px; text-align:center;"><div style="font-size:10px; color:#8B8175; letter-spacing:.1em;">K LINE</div><div style="font-size:13px; font-weight:600; color:#B3532E;">4 min</div></div>
+        </div>
+
+        <div style="flex:1; overflow:hidden;">
+          <sc-if value="{{ a2home }}" hint-placeholder-val="{{ true }}">
+            <div style="display:flex; flex-direction:column; gap:11px; padding:2px 20px 12px;">
+              <div>
+                <div style="font-family:'Newsreader',serif; font-size:28px; line-height:1.15;">Hi Sarah —</div>
+                <div style="font-size:13px; color:#8B8175; margin-top:3px;">251 Harold Ave · Ingleside</div>
+              </div>
+              <div style="background:#FFFFFF; border:1px solid #E4DCCF; border-radius:16px; padding:16px 18px; display:flex; justify-content:space-between; align-items:center;">
+                <div><div style="font-family:'Newsreader',serif; font-size:28px; line-height:1;">58°</div><div style="font-size:13px; color:#8B8175; margin-top:4px;">Fog until noon, then sun</div></div>
+                <div style="font-size:12px; color:#8B8175; text-align:right; line-height:1.6;">Bring a layer.<br>Windy by 4.</div>
+              </div>
+              <div style="background:#FFFFFF; border:1px solid #E4DCCF; border-radius:16px; padding:6px 16px;">
+                <div style="display:flex; justify-content:space-between; padding:10px 0; border-bottom:1px solid #EFE7D9;"><span style="font-size:14px;">K Ingleside · Ocean Ave</span><span style="font-size:14px; font-weight:600; color:#B3532E;">4, 16′</span></div>
+                <div style="display:flex; justify-content:space-between; padding:10px 0;"><span style="font-size:14px;">BART · Balboa Park</span><span style="font-size:14px; font-weight:600; color:#B3532E;">6, 21′</span></div>
+              </div>
+              <div style="display:flex; flex-direction:column; gap:7px;">
+                <div style="font-size:11px; letter-spacing:.16em; text-transform:uppercase; color:#8B8175;">The guide</div>
+                <div style="background:#FFFFFF; border:1px solid #E4DCCF; border-radius:14px; padding:12px 16px;"><div style="font-size:15px; font-weight:600;">Arrive</div><div style="font-size:12px; color:#8B8175; margin-top:1px;">Getting here, parking, getting in</div></div>
+                <div style="background:#FFFFFF; border:1px solid #E4DCCF; border-radius:14px; padding:12px 16px;"><div style="font-size:15px; font-weight:600;">The Cottage</div><div style="font-size:12px; color:#8B8175; margin-top:1px;">Rooms, appliances, rules, trash</div></div>
+                <div style="background:#FFFFFF; border:1px solid #E4DCCF; border-radius:14px; padding:12px 16px;"><div style="font-size:15px; font-weight:600;">Around Here</div><div style="font-size:12px; color:#8B8175; margin-top:1px;">Transit, food, groceries, delivery</div></div>
+                <div style="background:#FFFFFF; border:1px solid #E4DCCF; border-radius:14px; padding:12px 16px;"><div style="font-size:15px; font-weight:600;">Explore SF</div><div style="font-size:12px; color:#8B8175; margin-top:1px;">Neighborhoods, interests, what's on</div></div>
+                <div style="background:#FFFFFF; border:1px solid #E4DCCF; border-radius:14px; padding:12px 16px;"><div style="font-size:15px; font-weight:600;">Help</div><div style="font-size:12px; color:#8B8175; margin-top:1px;">Emergency, Keith, checkout</div></div>
+              </div>
+            </div>
+          </sc-if>
+
+          <sc-if value="{{ a2arrive }}" hint-placeholder-val="{{ false }}">
+            <div style="display:flex; flex-direction:column; gap:10px; padding:2px 20px 12px;">
+              <div style="font-family:'Newsreader',serif; font-size:28px;">Arrive</div>
+              <div style="background:#FFFFFF; border:1px solid #E4DCCF; border-radius:16px; padding:16px 18px;">
+                <div style="font-size:11px; letter-spacing:.16em; text-transform:uppercase; color:#B3532E; font-weight:600;">Getting in</div>
+                <div style="display:flex; flex-direction:column; gap:11px; margin-top:10px;">
+                  <div style="display:flex; gap:11px;"><div style="font-family:'Newsreader',serif; font-size:18px; color:#B3532E; line-height:1.2;">1</div><div style="font-size:13px; color:#4A443C; line-height:1.55;">Facing the house, the gate is just left of the front door.</div></div>
+                  <div style="display:flex; gap:11px;"><div style="font-family:'Newsreader',serif; font-size:18px; color:#B3532E; line-height:1.2;">2</div><div style="font-size:13px; color:#4A443C; line-height:1.55;">Press the big button on the white keypad, enter <strong>4821</strong>, then the checkmark.</div></div>
+                  <div style="display:flex; gap:11px;"><div style="font-family:'Newsreader',serif; font-size:18px; color:#B3532E; line-height:1.2;">3</div><div style="font-size:13px; color:#4A443C; line-height:1.55;">Walk down the lit alley to the shared courtyard.</div></div>
+                  <div style="display:flex; gap:11px;"><div style="font-family:'Newsreader',serif; font-size:18px; color:#B3532E; line-height:1.2;">4</div><div style="font-size:13px; color:#4A443C; line-height:1.55;">At the cottage door, press unlock (lower left) and enter the same code.</div></div>
+                </div>
+                <div style="height:76px; border-radius:12px; overflow:hidden; margin-top:10px;"><image-slot id="a2-gate" shape="rect" placeholder="Gate keypad"></image-slot></div>
+              </div>
+              <div style="background:#FFFFFF; border:1px solid #E4DCCF; border-radius:16px; padding:13px 16px;"><div style="font-size:14px; font-weight:600;">From SFO</div><div style="font-size:13px; color:#6B6660; line-height:1.55; margin-top:3px;">BART direct to Balboa Park, ~30 min, then an 8-minute walk.</div></div>
+              <div style="background:#FFFFFF; border:1px solid #E4DCCF; border-radius:16px; padding:13px 16px;"><div style="font-size:14px; font-weight:600;">Parking</div><div style="font-size:13px; color:#6B6660; line-height:1.55; margin-top:3px;">One free driveway space is yours; street parking is free nearby.</div></div>
+              <div style="background:#F0E8DA; border-radius:14px; padding:12px 16px; font-size:13px; line-height:1.55; color:#4A443C;">Narrow alley — take big suitcases slowly. Arriving early? Just ask.</div>
+            </div>
+          </sc-if>
+
+          <sc-if value="{{ a2cottage }}" hint-placeholder-val="{{ false }}">
+            <div style="display:flex; flex-direction:column; gap:14px; padding:2px 20px 16px;">
+              <div style="font-family:'Newsreader',serif; font-size:30px;">The Cottage</div>
+              <div style="font-family:'Newsreader',serif; font-style:italic; font-size:15px; color:#4A443C; line-height:1.6;">Six hundred square feet behind the main house — we rebuilt it ourselves, and it's been my favorite thing in Ingleside ever since.</div>
+              <div style="display:flex; gap:8px; overflow:hidden;">
+                <div style="font-size:12px; padding:6px 12px; border-radius:999px; background:#1C1917; color:#F7F2E9; white-space:nowrap;">Rooms</div>
+                <div style="font-size:12px; padding:6px 12px; border-radius:999px; border:1px solid #E4DCCF; white-space:nowrap;">Appliances</div>
+                <div style="font-size:12px; padding:6px 12px; border-radius:999px; border:1px solid #E4DCCF; white-space:nowrap;">Rules</div>
+                <div style="font-size:12px; padding:6px 12px; border-radius:999px; border:1px solid #E4DCCF; white-space:nowrap;">Trash</div>
+              </div>
+              <div style="background:#FFFFFF; border:1px solid #E4DCCF; border-radius:16px; padding:6px 16px;">
+                <div style="padding:12px 0; border-bottom:1px solid #EFE7D9;"><div style="font-size:14px; font-weight:600;">Living room</div><div style="font-size:12px; color:#8B8175; margin-top:2px;">Sofa converts to a bed — use the foam topper.</div></div>
+                <div style="padding:12px 0; border-bottom:1px solid #EFE7D9;"><div style="font-size:14px; font-weight:600;">Loft bedroom</div><div style="font-size:12px; color:#8B8175; margin-top:2px;">Queen bed. Low ceiling at the sides — watch your head.</div></div>
+                <div style="padding:12px 0; border-bottom:1px solid #EFE7D9;"><div style="font-size:14px; font-weight:600;">Kitchen</div><div style="font-size:12px; color:#8B8175; margin-top:2px;">Keurig for one, the 12-cup drip for a crowd.</div></div>
+                <div style="padding:12px 0;"><div style="font-size:14px; font-weight:600;">Work setup</div><div style="font-size:12px; color:#8B8175; margin-top:2px;">Two desks, 817 Mbps. Calls hold up fine.</div></div>
+              </div>
+              <div style="background:#F0E8DA; border-radius:14px; padding:14px 16px;"><div style="font-size:14px; font-weight:600;">Trash goes out Tuesday</div><div style="font-size:13px; color:#4A443C; line-height:1.6; margin-top:3px;">Blue recycling, green compost, black landfill. SF means it about compost.</div></div>
+              <div style="font-size:13px; color:#B3532E; font-weight:600;">Troubleshooting — breaker, water, WiFi reboot →</div>
+            </div>
+          </sc-if>
+
+          <sc-if value="{{ a2around }}" hint-placeholder-val="{{ false }}">
+            <div style="display:flex; flex-direction:column; gap:13px; padding:2px 20px 16px;">
+              <div style="font-family:'Newsreader',serif; font-size:30px;">Around Here</div>
+              <div style="height:150px; border-radius:16px; border:1px solid #E4DCCF; background:repeating-linear-gradient(45deg,#EFE7D9,#EFE7D9 12px,#F3EDE2 12px,#F3EDE2 24px); display:flex; align-items:center; justify-content:center; font-size:12px; color:#8B8175; letter-spacing:.1em; text-transform:uppercase;">Map · pins &amp; walk times</div>
+              <div style="background:#FFFFFF; border:1px solid #E4DCCF; border-radius:16px; padding:6px 16px;">
+                <div style="display:flex; justify-content:space-between; padding:10px 0; border-bottom:1px solid #EFE7D9;"><span style="font-size:14px;">K Ingleside · 2 min walk</span><span style="font-size:14px; font-weight:600; color:#B3532E;">4, 16′</span></div>
+                <div style="display:flex; justify-content:space-between; padding:10px 0;"><span style="font-size:14px;">BART Balboa · 9 min walk</span><span style="font-size:14px; font-weight:600; color:#B3532E;">6, 21′</span></div>
+              </div>
+              <div style="background:#FFFFFF; border:1px solid #E4DCCF; border-radius:16px; padding:14px 16px;">
+                <div style="font-size:14px; font-weight:600; margin-bottom:8px;">Eat &amp; drink</div>
+                <div style="display:flex; justify-content:space-between; font-size:13px; padding:5px 0;"><span>Beeps Burgers</span><span style="color:#8B8175;">2 min</span></div>
+                <div style="font-family:'Newsreader',serif; font-style:italic; font-size:13px; color:#B3532E;">My favorite burger in the city.</div>
+                <div style="display:flex; justify-content:space-between; font-size:13px; padding:5px 0; margin-top:6px;"><span>Philz Coffee</span><span style="color:#8B8175;">2 min</span></div>
+                <div style="font-family:'Newsreader',serif; font-style:italic; font-size:13px; color:#B3532E;">Order a Mint Mojito.</div>
+              </div>
+              <div style="display:flex; gap:9px;">
+                <div style="flex:1; background:#FFFFFF; border:1px solid #E4DCCF; border-radius:14px; padding:13px;"><div style="font-size:13px; font-weight:600;">Groceries</div><div style="font-size:12px; color:#8B8175; margin-top:2px;">Whole Foods, 4 min</div></div>
+                <div style="flex:1; background:#FFFFFF; border:1px solid #E4DCCF; border-radius:14px; padding:13px;"><div style="font-size:13px; font-weight:600;">Delivery</div><div style="font-size:12px; color:#8B8175; margin-top:2px;">All three deliver here</div></div>
+              </div>
+              <div style="font-size:13px; color:#6B6660; line-height:1.6;">Clipper lives in Apple and Google Pay — add it once and tap.</div>
+            </div>
+          </sc-if>
+
+          <sc-if value="{{ a2explore }}" hint-placeholder-val="{{ false }}">
+            <div style="display:flex; flex-direction:column; gap:13px; padding:2px 20px 16px;">
+              <div style="font-family:'Newsreader',serif; font-size:30px;">Explore SF</div>
+              <div style="display:flex; gap:8px; overflow:hidden;">
+                <div style="font-size:12px; padding:6px 12px; border-radius:999px; background:#1C1917; color:#F7F2E9; white-space:nowrap;">Neighborhoods</div>
+                <div style="font-size:12px; padding:6px 12px; border-radius:999px; border:1px solid #E4DCCF; white-space:nowrap;">Nature</div>
+                <div style="font-size:12px; padding:6px 12px; border-radius:999px; border:1px solid #E4DCCF; white-space:nowrap;">Museums</div>
+                <div style="font-size:12px; padding:6px 12px; border-radius:999px; border:1px solid #E4DCCF; white-space:nowrap;">Kids</div>
+              </div>
+              <div style="background:#FFFFFF; border:1px solid #E4DCCF; border-radius:16px; overflow:hidden;">
+                <div style="height:120px;"><image-slot id="a2-hood" shape="rect" placeholder="Mission photo"></image-slot></div>
+                <div style="padding:14px 16px;"><div style="font-size:15px; font-weight:600;">The Mission</div><div style="font-size:12px; color:#B3532E; margin-top:2px;">BART, 5 minutes from Balboa Park</div><div style="font-size:13px; color:#6B6660; line-height:1.6; margin-top:5px;">Murals on Balmy Alley, then a burrito. That's the whole plan and it's a good one.</div></div>
+              </div>
+              <div style="background:#FFFFFF; border:1px solid #E4DCCF; border-radius:16px; padding:14px 16px;"><div style="font-size:15px; font-weight:600;">Golden Gate Park</div><div style="font-size:12px; color:#B3532E; margin-top:2px;">Bus 29, 20 minutes</div><div style="font-size:13px; color:#6B6660; line-height:1.6; margin-top:5px;">Cal Academy and the de Young sit side by side. Go on a foggy day.</div></div>
+              <div style="background:#F0E8DA; border-radius:14px; padding:14px 16px;"><div style="font-size:13px; font-weight:600;">While you're here</div><div style="font-size:13px; color:#4A443C; line-height:1.6; margin-top:3px;">Outside Lands is on this weekend in the park — expect crowds on the N and the 29.</div></div>
+              <div style="font-size:13px; color:#6B6660; line-height:1.6;">One local rule: never leave anything visible in a parked car. Not a jacket, not a charger.</div>
+            </div>
+          </sc-if>
+
+          <sc-if value="{{ a2help }}" hint-placeholder-val="{{ false }}">
+            <div style="display:flex; flex-direction:column; gap:13px; padding:2px 20px 16px;">
+              <div style="font-family:'Newsreader',serif; font-size:30px;">Help</div>
+              <div style="background:#FFFFFF; border:1px solid #E4DCCF; border-radius:16px; padding:16px 18px; display:flex; gap:14px; align-items:center;">
+                <div style="width:44px; height:44px; border-radius:50%; flex-shrink:0; background:#F0E8DA; border:1px solid #E4DCCF; display:flex; align-items:center; justify-content:center; font-family:'Newsreader',serif; font-size:20px; color:#B3532E;">K</div>
+                <div style="flex:1;"><div style="font-size:15px; font-weight:600;">Message Keith</div><div style="font-size:12px; color:#8B8175; margin-top:2px;">Usually replies within the hour</div></div>
+                <div style="background:#B3532E; color:#FFF7EE; border-radius:10px; padding:8px 14px; font-size:13px; font-weight:600;">Open</div>
+              </div>
+              <div style="background:#FFFFFF; border:1px solid #E4DCCF; border-radius:16px; padding:6px 16px;">
+                <div style="display:flex; justify-content:space-between; padding:11px 0; border-bottom:1px solid #EFE7D9;"><span style="font-size:14px;">Emergency</span><span style="font-size:14px; font-weight:600; color:#B3532E;">911</span></div>
+                <div style="display:flex; justify-content:space-between; padding:11px 0; border-bottom:1px solid #EFE7D9;"><span style="font-size:14px;">SF non-emergency</span><span style="font-size:14px; font-weight:600;">415-553-0123</span></div>
+                <div style="display:flex; justify-content:space-between; padding:11px 0;"><span style="font-size:14px;">City services</span><span style="font-size:14px; font-weight:600;">311</span></div>
+              </div>
+              <div style="background:#FFFFFF; border:1px solid #E4DCCF; border-radius:16px; padding:14px 16px;"><div style="font-size:14px; font-weight:600;">Nearest urgent care</div><div style="font-size:13px; color:#6B6660; line-height:1.6; margin-top:3px;">Fire extinguisher under the kitchen sink; first-aid kit in the bathroom cupboard.</div></div>
+              <div style="background:#FFFFFF; border:1px solid #E4DCCF; border-radius:16px; padding:14px 16px;"><div style="font-size:14px; font-weight:600;">Checkout · 11:00 AM</div><div style="font-size:13px; color:#6B6660; line-height:1.85; margin-top:5px;">☐ Lights and heaters off<br>☐ Door and gate re-locked<br>☐ Signed out of Netflix</div></div>
+              <div style="background:#1C1917; color:#F7F2E9; border-radius:16px; padding:16px;"><div style="font-family:'Newsreader',serif; font-size:19px;">Come back without the fees.</div><div style="font-size:12px; opacity:.75; margin-top:5px;">Book direct — about 12% less.</div></div>
+            </div>
+          </sc-if>
+        </div>
+
+        <div style="display:grid; grid-template-columns:repeat(6,1fr); border-top:1px solid #E4DCCF; background:#FFFDF9; padding:6px 4px 20px;">
+          <div onClick="{{ a2Gohome }}" style="{{ a2Tabhome }}">⌂<span>Home</span></div>
+          <div onClick="{{ a2Goarrive }}" style="{{ a2Tabarrive }}">⌖<span>Arrive</span></div>
+          <div onClick="{{ a2Gocottage }}" style="{{ a2Tabcottage }}">⌂<span>Cottage</span></div>
+          <div onClick="{{ a2Goaround }}" style="{{ a2Tabaround }}">◍<span>Around</span></div>
+          <div onClick="{{ a2Goexplore }}" style="{{ a2Tabexplore }}">↗<span>Explore</span></div>
+          <div onClick="{{ a2Gohelp }}" style="{{ a2Tabhelp }}">✚<span>Help</span></div>
+        </div>
+      </div>
+    </div>
+    <div id="2b" style="display:flex; flex-direction:column; gap:14px;">
+      <div style="display:flex; align-items:baseline; gap:14px;">
+        <div style="background:#14201D; color:#EDF1EF; font-size:13px; font-weight:600; padding:5px 11px; border-radius:999px;">2b</div>
+        <div style="font-family:'Instrument Serif',serif; font-size:30px; color:#14201D;">Fog</div>
+        <div style="font-size:13px; color:#6B6660;">Cool &amp; calm</div>
+      </div>
+      <div style="width:390px; height:844px; background:#EDF1EF; border-radius:38px; border:1px solid #CBD6D2; box-shadow:0 24px 60px rgba(20,32,29,.16); overflow:hidden; display:flex; flex-direction:column; font-family:'Instrument Sans',sans-serif; color:#14201D;">
+        <div style="display:flex; justify-content:space-between; padding:14px 26px 8px; font-size:13px; font-weight:600;"><span>9:41</span><span style="color:#6E807B;">5G ▮</span></div>
+
+        <div style="padding:0 16px 10px; display:flex; flex-direction:column; gap:10px;">
+          <div style="background:#14201D; color:#EDF1EF; border-radius:16px; padding:12px 16px; display:flex; align-items:center; gap:14px;">
+            <div><div style="font-size:9px; letter-spacing:.18em; text-transform:uppercase; opacity:.6;">Code</div><div style="font-size:22px; font-weight:600; letter-spacing:.16em;">4821</div></div>
+            <div style="width:1px; height:26px; background:rgba(237,241,239,.2);"></div>
+            <div style="font-size:12px; opacity:.85;">WiFi</div>
+            <div style="font-size:12px; opacity:.85;">Keith</div>
+            <div style="margin-left:auto; font-size:12px; color:#8FD3C5; font-weight:600;">K · 4 min</div>
+          </div>
+          <div style="display:flex; gap:6px;">
+            <div onClick="{{ b2Gohome }}" style="{{ b2Tabhome }}">Today</div>
+            <div onClick="{{ b2Goarrive }}" style="{{ b2Tabarrive }}">Arrive</div>
+            <div onClick="{{ b2Gocottage }}" style="{{ b2Tabcottage }}">Cottage</div>
+            <div onClick="{{ b2Goaround }}" style="{{ b2Tabaround }}">Around</div>
+          </div>
+          <div style="display:flex; gap:6px;">
+            <div onClick="{{ b2Goexplore }}" style="{{ b2Tabexplore }}">Explore SF</div>
+            <div onClick="{{ b2Gohelp }}" style="{{ b2Tabhelp }}">Help</div>
+          </div>
+        </div>
+
+        <div style="flex:1; overflow:hidden;">
+          <sc-if value="{{ b2home }}" hint-placeholder-val="{{ true }}">
+            <div style="display:flex; flex-direction:column; gap:16px; padding:6px 18px 18px;">
+              <div style="font-family:'Instrument Serif',serif; font-size:32px; line-height:1.1;">Good morning, Sarah.<br><span style="color:#6E807B;">Here's your day in Ingleside.</span></div>
+              <div style="display:flex; gap:10px;">
+                <div style="flex:1; background:#FFFFFF; border:1px solid #DCE4E1; border-radius:16px; padding:14px;"><div style="font-family:'Instrument Serif',serif; font-size:30px; line-height:1;">58°</div><div style="font-size:12px; color:#6E807B; margin-top:4px; line-height:1.4;">Fog till noon<br>Take a layer</div></div>
+                <div style="flex:1; background:#FFFFFF; border:1px solid #DCE4E1; border-radius:16px; padding:14px;"><div style="font-family:'Instrument Serif',serif; font-size:30px; line-height:1;">4 min</div><div style="font-size:12px; color:#6E807B; margin-top:4px; line-height:1.4;">K Ingleside<br>2 min walk</div></div>
+              </div>
+              <div style="display:flex; flex-direction:column;">
+                <div style="font-size:11px; letter-spacing:.16em; text-transform:uppercase; color:#6E807B; margin-bottom:6px;">The guide</div>
+                <div style="padding:13px 0; border-bottom:1px solid #DCE4E1;"><div style="display:flex; justify-content:space-between;"><span style="font-size:16px;">Arrive</span><span style="color:#9FB0AA;">→</span></div><div style="font-size:12px; color:#6E807B; margin-top:2px;">Getting here, parking, getting in</div></div>
+                <div style="padding:13px 0; border-bottom:1px solid #DCE4E1;"><div style="display:flex; justify-content:space-between;"><span style="font-size:16px;">The Cottage</span><span style="color:#9FB0AA;">→</span></div><div style="font-size:12px; color:#6E807B; margin-top:2px;">Rooms, appliances, rules, trash day</div></div>
+                <div style="padding:13px 0; border-bottom:1px solid #DCE4E1;"><div style="display:flex; justify-content:space-between;"><span style="font-size:16px;">Around Here</span><span style="color:#9FB0AA;">→</span></div><div style="font-size:12px; color:#6E807B; margin-top:2px;">Transit, food, groceries, delivery</div></div>
+                <div style="padding:13px 0; border-bottom:1px solid #DCE4E1;"><div style="display:flex; justify-content:space-between;"><span style="font-size:16px;">Explore SF</span><span style="color:#9FB0AA;">→</span></div><div style="font-size:12px; color:#6E807B; margin-top:2px;">Neighborhoods, interests, what's on</div></div>
+                <div style="padding:13px 0;"><div style="display:flex; justify-content:space-between;"><span style="font-size:16px;">Help</span><span style="color:#9FB0AA;">→</span></div><div style="font-size:12px; color:#6E807B; margin-top:2px;">Emergency, Keith, checkout</div></div>
+              </div>
+            </div>
+          </sc-if>
+
+          <sc-if value="{{ b2arrive }}" hint-placeholder-val="{{ false }}">
+            <div style="display:flex; flex-direction:column; gap:11px; padding:4px 18px 14px;">
+              <div style="font-family:'Instrument Serif',serif; font-size:30px;">Arrive</div>
+              <div style="background:#FFFFFF; border:1px solid #DCE4E1; border-radius:18px; padding:16px 18px;">
+                <div style="font-size:11px; letter-spacing:.16em; text-transform:uppercase; color:#2C6D61;">Getting in</div>
+                <div style="display:flex; flex-direction:column; gap:10px; margin-top:10px;">
+                  <div style="font-size:13px; color:#3B4E49; line-height:1.55;"><strong>1</strong> · The gate is just left of the front door.</div>
+                  <div style="font-size:13px; color:#3B4E49; line-height:1.55;"><strong>2</strong> · Wake the keypad, enter <strong>4821</strong>, press the checkmark.</div>
+                  <div style="font-size:13px; color:#3B4E49; line-height:1.55;"><strong>3</strong> · Down the lit alley to the courtyard.</div>
+                  <div style="font-size:13px; color:#3B4E49; line-height:1.55;"><strong>4</strong> · Cottage door: unlock button, same code.</div>
+                </div>
+                <div style="height:84px; border-radius:14px; overflow:hidden; margin-top:10px;"><image-slot id="b2-gate" shape="rect" placeholder="Gate keypad"></image-slot></div>
+              </div>
+              <div style="background:#FFFFFF; border:1px solid #DCE4E1; border-radius:18px; padding:13px 16px;"><div style="font-size:14px; font-weight:600;">From SFO</div><div style="font-size:13px; color:#5C716B; line-height:1.55; margin-top:3px;">BART direct to Balboa Park, ~30 min, then an 8-minute walk.</div></div>
+              <div style="background:#FFFFFF; border:1px solid #DCE4E1; border-radius:18px; padding:13px 16px;"><div style="font-size:14px; font-weight:600;">Parking</div><div style="font-size:13px; color:#5C716B; line-height:1.55; margin-top:3px;">One free driveway space is yours; street parking is free nearby.</div></div>
+              <div style="background:#DFE9E5; border-radius:16px; padding:12px 16px; font-size:13px; line-height:1.55; color:#25423B;">Narrow alley — take big suitcases slowly. Need an early check-in? Just ask.</div>
+            </div>
+          </sc-if>
+
+          <sc-if value="{{ b2cottage }}" hint-placeholder-val="{{ false }}">
+            <div style="display:flex; flex-direction:column; gap:14px; padding:6px 18px 18px;">
+              <div style="font-family:'Instrument Serif',serif; font-size:32px;">The Cottage</div>
+              <div style="font-size:14px; color:#5C716B; line-height:1.65;">Six hundred square feet behind the main house. We rebuilt it ourselves — here's how everything works.</div>
+              <div style="display:flex; flex-direction:column;">
+                <div style="padding:13px 0; border-bottom:1px solid #DCE4E1;"><div style="font-size:15px; font-weight:600;">Living room</div><div style="font-size:13px; color:#5C716B; margin-top:3px; line-height:1.5;">Sofa converts to a bed — use the foam topper.</div></div>
+                <div style="padding:13px 0; border-bottom:1px solid #DCE4E1;"><div style="font-size:15px; font-weight:600;">Loft bedroom</div><div style="font-size:13px; color:#5C716B; margin-top:3px; line-height:1.5;">Queen bed, low ceiling at the sides — watch your head.</div></div>
+                <div style="padding:13px 0; border-bottom:1px solid #DCE4E1;"><div style="font-size:15px; font-weight:600;">Kitchen &amp; appliances</div><div style="font-size:13px; color:#5C716B; margin-top:3px; line-height:1.5;">Keurig for one, drip for a crowd, Sodastream under the counter.</div></div>
+                <div style="padding:13px 0;"><div style="font-size:15px; font-weight:600;">Work setup</div><div style="font-size:13px; color:#5C716B; margin-top:3px; line-height:1.5;">Two desks, 817 Mbps. Calls hold up fine.</div></div>
+              </div>
+              <div style="background:#DFE9E5; border-radius:16px; padding:14px 16px;"><div style="font-size:14px; font-weight:600;">Trash goes out Tuesday</div><div style="font-size:13px; color:#25423B; line-height:1.6; margin-top:3px;">Blue recycling, green compost, black landfill.</div></div>
+              <div style="font-size:13px; color:#2C6D61; font-weight:600;">House rules · troubleshooting →</div>
+            </div>
+          </sc-if>
+
+          <sc-if value="{{ b2around }}" hint-placeholder-val="{{ false }}">
+            <div style="display:flex; flex-direction:column; gap:13px; padding:6px 18px 18px;">
+              <div style="font-family:'Instrument Serif',serif; font-size:32px;">Around Here</div>
+              <div style="height:150px; border-radius:18px; border:1px solid #DCE4E1; background:linear-gradient(#E3EBE8,#D7E3DF); display:flex; align-items:center; justify-content:center; font-size:12px; color:#6E807B; letter-spacing:.1em; text-transform:uppercase;">Map · pins &amp; walk times</div>
+              <div style="display:flex; flex-direction:column;">
+                <div style="display:flex; justify-content:space-between; align-items:center; padding:11px 0; border-bottom:1px solid #DCE4E1;"><div><div style="font-size:14px; font-weight:600;">K Ingleside</div><div style="font-size:12px; color:#6E807B;">2 min walk</div></div><div style="font-family:'Instrument Serif',serif; font-size:22px; color:#2C6D61;">4′</div></div>
+                <div style="display:flex; justify-content:space-between; align-items:center; padding:11px 0; border-bottom:1px solid #DCE4E1;"><div><div style="font-size:14px; font-weight:600;">BART Balboa Park</div><div style="font-size:12px; color:#6E807B;">9 min walk</div></div><div style="font-family:'Instrument Serif',serif; font-size:22px; color:#2C6D61;">6′</div></div>
+              </div>
+              <div>
+                <div style="font-size:11px; letter-spacing:.16em; text-transform:uppercase; color:#6E807B; margin-bottom:4px;">Eat &amp; drink</div>
+                <div style="padding:11px 0; border-bottom:1px solid #DCE4E1;"><div style="display:flex; justify-content:space-between;"><span style="font-size:15px; font-weight:600;">Beeps Burgers</span><span style="font-size:12px; color:#6E807B;">2 min</span></div><div style="font-size:13px; color:#4A605A; margin-top:3px;">My favorite burger in the city.</div></div>
+                <div style="padding:11px 0;"><div style="display:flex; justify-content:space-between;"><span style="font-size:15px; font-weight:600;">Philz Coffee</span><span style="font-size:12px; color:#6E807B;">2 min</span></div><div style="font-size:13px; color:#4A605A; margin-top:3px;">Order a Mint Mojito.</div></div>
+              </div>
+              <div style="display:flex; gap:10px;">
+                <div style="flex:1; background:#FFFFFF; border:1px solid #DCE4E1; border-radius:14px; padding:13px;"><div style="font-size:13px; font-weight:600;">Groceries</div><div style="font-size:12px; color:#6E807B; margin-top:2px;">Whole Foods, 4 min</div></div>
+                <div style="flex:1; background:#FFFFFF; border:1px solid #DCE4E1; border-radius:14px; padding:13px;"><div style="font-size:13px; font-weight:600;">Delivery</div><div style="font-size:12px; color:#6E807B; margin-top:2px;">All three deliver here</div></div>
+              </div>
+            </div>
+          </sc-if>
+
+          <sc-if value="{{ b2explore }}" hint-placeholder-val="{{ false }}">
+            <div style="display:flex; flex-direction:column; gap:13px; padding:6px 18px 18px;">
+              <div style="font-family:'Instrument Serif',serif; font-size:32px;">Explore SF</div>
+              <div style="display:flex; gap:6px; overflow:hidden;">
+                <div style="font-size:12px; padding:6px 12px; border-radius:999px; background:#2C6D61; color:#F2F7F5; white-space:nowrap;">Neighborhoods</div>
+                <div style="font-size:12px; padding:6px 12px; border-radius:999px; background:#FFFFFF; border:1px solid #DCE4E1; white-space:nowrap;">Nature</div>
+                <div style="font-size:12px; padding:6px 12px; border-radius:999px; background:#FFFFFF; border:1px solid #DCE4E1; white-space:nowrap;">Kids</div>
+              </div>
+              <div style="border-radius:18px; overflow:hidden; background:#FFFFFF; border:1px solid #DCE4E1;">
+                <div style="height:120px;"><image-slot id="b2-hood" shape="rect" placeholder="Mission photo"></image-slot></div>
+                <div style="padding:14px 16px;"><div style="font-size:16px; font-weight:600;">The Mission</div><div style="font-size:12px; color:#2C6D61; margin-top:2px;">BART, 5 minutes from Balboa Park</div><div style="font-size:13px; color:#5C716B; line-height:1.6; margin-top:5px;">Murals on Balmy Alley, then a burrito. That's the whole plan.</div></div>
+              </div>
+              <div style="background:#FFFFFF; border:1px solid #DCE4E1; border-radius:18px; padding:14px 16px;"><div style="font-size:16px; font-weight:600;">Ocean Beach &amp; the Sunset</div><div style="font-size:12px; color:#2C6D61; margin-top:2px;">Bus 29, 25 minutes</div><div style="font-size:13px; color:#5C716B; line-height:1.6; margin-top:5px;">Four miles of sand and fire pits at the south end.</div></div>
+              <div style="background:#DFE9E5; border-radius:16px; padding:14px 16px; font-size:13px; line-height:1.6; color:#25423B;">Never leave anything visible in a parked car — not a jacket, not a charger.</div>
+            </div>
+          </sc-if>
+
+          <sc-if value="{{ b2help }}" hint-placeholder-val="{{ false }}">
+            <div style="display:flex; flex-direction:column; gap:13px; padding:6px 18px 18px;">
+              <div style="font-family:'Instrument Serif',serif; font-size:32px;">Help</div>
+              <div style="background:#FFFFFF; border:1px solid #DCE4E1; border-radius:18px; padding:16px; display:flex; gap:14px; align-items:center;">
+                <div style="width:44px; height:44px; border-radius:50%; flex-shrink:0; background:#DFE9E5; display:flex; align-items:center; justify-content:center; font-family:'Instrument Serif',serif; font-size:21px; color:#2C6D61;">K</div>
+                <div style="flex:1;"><div style="font-size:15px; font-weight:600;">Message Keith</div><div style="font-size:12px; color:#6E807B; margin-top:2px;">Usually replies within the hour</div></div>
+                <div style="background:#2C6D61; color:#F2F7F5; border-radius:999px; padding:8px 16px; font-size:13px; font-weight:600;">Open</div>
+              </div>
+              <div style="display:flex; flex-direction:column;">
+                <div style="display:flex; justify-content:space-between; padding:12px 0; border-bottom:1px solid #DCE4E1;"><span style="font-size:14px;">Emergency</span><span style="font-size:14px; font-weight:600; color:#2C6D61;">911</span></div>
+                <div style="display:flex; justify-content:space-between; padding:12px 0; border-bottom:1px solid #DCE4E1;"><span style="font-size:14px;">SF non-emergency</span><span style="font-size:14px; font-weight:600;">415-553-0123</span></div>
+                <div style="display:flex; justify-content:space-between; padding:12px 0;"><span style="font-size:14px;">City services</span><span style="font-size:14px; font-weight:600;">311</span></div>
+              </div>
+              <div style="background:#FFFFFF; border:1px solid #DCE4E1; border-radius:18px; padding:14px 16px;"><div style="font-size:14px; font-weight:600;">In the cottage</div><div style="font-size:13px; color:#5C716B; line-height:1.6; margin-top:3px;">Fire extinguisher under the kitchen sink, first-aid kit in the bathroom cupboard.</div></div>
+              <div style="background:#FFFFFF; border:1px solid #DCE4E1; border-radius:18px; padding:14px 16px;"><div style="font-size:14px; font-weight:600;">Checkout · 11:00 AM</div><div style="font-size:13px; color:#5C716B; line-height:1.85; margin-top:4px;">○ Lights and heaters off<br>○ Door and gate re-locked<br>○ Signed out of Netflix</div></div>
+              <div style="background:#14201D; color:#EDF1EF; border-radius:18px; padding:16px;"><div style="font-family:'Instrument Serif',serif; font-size:20px;">Next time, book direct.</div><div style="font-size:12px; opacity:.72; margin-top:5px;">Roughly 12% less without the platform fee.</div></div>
+            </div>
+          </sc-if>
+        </div>
+      </div>
+    </div>
+    <div id="2c" style="display:flex; flex-direction:column; gap:14px;">
+      <div style="display:flex; align-items:baseline; gap:14px;">
+        <div style="background:#0D0F0E; color:#D6F24B; font-size:13px; font-weight:700; padding:5px 11px; border-radius:999px;">2c</div>
+        <div style="font-family:'Archivo',sans-serif; font-size:26px; font-weight:800; letter-spacing:-.02em; color:#0D0F0E;">INGLESIDE</div>
+        <div style="font-size:13px; color:#6B6660;">Dark utility</div>
+      </div>
+      <div style="width:390px; height:844px; background:#0D0F0E; border-radius:38px; border:1px solid #2A2E2B; box-shadow:0 24px 60px rgba(13,15,14,.35); overflow:hidden; display:flex; flex-direction:column; font-family:'Archivo',sans-serif; color:#F1F4F0;">
+        <div style="display:flex; justify-content:space-between; padding:14px 26px 8px; font-size:13px; font-weight:600;"><span>9:41</span><span style="color:#8D958F;">5G ▮</span></div>
+
+        <div style="display:grid; grid-template-columns:1.3fr 1fr 1fr 1fr; gap:6px; padding:4px 16px 12px;">
+          <div style="background:#D6F24B; color:#0D0F0E; border-radius:10px; padding:8px 10px;"><div style="font-family:'DM Mono',monospace; font-size:9px; letter-spacing:.12em;">CODE</div><div style="font-family:'DM Mono',monospace; font-size:17px; font-weight:500; letter-spacing:.08em;">4821</div></div>
+          <div style="background:#171A18; border-radius:10px; padding:8px 10px;"><div style="font-family:'DM Mono',monospace; font-size:9px; letter-spacing:.12em; color:#8D958F;">WIFI</div><div style="font-size:13px; font-weight:700;">COPY</div></div>
+          <div style="background:#171A18; border-radius:10px; padding:8px 10px;"><div style="font-family:'DM Mono',monospace; font-size:9px; letter-spacing:.12em; color:#8D958F;">HOST</div><div style="font-size:13px; font-weight:700;">KEITH</div></div>
+          <div style="background:#171A18; border-radius:10px; padding:8px 10px;"><div style="font-family:'DM Mono',monospace; font-size:9px; letter-spacing:.12em; color:#8D958F;">K LINE</div><div style="font-size:13px; font-weight:700; color:#D6F24B;">4 MIN</div></div>
+        </div>
+
+        <div style="flex:1; overflow:hidden;">
+          <sc-if value="{{ c2home }}" hint-placeholder-val="{{ true }}">
+            <div style="display:flex; flex-direction:column; gap:13px; padding:2px 16px 16px;">
+              <div>
+                <div style="font-family:'DM Mono',monospace; font-size:11px; letter-spacing:.14em; color:#8D958F;">251 HAROLD AVE · INGLESIDE</div>
+                <div style="font-size:30px; font-weight:800; letter-spacing:-.03em; line-height:1.05; margin-top:5px;">HI SARAH</div>
+              </div>
+              <div style="display:flex; gap:8px;">
+                <div style="flex:1; background:#171A18; border-radius:12px; padding:13px;"><div style="font-size:26px; font-weight:800;">58°</div><div style="font-family:'DM Mono',monospace; font-size:10px; color:#8D958F; margin-top:3px; line-height:1.5;">FOG TILL NOON<br>TAKE A LAYER</div></div>
+                <div style="flex:1; background:#171A18; border-radius:12px; padding:13px;"><div style="font-size:26px; font-weight:800;">4 MIN</div><div style="font-family:'DM Mono',monospace; font-size:10px; color:#8D958F; margin-top:3px; line-height:1.5;">K INGLESIDE<br>2 MIN WALK</div></div>
+              </div>
+              <div style="display:flex; flex-direction:column; gap:8px;">
+                <div style="background:#171A18; border-radius:14px; padding:14px 16px; display:flex; justify-content:space-between; align-items:center;"><div><div style="font-size:17px; font-weight:700;">ARRIVE</div><div style="font-family:'DM Mono',monospace; font-size:10px; color:#8D958F; margin-top:3px;">GETTING HERE · PARKING · GETTING IN</div></div><div style="color:#D6F24B;">→</div></div>
+                <div style="background:#171A18; border-radius:14px; padding:14px 16px; display:flex; justify-content:space-between; align-items:center;"><div><div style="font-size:17px; font-weight:700;">THE COTTAGE</div><div style="font-family:'DM Mono',monospace; font-size:10px; color:#8D958F; margin-top:3px;">ROOMS · APPLIANCES · RULES · TRASH</div></div><div style="color:#D6F24B;">→</div></div>
+                <div style="background:#171A18; border-radius:14px; padding:14px 16px; display:flex; justify-content:space-between; align-items:center;"><div><div style="font-size:17px; font-weight:700;">AROUND HERE</div><div style="font-family:'DM Mono',monospace; font-size:10px; color:#8D958F; margin-top:3px;">TRANSIT · FOOD · GROCERIES · DELIVERY</div></div><div style="color:#D6F24B;">→</div></div>
+                <div style="background:#171A18; border-radius:14px; padding:14px 16px; display:flex; justify-content:space-between; align-items:center;"><div><div style="font-size:17px; font-weight:700;">EXPLORE SF</div><div style="font-family:'DM Mono',monospace; font-size:10px; color:#8D958F; margin-top:3px;">NEIGHBOURHOODS · INTERESTS · WHAT'S ON</div></div><div style="color:#D6F24B;">→</div></div>
+                <div style="background:#171A18; border-radius:14px; padding:14px 16px; display:flex; justify-content:space-between; align-items:center;"><div><div style="font-size:17px; font-weight:700;">HELP</div><div style="font-family:'DM Mono',monospace; font-size:10px; color:#8D958F; margin-top:3px;">EMERGENCY · KEITH · CHECKOUT</div></div><div style="color:#D6F24B;">→</div></div>
+              </div>
+            </div>
+          </sc-if>
+
+          <sc-if value="{{ c2arrive }}" hint-placeholder-val="{{ false }}">
+            <div style="display:flex; flex-direction:column; gap:13px; padding:2px 16px 16px;">
+              <div style="font-size:30px; font-weight:800; letter-spacing:-.03em;">ARRIVE</div>
+              <div style="background:#171A18; border-radius:14px; padding:16px;">
+                <div style="font-family:'DM Mono',monospace; font-size:10px; letter-spacing:.14em; color:#D6F24B;">GETTING IN</div>
+                <div style="display:flex; flex-direction:column; gap:9px; margin-top:10px; font-size:13px; color:#C6CCC7; line-height:1.5;">
+                  <div><span style="color:#D6F24B; font-family:'DM Mono',monospace;">01</span> &nbsp;Gate is just left of the front door.</div>
+                  <div><span style="color:#D6F24B; font-family:'DM Mono',monospace;">02</span> &nbsp;Wake the keypad, enter <strong style="color:#F1F4F0;">4821</strong>, press ✓.</div>
+                  <div><span style="color:#D6F24B; font-family:'DM Mono',monospace;">03</span> &nbsp;Down the lit alley to the courtyard.</div>
+                  <div><span style="color:#D6F24B; font-family:'DM Mono',monospace;">04</span> &nbsp;Cottage door: unlock button, same code.</div>
+                </div>
+                <div style="height:110px; border-radius:10px; overflow:hidden; margin-top:12px;"><image-slot id="c2-gate" shape="rect" placeholder="Gate keypad photo"></image-slot></div>
+              </div>
+              <div style="background:#171A18; border-radius:14px; padding:14px 16px;"><div style="font-family:'DM Mono',monospace; font-size:10px; letter-spacing:.14em; color:#D6F24B;">FROM SFO</div><div style="font-size:13px; color:#C6CCC7; line-height:1.6; margin-top:5px;">BART direct to Balboa Park, ~30 min, then an 8-minute walk.</div></div>
+              <div style="background:#171A18; border-radius:14px; padding:14px 16px;"><div style="font-family:'DM Mono',monospace; font-size:10px; letter-spacing:.14em; color:#D6F24B;">PARKING</div><div style="font-size:13px; color:#C6CCC7; line-height:1.6; margin-top:5px;">One free driveway space is yours. Street parking is free nearby.</div></div>
+              <div style="background:#171A18; border-left:3px solid #D6F24B; border-radius:0 12px 12px 0; padding:13px 15px; font-size:13px; color:#C6CCC7; line-height:1.6;">Narrow alley — take big suitcases slowly.</div>
+            </div>
+          </sc-if>
+
+          <sc-if value="{{ c2cottage }}" hint-placeholder-val="{{ false }}">
+            <div style="display:flex; flex-direction:column; gap:13px; padding:2px 16px 16px;">
+              <div style="font-size:30px; font-weight:800; letter-spacing:-.03em;">THE COTTAGE</div>
+              <div style="font-size:13px; color:#A9B0AB; line-height:1.6;">600 sq ft behind the main house. We rebuilt it ourselves — here's how it all works.</div>
+              <div style="display:flex; gap:6px; font-family:'DM Mono',monospace; font-size:10px;">
+                <div style="padding:6px 10px; border-radius:6px; background:#D6F24B; color:#0D0F0E;">ROOMS</div>
+                <div style="padding:6px 10px; border-radius:6px; background:#171A18; color:#8D958F;">APPLIANCES</div>
+                <div style="padding:6px 10px; border-radius:6px; background:#171A18; color:#8D958F;">RULES</div>
+                <div style="padding:6px 10px; border-radius:6px; background:#171A18; color:#8D958F;">TRASH</div>
+              </div>
+              <div style="display:flex; flex-direction:column;">
+                <div style="padding:13px 0; border-top:1px solid #262A27;"><div style="font-size:15px; font-weight:700;">LIVING ROOM</div><div style="font-size:13px; color:#A9B0AB; margin-top:3px; line-height:1.5;">Sofa converts to a bed — use the foam topper.</div></div>
+                <div style="padding:13px 0; border-top:1px solid #262A27;"><div style="font-size:15px; font-weight:700;">LOFT BEDROOM</div><div style="font-size:13px; color:#A9B0AB; margin-top:3px; line-height:1.5;">Queen bed. Low ceiling at the sides — watch your head.</div></div>
+                <div style="padding:13px 0; border-top:1px solid #262A27;"><div style="font-size:15px; font-weight:700;">KITCHEN</div><div style="font-size:13px; color:#A9B0AB; margin-top:3px; line-height:1.5;">Keurig for one, drip for a crowd, Sodastream below.</div></div>
+                <div style="padding:13px 0; border-top:1px solid #262A27; border-bottom:1px solid #262A27;"><div style="font-size:15px; font-weight:700;">WORK SETUP</div><div style="font-size:13px; color:#A9B0AB; margin-top:3px; line-height:1.5;">Two desks, 817 Mbps. Calls hold up fine.</div></div>
+              </div>
+              <div style="background:#171A18; border-left:3px solid #D6F24B; border-radius:0 12px 12px 0; padding:13px 15px;"><div style="font-size:14px; font-weight:700;">TRASH GOES OUT TUESDAY</div><div style="font-size:13px; color:#A9B0AB; line-height:1.6; margin-top:3px;">Blue recycling, green compost, black landfill.</div></div>
+            </div>
+          </sc-if>
+
+          <sc-if value="{{ c2around }}" hint-placeholder-val="{{ false }}">
+            <div style="display:flex; flex-direction:column; gap:13px; padding:2px 16px 16px;">
+              <div style="font-size:30px; font-weight:800; letter-spacing:-.03em;">AROUND HERE</div>
+              <div style="height:150px; border-radius:12px; background:#171A18; display:flex; align-items:center; justify-content:center; font-family:'DM Mono',monospace; font-size:11px; color:#8D958F; letter-spacing:.14em;">MAP · CACHED OFFLINE</div>
+              <div style="display:flex; flex-direction:column;">
+                <div style="display:flex; align-items:center; gap:12px; padding:12px 0; border-bottom:1px solid #262A27;"><div style="width:32px; height:32px; border-radius:50%; background:#D6F24B; color:#0D0F0E; display:flex; align-items:center; justify-content:center; font-weight:800;">K</div><div style="flex:1; font-size:14px; font-weight:700;">INGLESIDE<div style="font-family:'DM Mono',monospace; font-size:10px; color:#8D958F; font-weight:400;">2 MIN WALK</div></div><div style="font-family:'DM Mono',monospace; font-size:15px; color:#D6F24B;">4′</div></div>
+                <div style="display:flex; align-items:center; gap:12px; padding:12px 0; border-bottom:1px solid #262A27;"><div style="width:32px; height:32px; border-radius:50%; background:#F1F4F0; color:#0D0F0E; display:flex; align-items:center; justify-content:center; font-weight:800; font-size:10px;">BART</div><div style="flex:1; font-size:14px; font-weight:700;">BALBOA PARK<div style="font-family:'DM Mono',monospace; font-size:10px; color:#8D958F; font-weight:400;">9 MIN WALK</div></div><div style="font-family:'DM Mono',monospace; font-size:15px; color:#D6F24B;">6′</div></div>
+              </div>
+              <div>
+                <div style="font-family:'DM Mono',monospace; font-size:10px; letter-spacing:.14em; color:#8D958F;">EAT &amp; DRINK</div>
+                <div style="padding:11px 0; border-bottom:1px solid #262A27;"><div style="display:flex; justify-content:space-between;"><span style="font-size:15px; font-weight:700;">BEEPS BURGERS</span><span style="font-family:'DM Mono',monospace; font-size:11px; color:#D6F24B;">2 MIN</span></div><div style="font-size:13px; color:#A9B0AB; margin-top:3px;">My favorite burger in the city.</div></div>
+                <div style="padding:11px 0;"><div style="display:flex; justify-content:space-between;"><span style="font-size:15px; font-weight:700;">PHILZ COFFEE</span><span style="font-family:'DM Mono',monospace; font-size:11px; color:#D6F24B;">2 MIN</span></div><div style="font-size:13px; color:#A9B0AB; margin-top:3px;">Order a Mint Mojito.</div></div>
+              </div>
+              <div style="display:flex; gap:8px;">
+                <div style="flex:1; background:#171A18; border-radius:12px; padding:13px;"><div style="font-size:13px; font-weight:700;">GROCERIES</div><div style="font-family:'DM Mono',monospace; font-size:10px; color:#8D958F; margin-top:3px;">WHOLE FOODS · 4 MIN</div></div>
+                <div style="flex:1; background:#171A18; border-radius:12px; padding:13px;"><div style="font-size:13px; font-weight:700;">DELIVERY</div><div style="font-family:'DM Mono',monospace; font-size:10px; color:#8D958F; margin-top:3px;">ALL THREE DELIVER</div></div>
+              </div>
+            </div>
+          </sc-if>
+
+          <sc-if value="{{ c2explore }}" hint-placeholder-val="{{ false }}">
+            <div style="display:flex; flex-direction:column; gap:13px; padding:2px 16px 16px;">
+              <div style="font-size:30px; font-weight:800; letter-spacing:-.03em;">EXPLORE SF</div>
+              <div style="display:flex; gap:6px; font-family:'DM Mono',monospace; font-size:10px; overflow:hidden;">
+                <div style="padding:6px 10px; border-radius:6px; background:#D6F24B; color:#0D0F0E; white-space:nowrap;">NEIGHBOURHOODS</div>
+                <div style="padding:6px 10px; border-radius:6px; background:#171A18; color:#8D958F; white-space:nowrap;">NATURE</div>
+                <div style="padding:6px 10px; border-radius:6px; background:#171A18; color:#8D958F; white-space:nowrap;">MUSEUMS</div>
+                <div style="padding:6px 10px; border-radius:6px; background:#171A18; color:#8D958F; white-space:nowrap;">KIDS</div>
+              </div>
+              <div style="background:#171A18; border-radius:14px; overflow:hidden;">
+                <div style="height:120px;"><image-slot id="c2-hood" shape="rect" placeholder="Mission photo"></image-slot></div>
+                <div style="padding:14px 16px;"><div style="font-size:16px; font-weight:700;">THE MISSION</div><div style="font-family:'DM Mono',monospace; font-size:10px; color:#D6F24B; margin-top:3px;">BART · 5 MIN FROM BALBOA PARK</div><div style="font-size:13px; color:#A9B0AB; line-height:1.55; margin-top:5px;">Murals on Balmy Alley, then a burrito. That's the whole plan.</div></div>
+              </div>
+              <div style="background:#171A18; border-radius:14px; padding:14px 16px;"><div style="font-size:16px; font-weight:700;">OCEAN BEACH</div><div style="font-family:'DM Mono',monospace; font-size:10px; color:#D6F24B; margin-top:3px;">BUS 29 · 25 MIN</div><div style="font-size:13px; color:#A9B0AB; line-height:1.55; margin-top:5px;">Four miles of sand, fire pits at the south end.</div></div>
+              <div style="background:#2A1614; color:#FF8A7A; border-radius:12px; padding:13px 15px; font-size:13px; line-height:1.6;">Never leave anything visible in a parked car. Not a jacket, not a charger.</div>
+            </div>
+          </sc-if>
+
+          <sc-if value="{{ c2help }}" hint-placeholder-val="{{ false }}">
+            <div style="display:flex; flex-direction:column; gap:13px; padding:2px 16px 16px;">
+              <div style="font-size:30px; font-weight:800; letter-spacing:-.03em;">HELP</div>
+              <div style="background:#171A18; border-radius:14px; padding:14px 16px; display:flex; gap:13px; align-items:center;">
+                <div style="width:42px; height:42px; border-radius:50%; flex-shrink:0; background:#0D0F0E; border:1px solid #D6F24B; display:flex; align-items:center; justify-content:center; font-size:17px; font-weight:800; color:#D6F24B;">K</div>
+                <div style="flex:1;"><div style="font-size:15px; font-weight:700;">MESSAGE KEITH</div><div style="font-family:'DM Mono',monospace; font-size:10px; color:#8D958F; margin-top:3px;">REPLIES WITHIN THE HOUR</div></div>
+                <div style="background:#D6F24B; color:#0D0F0E; border-radius:8px; padding:8px 14px; font-size:12px; font-weight:700;">OPEN</div>
+              </div>
+              <div style="display:flex; flex-direction:column;">
+                <div style="display:flex; justify-content:space-between; padding:12px 0; border-top:1px solid #262A27;"><span style="font-size:14px;">EMERGENCY</span><span style="font-family:'DM Mono',monospace; font-size:14px; color:#FF8A7A;">911</span></div>
+                <div style="display:flex; justify-content:space-between; padding:12px 0; border-top:1px solid #262A27;"><span style="font-size:14px;">SF NON-EMERGENCY</span><span style="font-family:'DM Mono',monospace; font-size:14px;">415-553-0123</span></div>
+                <div style="display:flex; justify-content:space-between; padding:12px 0; border-top:1px solid #262A27; border-bottom:1px solid #262A27;"><span style="font-size:14px;">CITY SERVICES</span><span style="font-family:'DM Mono',monospace; font-size:14px;">311</span></div>
+              </div>
+              <div style="background:#171A18; border-radius:14px; padding:14px 16px;"><div style="font-size:14px; font-weight:700;">IN THE COTTAGE</div><div style="font-size:13px; color:#A9B0AB; line-height:1.6; margin-top:4px;">Fire extinguisher under the kitchen sink, first-aid kit in the bathroom cupboard.</div></div>
+              <div style="background:#171A18; border-radius:14px; padding:14px 16px;"><div style="font-size:14px; font-weight:700;">CHECKOUT · 11:00</div><div style="font-family:'DM Mono',monospace; font-size:12px; color:#A9B0AB; line-height:1.9; margin-top:5px;">☐ LIGHTS AND HEATERS OFF<br>☐ DOOR AND GATE RE-LOCKED<br>☐ SIGNED OUT OF NETFLIX</div></div>
+              <div style="background:#D6F24B; color:#0D0F0E; border-radius:14px; padding:14px 16px;"><div style="font-size:18px; font-weight:800; letter-spacing:-.02em; line-height:1.1;">COME BACK WITHOUT THE FEES</div><div style="font-size:12px; margin-top:5px; opacity:.8;">Book direct — about 12% less.</div></div>
+            </div>
+          </sc-if>
+        </div>
+
+        <div style="display:grid; grid-template-columns:repeat(6,1fr); border-top:1px solid #262A27; background:#111413; padding:6px 4px 20px;">
+          <div onClick="{{ c2Gohome }}" style="{{ c2Tabhome }}">⌂<span>HOME</span></div>
+          <div onClick="{{ c2Goarrive }}" style="{{ c2Tabarrive }}">⌖<span>ARRIVE</span></div>
+          <div onClick="{{ c2Gocottage }}" style="{{ c2Tabcottage }}">▣<span>COTTAGE</span></div>
+          <div onClick="{{ c2Goaround }}" style="{{ c2Tabaround }}">◍<span>AROUND</span></div>
+          <div onClick="{{ c2Goexplore }}" style="{{ c2Tabexplore }}">↗<span>EXPLORE</span></div>
+          <div onClick="{{ c2Gohelp }}" style="{{ c2Tabhelp }}">✚<span>HELP</span></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section style="padding:24px 56px 96px; display:flex; flex-direction:column; gap:40px; font-family:'IBM Plex Sans',sans-serif; border-top:1px solid #C9C5BD;">
+  <div style="display:flex; flex-direction:column; gap:10px; max-width:920px;">
+    <div style="font-size:12px; letter-spacing:.16em; text-transform:uppercase; color:#7A756B;">Turn 1 · Branding directions</div>
+    <div style="font-size:38px; line-height:1.1; color:#1C1917; letter-spacing:-0.02em;">Guidebook — three directions for The SF Cottage</div>
+    <div style="font-size:16px; line-height:1.6; color:#5C574F; text-wrap:pretty;">Each direction is a complete visual system plus a different navigation model. The live phone is clickable — tap the nav to move between Home, Getting Around, Eat &amp; Drink and Checkout. Beside it: the before-arrival home, the generic (no-hash) visitor home, a desktop section page, and the printed one-page essentials sheet. Reference a direction by its badge in chat.</div>
+  </div>
+
+  <div style="display:flex; flex-wrap:wrap; gap:56px; align-items:flex-start;">
+    <div id="1a" style="display:flex; flex-direction:column; gap:20px;">
+      <div style="display:flex; align-items:baseline; gap:14px;">
+        <div style="background:#1C1917; color:#F7F2E9; font-size:13px; font-weight:600; padding:5px 11px; border-radius:999px;">1a</div>
+        <div style="font-family:'Newsreader',serif; font-size:30px; color:#1C1917;">Harold</div>
+        <div style="font-size:13px; color:#6B6660;">Warm editorial · bottom tabs + section grid</div>
+      </div>
+      <div style="display:flex; gap:22px; align-items:center; padding:14px 18px; background:#F7F2E9; border:1px solid #E4DCCF; border-radius:14px; width:max-content;">
+        <div style="display:flex; gap:7px;">
+          <div style="width:26px; height:26px; border-radius:7px; background:#F7F2E9; border:1px solid #E4DCCF;"></div>
+          <div style="width:26px; height:26px; border-radius:7px; background:#B3532E;"></div>
+          <div style="width:26px; height:26px; border-radius:7px; background:#1C1917;"></div>
+          <div style="width:26px; height:26px; border-radius:7px; background:#8B8175;"></div>
+        </div>
+        <div style="width:1px; height:28px; background:#E4DCCF;"></div>
+        <div style="font-family:'Newsreader',serif; font-size:22px; color:#1C1917;">Newsreader</div>
+        <div style="font-family:'IBM Plex Sans',sans-serif; font-size:13px; color:#6B6660; letter-spacing:.02em;">IBM Plex Sans</div>
+      </div>
+
+      <div style="display:flex; gap:28px; align-items:flex-start;">
+
+        <!-- LIVE PHONE -->
+        <div style="display:flex; flex-direction:column; gap:10px;">
+          <div style="font-size:11px; letter-spacing:.14em; text-transform:uppercase; color:#7A756B;">Guest link · clickable</div>
+          <div style="width:390px; height:844px; background:#F7F2E9; border-radius:38px; border:1px solid #D8CFC0; box-shadow:0 24px 60px rgba(28,25,23,.16); overflow:hidden; display:flex; flex-direction:column; font-family:'IBM Plex Sans',sans-serif; color:#1C1917;">
+            <div style="display:flex; justify-content:space-between; padding:14px 26px 6px; font-size:13px; font-weight:600;"><span>9:41</span><span style="color:#8B8175;">5G ▮</span></div>
+
+            <div style="flex:1; overflow:hidden; display:flex; flex-direction:column;">
+              <sc-if value="{{ aHome }}" hint-placeholder-val="{{ true }}">
+                <div style="flex:1; display:flex; flex-direction:column; gap:16px; padding:10px 20px 20px;">
+                  <div>
+                    <div style="font-family:'Newsreader',serif; font-size:30px; line-height:1.15;">Hi Sarah —</div>
+                    <div style="font-size:14px; color:#8B8175; margin-top:4px;">251 Harold Ave · Ingleside</div>
+                  </div>
+
+                  <div style="background:#B3532E; color:#FFF7EE; border-radius:18px; padding:18px 20px; display:flex; flex-direction:column; gap:12px;">
+                    <div style="font-size:11px; letter-spacing:.16em; text-transform:uppercase; opacity:.8;">Your access code</div>
+                    <div style="display:flex; align-items:flex-end; gap:14px;">
+                      <div style="font-size:46px; font-weight:600; letter-spacing:.18em; line-height:1;">4821</div>
+                      <div style="font-size:12px; opacity:.85; line-height:1.4; padding-bottom:4px;">Same code for<br>the gate and the door</div>
+                    </div>
+                    <div style="font-size:13px; opacity:.9; border-top:1px solid rgba(255,247,238,.25); padding-top:10px;">Walk me through getting in →</div>
+                  </div>
+
+                  <div style="display:grid; grid-template-columns:repeat(3,1fr); gap:10px;">
+                    <div style="background:#FFFFFF; border:1px solid #E4DCCF; border-radius:14px; padding:12px 10px; display:flex; flex-direction:column; gap:6px;">
+                      <div style="font-size:18px;">◉</div>
+                      <div style="font-size:12px; font-weight:600;">WiFi</div>
+                      <div style="font-size:11px; color:#8B8175;">Copy + QR</div>
+                    </div>
+                    <div style="background:#FFFFFF; border:1px solid #E4DCCF; border-radius:14px; padding:12px 10px; display:flex; flex-direction:column; gap:6px;">
+                      <div style="font-size:18px;">✉</div>
+                      <div style="font-size:12px; font-weight:600;">Message</div>
+                      <div style="font-size:11px; color:#8B8175;">Keith · ~1 hr</div>
+                    </div>
+                    <div style="background:#FFFFFF; border:1px solid #E4DCCF; border-radius:14px; padding:12px 10px; display:flex; flex-direction:column; gap:6px;">
+                      <div style="font-size:18px;">↗</div>
+                      <div style="font-size:12px; font-weight:600;">Departures</div>
+                      <div style="font-size:11px; color:#B3532E; font-weight:600;">K in 4 min</div>
+                    </div>
+                  </div>
+
+                  <div style="background:#FFFFFF; border:1px solid #E4DCCF; border-radius:16px; padding:16px 18px; display:flex; justify-content:space-between; align-items:center;">
+                    <div>
+                      <div style="font-family:'Newsreader',serif; font-size:28px; line-height:1;">58°</div>
+                      <div style="font-size:13px; color:#8B8175; margin-top:4px;">Fog until noon, then sun</div>
+                    </div>
+                    <div style="font-size:12px; color:#8B8175; text-align:right; line-height:1.6;">Bring a layer.<br>It gets windy by 4.</div>
+                  </div>
+
+                  <div style="display:flex; flex-direction:column; gap:8px;">
+                    <div style="font-size:11px; letter-spacing:.16em; text-transform:uppercase; color:#8B8175;">Browse the guide</div>
+                    <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px;">
+                      <div style="background:#FFFFFF; border:1px solid #E4DCCF; border-radius:14px; padding:14px; font-size:14px; font-weight:500;">The Cottage<div style="font-size:11px; color:#8B8175; font-weight:400; margin-top:3px;">Rooms &amp; how-tos</div></div>
+                      <div style="background:#FFFFFF; border:1px solid #E4DCCF; border-radius:14px; padding:14px; font-size:14px; font-weight:500;">Explore SF<div style="font-size:11px; color:#8B8175; font-weight:400; margin-top:3px;">By interest</div></div>
+                      <div style="background:#FFFFFF; border:1px solid #E4DCCF; border-radius:14px; padding:14px; font-size:14px; font-weight:500;">Delivery<div style="font-size:11px; color:#8B8175; font-weight:400; margin-top:3px;">What actually delivers</div></div>
+                      <div style="background:#FFFFFF; border:1px solid #E4DCCF; border-radius:14px; padding:14px; font-size:14px; font-weight:500;">Emergency<div style="font-size:11px; color:#8B8175; font-weight:400; margin-top:3px;">911 · urgent care</div></div>
+                    </div>
+                    <div style="font-size:13px; color:#B3532E; font-weight:600; padding-top:2px;">All 15 sections →</div>
+                  </div>
+                </div>
+              </sc-if>
+
+              <sc-if value="{{ aAround }}" hint-placeholder-val="{{ false }}">
+                <div style="flex:1; display:flex; flex-direction:column; gap:14px; padding:10px 20px 20px;">
+                  <div style="font-family:'Newsreader',serif; font-size:28px;">Getting around</div>
+                  <div style="height:190px; border-radius:16px; border:1px solid #E4DCCF; background:repeating-linear-gradient(45deg,#EFE7D9,#EFE7D9 12px,#F3EDE2 12px,#F3EDE2 24px); display:flex; align-items:center; justify-content:center; font-size:12px; color:#8B8175; letter-spacing:.1em; text-transform:uppercase;">Leaflet / OSM · cached offline</div>
+                  <div style="background:#FFFFFF; border:1px solid #E4DCCF; border-radius:16px; overflow:hidden;">
+                    <div style="padding:12px 16px; border-bottom:1px solid #EFE7D9; display:flex; justify-content:space-between; align-items:center;">
+                      <div><div style="font-size:14px; font-weight:600;">K Ingleside · inbound</div><div style="font-size:12px; color:#8B8175;">Ocean Ave · 2 min walk</div></div>
+                      <div style="font-size:15px; font-weight:600; color:#B3532E;">4, 16, 28′</div>
+                    </div>
+                    <div style="padding:12px 16px; border-bottom:1px solid #EFE7D9; display:flex; justify-content:space-between; align-items:center;">
+                      <div><div style="font-size:14px; font-weight:600;">BART · Balboa Park</div><div style="font-size:12px; color:#8B8175;">9 min walk · 12 min downtown</div></div>
+                      <div style="font-size:15px; font-weight:600; color:#B3532E;">6, 21′</div>
+                    </div>
+                    <div style="padding:12px 16px; display:flex; justify-content:space-between; align-items:center;">
+                      <div><div style="font-size:14px; font-weight:600;">Bus 29 / 49</div><div style="font-size:12px; color:#8B8175;">1 min walk</div></div>
+                      <div style="font-size:15px; font-weight:600; color:#B3532E;">2, 11′</div>
+                    </div>
+                  </div>
+                  <div style="background:#F0E8DA; border-radius:14px; padding:14px 16px; font-size:13px; line-height:1.6; color:#4A443C;">You don't need a car, and you don't need a Clipper card — add Clipper to Apple or Google Pay and tap. Works on Muni and BART both.</div>
+                </div>
+              </sc-if>
+
+              <sc-if value="{{ aEat }}" hint-placeholder-val="{{ false }}">
+                <div style="flex:1; display:flex; flex-direction:column; gap:12px; padding:10px 20px 20px;">
+                  <div style="font-family:'Newsreader',serif; font-size:28px;">Eat &amp; drink</div>
+                  <div style="display:flex; gap:8px;">
+                    <div style="font-size:12px; padding:6px 12px; border-radius:999px; background:#1C1917; color:#F7F2E9;">Walkable</div>
+                    <div style="font-size:12px; padding:6px 12px; border-radius:999px; border:1px solid #E4DCCF;">Open now</div>
+                    <div style="font-size:12px; padding:6px 12px; border-radius:999px; border:1px solid #E4DCCF;">Coffee</div>
+                  </div>
+                  <div style="display:flex; flex-direction:column; gap:10px;">
+                    <div style="background:#FFFFFF; border:1px solid #E4DCCF; border-radius:14px; padding:14px 16px;">
+                      <div style="display:flex; justify-content:space-between;"><div style="font-size:15px; font-weight:600;">Beeps Burgers</div><div style="font-size:12px; color:#8B8175;">2 min</div></div>
+                      <div style="font-family:'Newsreader',serif; font-style:italic; font-size:14px; color:#B3532E; margin-top:5px;">"My favorite burger in the city, and it's around the corner."</div>
+                    </div>
+                    <div style="background:#FFFFFF; border:1px solid #E4DCCF; border-radius:14px; padding:14px 16px;">
+                      <div style="display:flex; justify-content:space-between;"><div style="font-size:15px; font-weight:600;">Philz Coffee</div><div style="font-size:12px; color:#8B8175;">2 min</div></div>
+                      <div style="font-family:'Newsreader',serif; font-style:italic; font-size:14px; color:#B3532E; margin-top:5px;">"Order a Mint Mojito. Don't overthink it."</div>
+                    </div>
+                    <div style="background:#FFFFFF; border:1px solid #E4DCCF; border-radius:14px; padding:14px 16px;">
+                      <div style="display:flex; justify-content:space-between;"><div style="font-size:15px; font-weight:600;">Pakwan</div><div style="font-size:12px; color:#8B8175;">2 min · til 10</div></div>
+                      <div style="font-family:'Newsreader',serif; font-style:italic; font-size:14px; color:#B3532E; margin-top:5px;">"Cheap, huge, and better than it looks."</div>
+                    </div>
+                    <div style="background:#FFFFFF; border:1px solid #E4DCCF; border-radius:14px; padding:14px 16px;">
+                      <div style="display:flex; justify-content:space-between;"><div style="font-size:15px; font-weight:600;">Sakesan Sushi</div><div style="font-size:12px; color:#8B8175;">6 min · til 10:30</div></div>
+                      <div style="font-family:'Newsreader',serif; font-style:italic; font-size:14px; color:#B3532E; margin-top:5px;">"Where we go when we don't want to cook."</div>
+                    </div>
+                  </div>
+                </div>
+              </sc-if>
+
+              <sc-if value="{{ aOut }}" hint-placeholder-val="{{ false }}">
+                <div style="flex:1; display:flex; flex-direction:column; gap:14px; padding:10px 20px 20px;">
+                  <div>
+                    <div style="font-family:'Newsreader',serif; font-size:28px; line-height:1.15;">Safe travels, Sarah.</div>
+                    <div style="font-size:14px; color:#8B8175; margin-top:4px;">Checkout is at 11:00 AM today.</div>
+                  </div>
+                  <div style="background:#FFFFFF; border:1px solid #E4DCCF; border-radius:16px; padding:6px 16px;">
+                    <div style="display:flex; gap:12px; align-items:center; padding:12px 0; border-bottom:1px solid #EFE7D9;"><div style="width:20px; height:20px; border-radius:6px; background:#B3532E;"></div><div style="font-size:14px;">Turn off lights, heaters, appliances</div></div>
+                    <div style="display:flex; gap:12px; align-items:center; padding:12px 0; border-bottom:1px solid #EFE7D9;"><div style="width:20px; height:20px; border-radius:6px; border:1.5px solid #D8CFC0;"></div><div style="font-size:14px;">Lock the cottage door and the gate</div></div>
+                    <div style="display:flex; gap:12px; align-items:center; padding:12px 0; border-bottom:1px solid #EFE7D9;"><div style="width:20px; height:20px; border-radius:6px; border:1.5px solid #D8CFC0;"></div><div style="font-size:14px;">Sign out of Netflix on both TVs</div></div>
+                    <div style="display:flex; gap:12px; align-items:center; padding:12px 0;"><div style="width:20px; height:20px; border-radius:6px; border:1.5px solid #D8CFC0;"></div><div style="font-size:14px;">Check drawers and outlets</div></div>
+                  </div>
+                  <div style="background:#1C1917; color:#F7F2E9; border-radius:16px; padding:18px;">
+                    <div style="font-family:'Newsreader',serif; font-size:20px; line-height:1.3;">Come back without the fees.</div>
+                    <div style="font-size:13px; opacity:.75; margin-top:6px; line-height:1.55;">Book the cottage direct next time — same place, about 12% less.</div>
+                    <div style="margin-top:12px; background:#B3532E; border-radius:10px; padding:10px; text-align:center; font-size:13px; font-weight:600;">Book direct</div>
+                  </div>
+                  <div style="border:1px dashed #D8CFC0; border-radius:14px; padding:14px 16px; font-size:13px; color:#6B6660;">What was missing from this guide? <span style="color:#B3532E; font-weight:600;">Tell me →</span></div>
+                </div>
+              </sc-if>
+            </div>
+
+            <div style="display:grid; grid-template-columns:repeat(4,1fr); border-top:1px solid #E4DCCF; background:#FFFDF9; padding:8px 8px 22px;">
+              <div onClick="{{ aGoHome }}" style="{{ aTabhome }}">⌂<span>Home</span></div>
+              <div onClick="{{ aGoAround }}" style="{{ aTabaround }}">↗<span>Around</span></div>
+              <div onClick="{{ aGoEat }}" style="{{ aTabeat }}">◍<span>Eat</span></div>
+              <div onClick="{{ aGoOut }}" style="{{ aTabout }}">⇥<span>Checkout</span></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- BEFORE ARRIVAL -->
+        <div style="display:flex; flex-direction:column; gap:10px;">
+          <div style="font-size:11px; letter-spacing:.14em; text-transform:uppercase; color:#7A756B;">Before arrival</div>
+          <div style="width:390px; height:844px; background:#F7F2E9; border-radius:38px; border:1px solid #D8CFC0; box-shadow:0 24px 60px rgba(28,25,23,.16); overflow:hidden; display:flex; flex-direction:column; font-family:'IBM Plex Sans',sans-serif; color:#1C1917;">
+            <div style="position:relative; height:260px;">
+              <image-slot id="a-hero" shape="rect" placeholder="Cottage exterior / courtyard photo"></image-slot>
+            </div>
+            <div style="flex:1; display:flex; flex-direction:column; gap:14px; padding:20px;">
+              <div>
+                <div style="font-size:11px; letter-spacing:.16em; text-transform:uppercase; color:#B3532E; font-weight:600;">Check-in Friday, from 3:00 PM</div>
+                <div style="font-family:'Newsreader',serif; font-size:30px; line-height:1.15; margin-top:6px;">See you Friday, Sarah.</div>
+                <div style="font-size:14px; color:#8B8175; margin-top:6px; line-height:1.6;">Your access code appears here the morning you arrive. Everything else is ready now.</div>
+              </div>
+              <div style="background:#FFFFFF; border:1px solid #E4DCCF; border-radius:16px; padding:16px;">
+                <div style="font-size:14px; font-weight:600;">Getting here from SFO</div>
+                <div style="font-size:13px; color:#6B6660; line-height:1.65; margin-top:6px;">BART straight to Balboa Park, ~30 min, then an 8-minute walk. Cheapest and usually fastest. Full step-by-step →</div>
+              </div>
+              <div style="background:#FFFFFF; border:1px solid #E4DCCF; border-radius:16px; padding:16px;">
+                <div style="font-size:14px; font-weight:600;">What to pack</div>
+                <div style="font-size:13px; color:#6B6660; line-height:1.65; margin-top:6px;">Layers. It'll be 55–62° and foggy in the morning. No A/C — you won't need it.</div>
+              </div>
+              <div style="background:#F0E8DA; border-radius:16px; padding:16px; display:flex; justify-content:space-between; align-items:center;">
+                <div><div style="font-size:14px; font-weight:600;">Arrival day</div><div style="font-size:13px; color:#6B6660; margin-top:3px;">57° · fog, clearing late</div></div>
+                <div style="font-family:'Newsreader',serif; font-size:32px;">57°</div>
+              </div>
+              <div style="margin-top:auto; font-size:12px; color:#8B8175; text-align:center; line-height:1.6;">Install this guide to your home screen — it works offline.</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- GENERIC -->
+        <div style="display:flex; flex-direction:column; gap:10px;">
+          <div style="font-size:11px; letter-spacing:.14em; text-transform:uppercase; color:#7A756B;">Generic visitor · no codes</div>
+          <div style="width:390px; height:844px; background:#F7F2E9; border-radius:38px; border:1px solid #D8CFC0; box-shadow:0 24px 60px rgba(28,25,23,.16); overflow:hidden; display:flex; flex-direction:column; font-family:'IBM Plex Sans',sans-serif; color:#1C1917;">
+            <div style="display:flex; justify-content:space-between; padding:14px 26px 6px; font-size:13px; font-weight:600;"><span>9:41</span><span style="color:#8B8175;">5G ▮</span></div>
+            <div style="flex:1; display:flex; flex-direction:column; gap:16px; padding:10px 20px 20px;">
+              <div>
+                <div style="font-family:'Newsreader',serif; font-size:32px; line-height:1.12;">The SF Cottage</div>
+                <div style="font-size:14px; color:#8B8175; margin-top:6px; line-height:1.6;">Quiet 2BR in Ingleside. Keith's guide to the cottage and the city around it.</div>
+              </div>
+              <div style="height:150px; border-radius:16px; overflow:hidden;"><image-slot id="a-generic" shape="rect" placeholder="Living room photo"></image-slot></div>
+              <div style="background:#FFFFFF; border:1px dashed #D8CFC0; border-radius:16px; padding:16px; display:flex; gap:12px; align-items:center;">
+                <div style="width:34px; height:34px; border-radius:9px; background:#F0E8DA; display:flex; align-items:center; justify-content:center; color:#8B8175;">🔒</div>
+                <div style="font-size:13px; color:#6B6660; line-height:1.5;">WiFi and your access code appear once you've booked — they arrive in your stay link.</div>
+              </div>
+              <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px;">
+                <div style="background:#FFFFFF; border:1px solid #E4DCCF; border-radius:14px; padding:14px; font-size:14px; font-weight:500;">Getting here</div>
+                <div style="background:#FFFFFF; border:1px solid #E4DCCF; border-radius:14px; padding:14px; font-size:14px; font-weight:500;">The Cottage</div>
+                <div style="background:#FFFFFF; border:1px solid #E4DCCF; border-radius:14px; padding:14px; font-size:14px; font-weight:500;">Eat &amp; Drink</div>
+                <div style="background:#FFFFFF; border:1px solid #E4DCCF; border-radius:14px; padding:14px; font-size:14px; font-weight:500;">Explore SF</div>
+              </div>
+              <div style="background:#1C1917; color:#F7F2E9; border-radius:16px; padding:18px; margin-top:auto;">
+                <div style="font-family:'Newsreader',serif; font-size:21px; line-height:1.25;">Book direct, skip the fees.</div>
+                <div style="font-size:13px; opacity:.75; margin-top:6px; line-height:1.55;">Same cottage, same host, about 12% less than the listing.</div>
+                <div style="margin-top:12px; background:#B3532E; border-radius:10px; padding:11px; text-align:center; font-size:13px; font-weight:600;">Check dates</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- DESKTOP + PRINT -->
+      <div style="display:flex; gap:28px; align-items:flex-start; margin-top:12px;">
+        <div style="display:flex; flex-direction:column; gap:10px;">
+          <div style="font-size:11px; letter-spacing:.14em; text-transform:uppercase; color:#7A756B;">Desktop / tablet · section page</div>
+          <div style="width:1180px; height:740px; background:#F7F2E9; border:1px solid #D8CFC0; border-radius:16px; overflow:hidden; box-shadow:0 24px 60px rgba(28,25,23,.14); display:flex; font-family:'IBM Plex Sans',sans-serif; color:#1C1917;">
+            <div style="width:250px; background:#FFFDF9; border-right:1px solid #E4DCCF; padding:26px 20px; display:flex; flex-direction:column; gap:6px;">
+              <div style="font-family:'Newsreader',serif; font-size:22px; margin-bottom:10px;">The SF Cottage</div>
+              <div style="font-size:12px; color:#8B8175; margin-bottom:14px;">Sarah · guest guide</div>
+              <div style="background:#F7F2E9; border-radius:8px; padding:7px 12px; font-size:13px;">Welcome</div>
+              <div style="padding:7px 12px; font-size:13px; color:#6B6660;">Getting Here / Arriving</div>
+              <div style="padding:7px 12px; font-size:13px; color:#6B6660;">About the Space</div>
+              <div style="background:#B3532E; color:#FFF7EE; border-radius:8px; padding:7px 12px; font-size:13px; font-weight:600;">The Cottage</div>
+              <div style="padding:7px 12px; font-size:13px; color:#6B6660;">Getting Around</div>
+              <div style="padding:7px 12px; font-size:13px; color:#6B6660;">Eat &amp; Drink</div>
+              <div style="padding:7px 12px; font-size:13px; color:#6B6660;">Delivery Services</div>
+              <div style="padding:7px 12px; font-size:13px; color:#6B6660;">Groceries &amp; Essentials</div>
+              <div style="padding:7px 12px; font-size:13px; color:#6B6660;">Explore SF</div>
+              <div style="padding:7px 12px; font-size:13px; color:#6B6660;">Work From Cottage</div>
+              <div style="padding:7px 12px; font-size:13px; color:#6B6660;">Kids &amp; Pets</div>
+              <div style="padding:7px 12px; font-size:13px; color:#6B6660;">SF Tips &amp; Safety</div>
+              <div style="padding:7px 12px; font-size:13px; color:#6B6660;">What's On</div>
+              <div style="padding:7px 12px; font-size:13px; color:#6B6660;">Emergency</div>
+              <div style="padding:7px 12px; font-size:13px; color:#6B6660;">Checkout</div>
+              <div style="margin-top:auto; font-size:12px; color:#8B8175; line-height:1.6;">Tip: Chrome and Safari translate this guide well.</div>
+            </div>
+            <div style="flex:1; display:flex; flex-direction:column;">
+              <div style="display:flex; align-items:center; gap:14px; padding:16px 32px; border-bottom:1px solid #E4DCCF; background:#FFFDF9;">
+                <div style="flex:1; background:#F7F2E9; border:1px solid #E4DCCF; border-radius:10px; padding:9px 14px; font-size:13px; color:#8B8175;">Search the guide — "trash day", "loft ceiling", "Keurig"</div>
+                <div style="background:#B3532E; color:#FFF7EE; border-radius:10px; padding:9px 16px; font-size:13px; font-weight:600; letter-spacing:.08em; white-space:nowrap; flex-shrink:0;">Code 4821</div>
+              </div>
+              <div style="flex:1; overflow:hidden; padding:32px; display:flex; gap:32px;">
+                <div style="flex:1; display:flex; flex-direction:column; gap:18px;">
+                  <div>
+                    <div style="font-size:11px; letter-spacing:.16em; text-transform:uppercase; color:#8B8175;">Section 4</div>
+                    <div style="font-family:'Newsreader',serif; font-size:44px; line-height:1.05; margin-top:6px;">The Cottage</div>
+                    <div style="font-size:15px; color:#6B6660; line-height:1.7; margin-top:10px; max-width:520px; text-wrap:pretty;">600 square feet, two bedrooms, and a shared courtyard with a firepit. Here's how everything works — including the two things people always ask me about.</div>
+                  </div>
+                  <div style="display:grid; grid-template-columns:1fr 1fr; gap:14px;">
+                    <div style="background:#FFFFFF; border:1px solid #E4DCCF; border-radius:14px; padding:16px;"><div style="font-size:15px; font-weight:600;">Living Room</div><div style="font-size:13px; color:#6B6660; line-height:1.6; margin-top:5px;">Sectional converts to a bed — use the foam topper, it makes all the difference. 50" TV on a swing arm.</div></div>
+                    <div style="background:#FFFFFF; border:1px solid #E4DCCF; border-radius:14px; padding:16px;"><div style="font-size:15px; font-weight:600;">Bedroom 2 · loft</div><div style="font-size:13px; color:#6B6660; line-height:1.6; margin-top:5px;">Queen bed, lots of closet. Low ceiling at the sides — watch your head getting up.</div></div>
+                    <div style="background:#FFFFFF; border:1px solid #E4DCCF; border-radius:14px; padding:16px;"><div style="font-size:15px; font-weight:600;">Kitchen</div><div style="font-size:13px; color:#6B6660; line-height:1.6; margin-top:5px;">Keurig for one cup, the 12-cup drip for a crowd. Sodastream under the counter.</div></div>
+                    <div style="background:#FFFFFF; border:1px solid #E4DCCF; border-radius:14px; padding:16px;"><div style="font-size:15px; font-weight:600;">Laundry</div><div style="font-size:13px; color:#6B6660; line-height:1.6; margin-top:5px;">Free stackable washer/dryer, behind the kitchen door.</div></div>
+                  </div>
+                  <div style="background:#F0E8DA; border-radius:14px; padding:16px 18px;">
+                    <div style="font-size:14px; font-weight:600;">Trash day is Tuesday</div>
+                    <div style="font-size:13px; color:#4A443C; line-height:1.6; margin-top:5px;">Three bins: blue recycling, green compost, black landfill. SF is serious about this one — compost really does mean food scraps.</div>
+                  </div>
+                </div>
+                <div style="width:330px; display:flex; flex-direction:column; gap:14px;">
+                  <div style="height:250px; border-radius:14px; overflow:hidden;"><image-slot id="a-desk" shape="rect" placeholder="Room photo"></image-slot></div>
+                  <div style="background:#FFFFFF; border:1px solid #E4DCCF; border-radius:14px; padding:16px;">
+                    <div style="font-size:13px; font-weight:600; margin-bottom:8px;">Troubleshooting</div>
+                    <div style="font-size:13px; color:#6B6660; line-height:2;">Breaker panel<br>Water shutoff<br>Rebooting the WiFi<br>Where packages go</div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div style="display:flex; flex-direction:column; gap:10px;">
+          <div style="font-size:11px; letter-spacing:.14em; text-transform:uppercase; color:#7A756B;">Printed essentials · letter</div>
+          <div style="width:612px; height:792px; background:#FFFFFF; border:1px solid #D8CFC0; box-shadow:0 24px 60px rgba(28,25,23,.14); padding:48px; display:flex; flex-direction:column; gap:22px; font-family:'IBM Plex Sans',sans-serif; color:#1C1917;">
+            <div style="display:flex; justify-content:space-between; align-items:flex-start; border-bottom:2px solid #1C1917; padding-bottom:16px;">
+              <div>
+                <div style="font-family:'Newsreader',serif; font-size:34px; line-height:1;">The SF Cottage</div>
+                <div style="font-size:12px; color:#8B8175; margin-top:6px;">251 Harold Ave, San Francisco · STR 2022-010560</div>
+              </div>
+              <div style="width:74px; height:74px; background:repeating-conic-gradient(#1C1917 0 25%, #FFFFFF 0 50%) 0 0/12px 12px;"></div>
+            </div>
+            <div style="display:grid; grid-template-columns:1fr 1fr; gap:18px;">
+              <div style="border:1px solid #E4DCCF; border-radius:12px; padding:16px;">
+                <div style="font-size:10px; letter-spacing:.16em; text-transform:uppercase; color:#8B8175;">WiFi</div>
+                <div style="font-size:20px; font-weight:600; margin-top:6px;">SFCottage-5G</div>
+                <div style="font-size:20px; font-weight:600; letter-spacing:.06em;">••••••••</div>
+                <div style="font-size:12px; color:#8B8175; margin-top:6px;">817 Mbps</div>
+              </div>
+              <div style="border:1px solid #E4DCCF; border-radius:12px; padding:16px; background:#FBF6EE;">
+                <div style="font-size:10px; letter-spacing:.16em; text-transform:uppercase; color:#8B8175;">Access code · gate + door</div>
+                <div style="font-size:34px; font-weight:600; margin-top:4px; letter-spacing:.14em;">4821</div>
+                <div style="font-size:11px; color:#B3532E; margin-top:6px;">Printed from a stay link — otherwise redacted</div>
+              </div>
+            </div>
+            <div>
+              <div style="font-family:'Newsreader',serif; font-size:22px; margin-bottom:8px;">Transit cheat sheet</div>
+              <div style="font-size:13px; line-height:2; color:#3A352F; border-top:1px solid #E4DCCF;">
+                <div style="display:flex; justify-content:space-between; border-bottom:1px solid #F0E8DA;"><span>K Ingleside · Ocean Ave</span><span style="color:#8B8175;">2 min walk · 30 min downtown</span></div>
+                <div style="display:flex; justify-content:space-between; border-bottom:1px solid #F0E8DA;"><span>BART · Balboa Park</span><span style="color:#8B8175;">9 min walk · direct to SFO</span></div>
+                <div style="display:flex; justify-content:space-between; border-bottom:1px solid #F0E8DA;"><span>Buses 29 · 49 · 8 · 43 · 54</span><span style="color:#8B8175;">1–2 min walk</span></div>
+                <div style="display:flex; justify-content:space-between;"><span>Clipper via Apple / Google Pay</span><span style="color:#8B8175;">no card needed</span></div>
+              </div>
+            </div>
+            <div>
+              <div style="font-family:'Newsreader',serif; font-size:22px; margin-bottom:8px;">Before you go — 11:00 AM</div>
+              <div style="font-size:13px; line-height:1.95; color:#3A352F;">☐ Lights, heaters and appliances off<br>☐ Windows closed; door and gate re-locked<br>☐ Signed out of Netflix on both TVs<br>☐ Drawers and outlets checked</div>
+            </div>
+            <div style="margin-top:auto; display:flex; justify-content:space-between; align-items:flex-end; border-top:1px solid #E4DCCF; padding-top:16px;">
+              <div style="font-size:13px; line-height:1.7;"><strong>Keith</strong> · usually replies within the hour<br><span style="color:#8B8175;">Message me on Airbnb · 911 for emergencies · 311 for the city</span></div>
+              <div style="text-align:center;"><div style="width:64px; height:64px; background:repeating-conic-gradient(#1C1917 0 25%, #FFFFFF 0 50%) 0 0/10px 10px;"></div><div style="font-size:10px; color:#8B8175; margin-top:5px;">Live guide</div></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div id="1b" style="display:flex; flex-direction:column; gap:20px;">
+      <div style="display:flex; align-items:baseline; gap:14px;">
+        <div style="background:#14201D; color:#EDF1EF; font-size:13px; font-weight:600; padding:5px 11px; border-radius:999px;">1b</div>
+        <div style="font-family:'Instrument Serif',serif; font-size:32px; color:#14201D;">Fog</div>
+        <div style="font-size:13px; color:#6B6660;">Cool &amp; calm · one scrolling home with jump chips</div>
+      </div>
+      <div style="display:flex; gap:22px; align-items:center; padding:14px 18px; background:#EDF1EF; border:1px solid #DCE4E1; border-radius:14px; width:max-content;">
+        <div style="display:flex; gap:7px;">
+          <div style="width:26px; height:26px; border-radius:7px; background:#EDF1EF; border:1px solid #DCE4E1;"></div>
+          <div style="width:26px; height:26px; border-radius:7px; background:#2C6D61;"></div>
+          <div style="width:26px; height:26px; border-radius:7px; background:#14201D;"></div>
+          <div style="width:26px; height:26px; border-radius:7px; background:#C9D6D1;"></div>
+        </div>
+        <div style="width:1px; height:28px; background:#DCE4E1;"></div>
+        <div style="font-family:'Instrument Serif',serif; font-size:24px; color:#14201D;">Instrument Serif</div>
+        <div style="font-family:'Instrument Sans',sans-serif; font-size:13px; color:#6E807B;">Instrument Sans</div>
+      </div>
+
+      <div style="display:flex; gap:28px; align-items:flex-start;">
+        <div style="display:flex; flex-direction:column; gap:10px;">
+          <div style="font-size:11px; letter-spacing:.14em; text-transform:uppercase; color:#7A756B;">Guest link · clickable</div>
+          <div style="width:390px; height:844px; background:#EDF1EF; border-radius:38px; border:1px solid #CBD6D2; box-shadow:0 24px 60px rgba(20,32,29,.16); overflow:hidden; display:flex; flex-direction:column; font-family:'Instrument Sans',sans-serif; color:#14201D;">
+            <div style="display:flex; justify-content:space-between; padding:14px 26px 8px; font-size:13px; font-weight:600;"><span>9:41</span><span style="color:#6E807B;">5G ▮</span></div>
+
+            <div style="padding:0 18px 10px; display:flex; flex-direction:column; gap:10px;">
+              <div style="background:#14201D; color:#EDF1EF; border-radius:16px; padding:14px 16px; display:flex; justify-content:space-between; align-items:center;">
+                <div>
+                  <div style="font-size:10px; letter-spacing:.18em; text-transform:uppercase; opacity:.65;">Access code · gate + door</div>
+                  <div style="font-size:28px; font-weight:600; letter-spacing:.18em; margin-top:2px;">4821</div>
+                </div>
+                <div style="font-size:12px; color:#8FD3C5; text-align:right; line-height:1.4;">Getting<br>in →</div>
+              </div>
+              <div style="display:flex; gap:7px;">
+                <div onClick="{{ bGoHome }}" style="{{ bChiphome }}">Today</div>
+                <div onClick="{{ bGoAround }}" style="{{ bChiparound }}">Around</div>
+                <div onClick="{{ bGoEat }}" style="{{ bChipeat }}">Eat</div>
+                <div onClick="{{ bGoOut }}" style="{{ bChipout }}">Checkout</div>
+              </div>
+            </div>
+
+            <div style="flex:1; overflow:hidden;">
+              <sc-if value="{{ bHome }}" hint-placeholder-val="{{ true }}">
+                <div style="display:flex; flex-direction:column; gap:18px; padding:6px 18px 20px;">
+                  <div style="font-family:'Instrument Serif',serif; font-size:34px; line-height:1.1;">Good morning, Sarah.<br><span style="color:#6E807B;">Here’s your day in Ingleside.</span></div>
+                  <div style="display:flex; gap:10px;">
+                    <div style="flex:1; background:#FFFFFF; border-radius:16px; padding:14px; border:1px solid #DCE4E1;">
+                      <div style="font-family:'Instrument Serif',serif; font-size:30px; line-height:1;">58°</div>
+                      <div style="font-size:12px; color:#6E807B; margin-top:4px; line-height:1.4;">Fog till noon<br>Take a layer</div>
+                    </div>
+                    <div style="flex:1; background:#FFFFFF; border-radius:16px; padding:14px; border:1px solid #DCE4E1;">
+                      <div style="font-family:'Instrument Serif',serif; font-size:30px; line-height:1;">4 min</div>
+                      <div style="font-size:12px; color:#6E807B; margin-top:4px; line-height:1.4;">K Ingleside<br>2 min walk</div>
+                    </div>
+                  </div>
+                  <div style="display:flex; gap:10px;">
+                    <div style="flex:1; background:#FFFFFF; border:1px solid #DCE4E1; border-radius:14px; padding:12px; text-align:center; font-size:12px; font-weight:600;">WiFi<div style="font-size:11px; color:#6E807B; font-weight:400; margin-top:3px;">Copy</div></div>
+                    <div style="flex:1; background:#FFFFFF; border:1px solid #DCE4E1; border-radius:14px; padding:12px; text-align:center; font-size:12px; font-weight:600;">Message<div style="font-size:11px; color:#6E807B; font-weight:400; margin-top:3px;">Keith</div></div>
+                    <div style="flex:1; background:#FFFFFF; border:1px solid #DCE4E1; border-radius:14px; padding:12px; text-align:center; font-size:12px; font-weight:600;">Departures<div style="font-size:11px; color:#6E807B; font-weight:400; margin-top:3px;">Live</div></div>
+                  </div>
+                  <div style="border-top:1px solid #DCE4E1; padding-top:14px; display:flex; flex-direction:column; gap:2px;">
+                    <div style="font-size:11px; letter-spacing:.16em; text-transform:uppercase; color:#6E807B; margin-bottom:8px;">The whole guide</div>
+                    <div style="display:flex; justify-content:space-between; padding:10px 0; border-bottom:1px solid #E4EBE8; font-size:15px;">About the space<span style="color:#9FB0AA;">→</span></div>
+                    <div style="display:flex; justify-content:space-between; padding:10px 0; border-bottom:1px solid #E4EBE8; font-size:15px;">The Cottage<span style="color:#9FB0AA;">→</span></div>
+                    <div style="display:flex; justify-content:space-between; padding:10px 0; border-bottom:1px solid #E4EBE8; font-size:15px;">Delivery services<span style="color:#9FB0AA;">→</span></div>
+                    <div style="display:flex; justify-content:space-between; padding:10px 0; border-bottom:1px solid #E4EBE8; font-size:15px;">Groceries &amp; essentials<span style="color:#9FB0AA;">→</span></div>
+                    <div style="display:flex; justify-content:space-between; padding:10px 0; border-bottom:1px solid #E4EBE8; font-size:15px;">Explore SF<span style="color:#9FB0AA;">→</span></div>
+                    <div style="display:flex; justify-content:space-between; padding:10px 0; font-size:15px;">Emergency<span style="color:#9FB0AA;">→</span></div>
+                    <div style="font-size:13px; color:#2C6D61; font-weight:600; padding-top:10px;">All 15 sections →</div>
+                  </div>
+                </div>
+              </sc-if>
+
+              <sc-if value="{{ bAround }}" hint-placeholder-val="{{ false }}">
+                <div style="display:flex; flex-direction:column; gap:14px; padding:6px 18px 20px;">
+                  <div style="font-family:'Instrument Serif',serif; font-size:32px;">Getting around</div>
+                  <div style="height:200px; border-radius:18px; border:1px solid #DCE4E1; background:linear-gradient(#E3EBE8,#D7E3DF); display:flex; align-items:center; justify-content:center; font-size:12px; color:#6E807B; letter-spacing:.1em; text-transform:uppercase;">Map · pins &amp; walk times</div>
+                  <div style="display:flex; flex-direction:column; gap:9px;">
+                    <div style="background:#FFFFFF; border:1px solid #DCE4E1; border-radius:14px; padding:13px 15px; display:flex; justify-content:space-between; align-items:center;"><div><div style="font-size:14px; font-weight:600;">K Ingleside</div><div style="font-size:12px; color:#6E807B;">Ocean Ave · 2 min walk</div></div><div style="font-family:'Instrument Serif',serif; font-size:22px; color:#2C6D61;">4′</div></div>
+                    <div style="background:#FFFFFF; border:1px solid #DCE4E1; border-radius:14px; padding:13px 15px; display:flex; justify-content:space-between; align-items:center;"><div><div style="font-size:14px; font-weight:600;">BART Balboa Park</div><div style="font-size:12px; color:#6E807B;">9 min walk · direct to SFO</div></div><div style="font-family:'Instrument Serif',serif; font-size:22px; color:#2C6D61;">6′</div></div>
+                    <div style="background:#FFFFFF; border:1px solid #DCE4E1; border-radius:14px; padding:13px 15px; display:flex; justify-content:space-between; align-items:center;"><div><div style="font-size:14px; font-weight:600;">Bus 29 · 49</div><div style="font-size:12px; color:#6E807B;">1 min walk</div></div><div style="font-family:'Instrument Serif',serif; font-size:22px; color:#2C6D61;">2′</div></div>
+                  </div>
+                  <div style="background:#DFE9E5; border-radius:14px; padding:14px 16px; font-size:13px; line-height:1.6; color:#25423B;">Add Clipper to Apple or Google Pay and just tap — no card, no ticket machine. Muni is the city; BART is the region.</div>
+                </div>
+              </sc-if>
+
+              <sc-if value="{{ bEat }}" hint-placeholder-val="{{ false }}">
+                <div style="display:flex; flex-direction:column; gap:12px; padding:6px 18px 20px;">
+                  <div style="font-family:'Instrument Serif',serif; font-size:32px;">Eat &amp; drink</div>
+                  <div style="font-size:13px; color:#6E807B; line-height:1.6;">Nine places I actually go, all within a ten-minute walk.</div>
+                  <div style="display:flex; flex-direction:column;">
+                    <div style="padding:14px 0; border-bottom:1px solid #DCE4E1;"><div style="display:flex; justify-content:space-between;"><div style="font-size:16px; font-weight:600;">Beeps Burgers</div><div style="font-size:12px; color:#6E807B;">2 min</div></div><div style="font-size:13px; color:#4A605A; margin-top:4px; line-height:1.5;">My favorite burger in the city, and it's around the corner.</div></div>
+                    <div style="padding:14px 0; border-bottom:1px solid #DCE4E1;"><div style="display:flex; justify-content:space-between;"><div style="font-size:16px; font-weight:600;">Philz Coffee</div><div style="font-size:12px; color:#6E807B;">2 min</div></div><div style="font-size:13px; color:#4A605A; margin-top:4px; line-height:1.5;">Order a Mint Mojito. Don't overthink it.</div></div>
+                    <div style="padding:14px 0; border-bottom:1px solid #DCE4E1;"><div style="display:flex; justify-content:space-between;"><div style="font-size:16px; font-weight:600;">Pakwan</div><div style="font-size:12px; color:#6E807B;">2 min · til 10</div></div><div style="font-size:13px; color:#4A605A; margin-top:4px; line-height:1.5;">Cheap, huge portions, better than it looks.</div></div>
+                    <div style="padding:14px 0; border-bottom:1px solid #DCE4E1;"><div style="display:flex; justify-content:space-between;"><div style="font-size:16px; font-weight:600;">Sakesan Sushi</div><div style="font-size:12px; color:#6E807B;">6 min · til 10:30</div></div><div style="font-size:13px; color:#4A605A; margin-top:4px; line-height:1.5;">Where we go when we don't want to cook.</div></div>
+                    <div style="padding:14px 0;"><div style="display:flex; justify-content:space-between;"><div style="font-size:16px; font-weight:600;">Ocean Ave Alehouse</div><div style="font-size:12px; color:#6E807B;">7 min · til 9</div></div><div style="font-size:13px; color:#4A605A; margin-top:4px; line-height:1.5;">Good beer list, quiet on weeknights.</div></div>
+                  </div>
+                </div>
+              </sc-if>
+
+              <sc-if value="{{ bOut }}" hint-placeholder-val="{{ false }}">
+                <div style="display:flex; flex-direction:column; gap:16px; padding:6px 18px 20px;">
+                  <div style="font-family:'Instrument Serif',serif; font-size:32px; line-height:1.15;">Out by 11:00 AM.<br><span style="color:#6E807B;">Thanks for staying.</span></div>
+                  <div style="display:flex; flex-direction:column;">
+                    <div style="display:flex; gap:12px; align-items:center; padding:13px 0; border-bottom:1px solid #DCE4E1;"><div style="width:19px; height:19px; border-radius:50%; background:#2C6D61;"></div><div style="font-size:14px;">Lights, heaters, appliances off</div></div>
+                    <div style="display:flex; gap:12px; align-items:center; padding:13px 0; border-bottom:1px solid #DCE4E1;"><div style="width:19px; height:19px; border-radius:50%; border:1.5px solid #C2CFCA;"></div><div style="font-size:14px;">Lock the cottage door and gate</div></div>
+                    <div style="display:flex; gap:12px; align-items:center; padding:13px 0; border-bottom:1px solid #DCE4E1;"><div style="width:19px; height:19px; border-radius:50%; border:1.5px solid #C2CFCA;"></div><div style="font-size:14px;">Sign out of Netflix on both TVs</div></div>
+                    <div style="display:flex; gap:12px; align-items:center; padding:13px 0;"><div style="width:19px; height:19px; border-radius:50%; border:1.5px solid #C2CFCA;"></div><div style="font-size:14px;">Check drawers and outlets</div></div>
+                  </div>
+                  <div style="background:#14201D; color:#EDF1EF; border-radius:18px; padding:18px;">
+                    <div style="font-family:'Instrument Serif',serif; font-size:22px;">Next time, book direct.</div>
+                    <div style="font-size:13px; opacity:.72; margin-top:6px; line-height:1.55;">Same cottage, roughly 12% less without the platform fee.</div>
+                    <div style="margin-top:12px; background:#2C6D61; border-radius:999px; padding:11px; text-align:center; font-size:13px; font-weight:600;">Check dates</div>
+                  </div>
+                  <div style="font-size:13px; color:#6E807B; line-height:1.6;">One question before you go: <span style="color:#2C6D61; font-weight:600;">what was missing from this guide?</span></div>
+                </div>
+              </sc-if>
+            </div>
+          </div>
+        </div>
+
+        <div style="display:flex; flex-direction:column; gap:10px;">
+          <div style="font-size:11px; letter-spacing:.14em; text-transform:uppercase; color:#7A756B;">Before arrival</div>
+          <div style="width:390px; height:844px; background:#EDF1EF; border-radius:38px; border:1px solid #CBD6D2; box-shadow:0 24px 60px rgba(20,32,29,.16); overflow:hidden; display:flex; flex-direction:column; font-family:'Instrument Sans',sans-serif; color:#14201D;">
+            <div style="position:relative; height:300px;">
+              <image-slot id="b-hero" shape="rect" placeholder="Cottage exterior photo"></image-slot>
+            </div>
+            <div style="flex:1; display:flex; flex-direction:column; gap:16px; padding:20px; margin-top:-34px; background:#EDF1EF; border-radius:26px 26px 0 0; position:relative;">
+              <div>
+                <div style="font-family:'Instrument Serif',serif; font-size:32px; line-height:1.12;">See you Friday.</div>
+                <div style="font-size:14px; color:#6E807B; margin-top:6px; line-height:1.6;">Check-in is any time from 3:00 PM. Your access code — one code for the gate and the door — appears here on the morning you arrive.</div>
+              </div>
+              <div style="background:#FFFFFF; border:1px solid #DCE4E1; border-radius:16px; padding:16px;">
+                <div style="font-size:14px; font-weight:600;">From SFO, take BART</div>
+                <div style="font-size:13px; color:#5C716B; line-height:1.65; margin-top:5px;">Straight to Balboa Park, about 30 minutes, then an 8-minute walk. Cheaper than a car and usually faster.</div>
+              </div>
+              <div style="background:#FFFFFF; border:1px solid #DCE4E1; border-radius:16px; padding:16px;">
+                <div style="font-size:14px; font-weight:600;">Pack layers</div>
+                <div style="font-size:13px; color:#5C716B; line-height:1.65; margin-top:5px;">55–62° and foggy mornings all week. There's no A/C and you won't miss it.</div>
+              </div>
+              <div style="background:#DFE9E5; border-radius:16px; padding:16px; font-size:13px; color:#25423B; line-height:1.6;">Heads up: the cottage is down a narrow alley. Big suitcases fit — just take it slow.</div>
+              <div style="margin-top:auto; text-align:center; font-size:12px; color:#6E807B;">Add to home screen · works offline</div>
+            </div>
+          </div>
+        </div>
+
+        <div style="display:flex; flex-direction:column; gap:10px;">
+          <div style="font-size:11px; letter-spacing:.14em; text-transform:uppercase; color:#7A756B;">Generic visitor · no codes</div>
+          <div style="width:390px; height:844px; background:#EDF1EF; border-radius:38px; border:1px solid #CBD6D2; box-shadow:0 24px 60px rgba(20,32,29,.16); overflow:hidden; display:flex; flex-direction:column; font-family:'Instrument Sans',sans-serif; color:#14201D;">
+            <div style="display:flex; justify-content:space-between; padding:14px 26px 8px; font-size:13px; font-weight:600;"><span>9:41</span><span style="color:#6E807B;">5G ▮</span></div>
+            <div style="flex:1; display:flex; flex-direction:column; gap:16px; padding:10px 18px 20px;">
+              <div style="font-family:'Instrument Serif',serif; font-size:36px; line-height:1.08;">The SF Cottage<br><span style="color:#6E807B; font-size:24px;">Ingleside, San Francisco</span></div>
+              <div style="height:170px; border-radius:18px; overflow:hidden;"><image-slot id="b-generic" shape="rect" placeholder="Courtyard photo"></image-slot></div>
+              <div style="font-size:14px; color:#5C716B; line-height:1.65;">A quiet 2-bedroom cottage two minutes from the K line. This is the same guide my guests get — minus the codes.</div>
+              <div style="display:flex; flex-direction:column;">
+                <div style="display:flex; justify-content:space-between; padding:11px 0; border-bottom:1px solid #DCE4E1; font-size:15px;">Getting here<span style="color:#9FB0AA;">→</span></div>
+                <div style="display:flex; justify-content:space-between; padding:11px 0; border-bottom:1px solid #DCE4E1; font-size:15px;">The cottage<span style="color:#9FB0AA;">→</span></div>
+                <div style="display:flex; justify-content:space-between; padding:11px 0; border-bottom:1px solid #DCE4E1; font-size:15px;">Eat &amp; drink<span style="color:#9FB0AA;">→</span></div>
+                <div style="display:flex; justify-content:space-between; padding:11px 0; font-size:15px;">Explore SF<span style="color:#9FB0AA;">→</span></div>
+              </div>
+              <div style="margin-top:auto; background:#14201D; color:#EDF1EF; border-radius:18px; padding:18px;">
+                <div style="font-family:'Instrument Serif',serif; font-size:22px;">Book direct, skip the fees.</div>
+                <div style="font-size:13px; opacity:.72; margin-top:6px; line-height:1.55;">About 12% less than the listing, straight with me.</div>
+                <div style="margin-top:12px; background:#2C6D61; border-radius:999px; padding:11px; text-align:center; font-size:13px; font-weight:600;">Check dates</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div style="display:flex; gap:28px; align-items:flex-start; margin-top:12px;">
+        <div style="display:flex; flex-direction:column; gap:10px;">
+          <div style="font-size:11px; letter-spacing:.14em; text-transform:uppercase; color:#7A756B;">Desktop / tablet · section page</div>
+          <div style="width:1180px; height:740px; background:#EDF1EF; border:1px solid #CBD6D2; border-radius:16px; overflow:hidden; box-shadow:0 24px 60px rgba(20,32,29,.14); display:flex; flex-direction:column; font-family:'Instrument Sans',sans-serif; color:#14201D;">
+            <div style="display:flex; align-items:center; gap:18px; padding:16px 34px; background:#FFFFFF; border-bottom:1px solid #DCE4E1;">
+              <div style="font-family:'Instrument Serif',serif; font-size:22px;">The SF Cottage</div>
+              <div style="display:flex; gap:6px; font-size:13px; color:#5C716B;">
+                <div style="padding:6px 12px; border-radius:999px;">Welcome</div>
+                <div style="padding:6px 12px; border-radius:999px;">Arriving</div>
+                <div style="padding:6px 12px; border-radius:999px;">About the space</div>
+                <div style="padding:6px 12px; border-radius:999px; background:#2C6D61; color:#F2F7F5; font-weight:600;">Getting around</div>
+                <div style="padding:6px 12px; border-radius:999px;">Eat &amp; drink</div>
+                <div style="padding:6px 12px; border-radius:999px;">Delivery</div>
+                <div style="padding:6px 12px; border-radius:999px;">Explore</div>
+              </div>
+              <div style="margin-left:auto; display:flex; gap:10px; align-items:center;">
+                <div style="background:#EDF1EF; border:1px solid #DCE4E1; border-radius:999px; padding:8px 16px; font-size:13px; color:#6E807B;">Search</div>
+                <div style="background:#14201D; color:#EDF1EF; border-radius:999px; padding:8px 16px; font-size:13px; font-weight:600; letter-spacing:.08em; white-space:nowrap; flex-shrink:0;">Code 4821</div>
+              </div>
+            </div>
+            <div style="flex:1; display:flex; overflow:hidden;">
+              <div style="width:520px; padding:34px; display:flex; flex-direction:column; gap:18px;">
+                <div>
+                  <div style="font-family:'Instrument Serif',serif; font-size:48px; line-height:1.02;">Getting around</div>
+                  <div style="font-size:15px; color:#5C716B; line-height:1.7; margin-top:10px; text-wrap:pretty;">You genuinely don't need a car here. The K stops two minutes from the gate, and BART at Balboa Park runs straight to downtown and to the airport.</div>
+                </div>
+                <div style="background:#FFFFFF; border:1px solid #DCE4E1; border-radius:16px; overflow:hidden;">
+                  <div style="padding:14px 18px; border-bottom:1px solid #E4EBE8; display:flex; justify-content:space-between; align-items:center;"><div><div style="font-size:15px; font-weight:600;">K Ingleside · inbound</div><div style="font-size:12px; color:#6E807B;">Ocean Ave &amp; Harold · 2 min walk</div></div><div style="font-family:'Instrument Serif',serif; font-size:26px; color:#2C6D61;">4, 16, 28′</div></div>
+                  <div style="padding:14px 18px; border-bottom:1px solid #E4EBE8; display:flex; justify-content:space-between; align-items:center;"><div><div style="font-size:15px; font-weight:600;">BART · Balboa Park</div><div style="font-size:12px; color:#6E807B;">9 min walk · 12 min downtown</div></div><div style="font-family:'Instrument Serif',serif; font-size:26px; color:#2C6D61;">6, 21′</div></div>
+                  <div style="padding:14px 18px; display:flex; justify-content:space-between; align-items:center;"><div><div style="font-size:15px; font-weight:600;">J Church · M Ocean View</div><div style="font-size:12px; color:#6E807B;">10–15 min walk</div></div><div style="font-family:'Instrument Serif',serif; font-size:26px; color:#2C6D61;">9, 14′</div></div>
+                </div>
+                <div style="background:#DFE9E5; border-radius:16px; padding:18px; font-size:14px; line-height:1.65; color:#25423B;">Clipper lives in Apple and Google Pay now — add it once, tap on every Muni vehicle and BART gate. Riders under 18 ride Muni free.</div>
+                <div style="font-size:13px; color:#6E807B; line-height:1.6;">Google Maps isn't always right about Muni. I use the Transit app, or 511.org.</div>
+              </div>
+              <div style="flex:1; position:relative; border-left:1px solid #DCE4E1; background:linear-gradient(#E3EBE8,#D5E2DD); display:flex; align-items:center; justify-content:center;">
+                <div style="font-size:12px; color:#6E807B; letter-spacing:.12em; text-transform:uppercase;">Interactive map · tiles cached offline</div>
+                <div style="position:absolute; left:120px; top:210px; background:#14201D; color:#EDF1EF; font-size:11px; padding:6px 10px; border-radius:999px;">K · 2 min</div>
+                <div style="position:absolute; left:300px; top:400px; background:#2C6D61; color:#F2F7F5; font-size:11px; padding:6px 10px; border-radius:999px;">BART · 9 min</div>
+                <div style="position:absolute; left:210px; top:300px; background:#FFFFFF; border:1px solid #DCE4E1; font-size:11px; padding:6px 10px; border-radius:999px;">The cottage</div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div style="display:flex; flex-direction:column; gap:10px;">
+          <div style="font-size:11px; letter-spacing:.14em; text-transform:uppercase; color:#7A756B;">Printed essentials · letter</div>
+          <div style="width:612px; height:792px; background:#FFFFFF; border:1px solid #CBD6D2; box-shadow:0 24px 60px rgba(20,32,29,.14); padding:52px; display:flex; flex-direction:column; gap:24px; font-family:'Instrument Sans',sans-serif; color:#14201D;">
+            <div>
+              <div style="font-family:'Instrument Serif',serif; font-size:40px; line-height:1;">The SF Cottage</div>
+              <div style="font-size:12px; color:#6E807B; margin-top:8px; letter-spacing:.04em;">251 HAROLD AVE · SAN FRANCISCO 94112 · STR 2022-010560</div>
+            </div>
+            <div style="display:flex; gap:16px;">
+              <div style="flex:1; background:#EDF1EF; border-radius:14px; padding:18px;">
+                <div style="font-size:10px; letter-spacing:.18em; text-transform:uppercase; color:#6E807B;">WiFi</div>
+                <div style="font-family:'Instrument Serif',serif; font-size:26px; margin-top:6px;">SFCottage-5G</div>
+                <div style="font-size:16px; letter-spacing:.14em; color:#2C6D61;">••••••••</div>
+              </div>
+              <div style="flex:1; background:#14201D; color:#EDF1EF; border-radius:14px; padding:18px;">
+                <div style="font-size:10px; letter-spacing:.18em; text-transform:uppercase; opacity:.6;">Access code · gate + door</div>
+                <div style="font-family:'Instrument Serif',serif; font-size:34px; margin-top:6px; letter-spacing:.1em;">4821</div>
+                <div style="font-size:11px; opacity:.6; margin-top:4px;">Redacted unless printed from a stay link</div>
+              </div>
+              <div style="width:96px; display:flex; flex-direction:column; align-items:center; gap:6px;">
+                <div style="width:96px; height:96px; background:repeating-conic-gradient(#14201D 0 25%, #FFFFFF 0 50%) 0 0/14px 14px; border-radius:8px;"></div>
+                <div style="font-size:10px; color:#6E807B;">Live guide</div>
+              </div>
+            </div>
+            <div>
+              <div style="font-family:'Instrument Serif',serif; font-size:24px; margin-bottom:10px;">Transit</div>
+              <div style="font-size:13px; color:#3B4E49; line-height:2.1;">
+                <div style="display:flex; justify-content:space-between; border-bottom:1px solid #E4EBE8;"><span>K Ingleside · Ocean Ave</span><span style="color:#6E807B;">2 min walk · 30 min downtown</span></div>
+                <div style="display:flex; justify-content:space-between; border-bottom:1px solid #E4EBE8;"><span>BART · Balboa Park</span><span style="color:#6E807B;">9 min walk · direct to SFO</span></div>
+                <div style="display:flex; justify-content:space-between; border-bottom:1px solid #E4EBE8;"><span>Buses 29 · 49 · 8 · 43 · 54</span><span style="color:#6E807B;">1–2 min walk</span></div>
+                <div style="display:flex; justify-content:space-between;"><span>Clipper in Apple / Google Pay</span><span style="color:#6E807B;">no card needed</span></div>
+              </div>
+            </div>
+            <div>
+              <div style="font-family:'Instrument Serif',serif; font-size:24px; margin-bottom:10px;">Checkout · 11:00 AM</div>
+              <div style="font-size:13px; color:#3B4E49; line-height:2;">○ Lights, heaters and appliances off<br>○ Windows closed, door and gate re-locked<br>○ Signed out of Netflix on both TVs<br>○ Drawers and outlets checked</div>
+            </div>
+            <div style="margin-top:auto; background:#EDF1EF; border-radius:14px; padding:18px; font-size:13px; line-height:1.7; color:#3B4E49;">
+              <strong>Keith</strong> — usually replies within the hour, message me on Airbnb.<br>911 emergencies · 415-553-0123 non-emergency · 311 city services
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div id="1c" style="display:flex; flex-direction:column; gap:20px;">
+      <div style="display:flex; align-items:baseline; gap:14px;">
+        <div style="background:#0D0F0E; color:#D6F24B; font-size:13px; font-weight:700; padding:5px 11px; border-radius:999px;">1c</div>
+        <div style="font-family:'Archivo',sans-serif; font-size:28px; font-weight:800; letter-spacing:-.02em; color:#0D0F0E;">INGLESIDE</div>
+        <div style="font-size:13px; color:#6B6660;">Dark utility, transit-signage · card grid index</div>
+      </div>
+      <div style="display:flex; gap:22px; align-items:center; padding:14px 18px; background:#0D0F0E; border-radius:14px; width:max-content;">
+        <div style="display:flex; gap:7px;">
+          <div style="width:26px; height:26px; border-radius:7px; background:#0D0F0E; border:1px solid #333;"></div>
+          <div style="width:26px; height:26px; border-radius:7px; background:#171A18;"></div>
+          <div style="width:26px; height:26px; border-radius:7px; background:#D6F24B;"></div>
+          <div style="width:26px; height:26px; border-radius:7px; background:#F1F4F0;"></div>
+        </div>
+        <div style="width:1px; height:28px; background:#333;"></div>
+        <div style="font-family:'Archivo',sans-serif; font-weight:800; font-size:20px; color:#F1F4F0; letter-spacing:-.02em;">Archivo</div>
+        <div style="font-family:'DM Mono',monospace; font-size:13px; color:#8D958F;">DM Mono</div>
+      </div>
+
+      <div style="display:flex; gap:28px; align-items:flex-start;">
+        <div style="display:flex; flex-direction:column; gap:10px;">
+          <div style="font-size:11px; letter-spacing:.14em; text-transform:uppercase; color:#7A756B;">Guest link · clickable</div>
+          <div style="width:390px; height:844px; background:#0D0F0E; border-radius:38px; border:1px solid #2A2E2B; box-shadow:0 24px 60px rgba(13,15,14,.35); overflow:hidden; display:flex; flex-direction:column; font-family:'Archivo',sans-serif; color:#F1F4F0;">
+            <div style="display:flex; justify-content:space-between; padding:14px 26px 8px; font-size:13px; font-weight:600;"><span>9:41</span><span style="color:#8D958F;">5G ▮</span></div>
+
+            <sc-if value="{{ cHome }}" hint-placeholder-val="{{ true }}">
+              <div style="flex:1; display:flex; flex-direction:column; gap:14px; padding:8px 18px 20px;">
+                <div>
+                  <div style="font-family:'DM Mono',monospace; font-size:11px; letter-spacing:.14em; text-transform:uppercase; color:#8D958F;">251 Harold Ave · Ingleside</div>
+                  <div style="font-size:30px; font-weight:800; letter-spacing:-.03em; line-height:1.05; margin-top:6px;">HI SARAH</div>
+                </div>
+
+                <div style="background:#D6F24B; color:#0D0F0E; border-radius:16px; padding:16px 18px;">
+                  <div style="font-family:'DM Mono',monospace; font-size:11px; letter-spacing:.16em; text-transform:uppercase; opacity:.7;">Access code · gate + door</div>
+                  <div style="display:flex; gap:14px; margin-top:6px; align-items:flex-end;">
+                    <div style="font-family:'DM Mono',monospace; font-size:46px; font-weight:500; letter-spacing:.12em; line-height:1;">4821</div>
+                    <div style="margin-left:auto; font-size:12px; font-weight:700; text-align:right; line-height:1.3;">GETTING<br>IN →</div>
+                  </div>
+                </div>
+
+                <div style="display:grid; grid-template-columns:repeat(3,1fr); gap:8px;">
+                  <div style="background:#171A18; border-radius:12px; padding:12px 10px; font-size:12px; font-weight:700;">WIFI<div style="font-family:'DM Mono',monospace; font-size:10px; color:#8D958F; font-weight:400; margin-top:4px;">COPY + QR</div></div>
+                  <div style="background:#171A18; border-radius:12px; padding:12px 10px; font-size:12px; font-weight:700;">HOST<div style="font-family:'DM Mono',monospace; font-size:10px; color:#8D958F; font-weight:400; margin-top:4px;">~1 HR</div></div>
+                  <div style="background:#171A18; border-radius:12px; padding:12px 10px; font-size:12px; font-weight:700;">K LINE<div style="font-family:'DM Mono',monospace; font-size:10px; color:#D6F24B; font-weight:400; margin-top:4px;">4 MIN</div></div>
+                </div>
+
+                <div style="display:flex; gap:8px; background:#171A18; border-radius:12px; padding:12px 14px; align-items:center; font-family:'DM Mono',monospace; font-size:12px; color:#8D958F;">
+                  <span style="color:#F1F4F0; font-size:18px;">58°</span> FOG UNTIL NOON · WINDY BY 4
+                </div>
+
+                <div style="display:grid; grid-template-columns:1fr 1fr; gap:8px; flex:1; overflow:hidden;">
+                  <div style="background:#171A18; border-radius:14px; padding:14px; display:flex; flex-direction:column; justify-content:space-between;"><div style="font-family:'DM Mono',monospace; font-size:10px; color:#8D958F;">04</div><div style="font-size:16px; font-weight:700; line-height:1.1;">THE<br>COTTAGE</div></div>
+                  <div onClick="{{ cGoAround }}" style="cursor:pointer; background:#171A18; border-radius:14px; padding:14px; display:flex; flex-direction:column; justify-content:space-between;"><div style="font-family:'DM Mono',monospace; font-size:10px; color:#8D958F;">05</div><div style="font-size:16px; font-weight:700; line-height:1.1;">GETTING<br>AROUND</div></div>
+                  <div onClick="{{ cGoEat }}" style="cursor:pointer; background:#171A18; border-radius:14px; padding:14px; display:flex; flex-direction:column; justify-content:space-between;"><div style="font-family:'DM Mono',monospace; font-size:10px; color:#8D958F;">06</div><div style="font-size:16px; font-weight:700; line-height:1.1;">EAT &amp;<br>DRINK</div></div>
+                  <div style="background:#171A18; border-radius:14px; padding:14px; display:flex; flex-direction:column; justify-content:space-between;"><div style="font-family:'DM Mono',monospace; font-size:10px; color:#8D958F;">07</div><div style="font-size:16px; font-weight:700; line-height:1.1;">DELIVERY<br>SERVICES</div></div>
+                  <div style="background:#171A18; border-radius:14px; padding:14px; display:flex; flex-direction:column; justify-content:space-between;"><div style="font-family:'DM Mono',monospace; font-size:10px; color:#8D958F;">09</div><div style="font-size:16px; font-weight:700; line-height:1.1;">EXPLORE<br>SF</div></div>
+                  <div onClick="{{ cGoOut }}" style="cursor:pointer; background:#171A18; border-radius:14px; padding:14px; display:flex; flex-direction:column; justify-content:space-between;"><div style="font-family:'DM Mono',monospace; font-size:10px; color:#8D958F;">15</div><div style="font-size:16px; font-weight:700; line-height:1.1;">CHECK<br>OUT</div></div>
+                </div>
+                <div style="display:flex; gap:8px;">
+                  <div style="flex:1; background:#171A18; border-radius:12px; padding:12px 14px; font-family:'DM Mono',monospace; font-size:11px; color:#8D958F; letter-spacing:.08em;">ALL 15 SECTIONS →</div>
+                  <div style="background:#2A1614; color:#FF8A7A; border-radius:12px; padding:12px 14px; font-family:'DM Mono',monospace; font-size:11px; letter-spacing:.08em;">14 EMERGENCY</div>
+                </div>
+              </div>
+            </sc-if>
+
+            <sc-if value="{{ cAround }}" hint-placeholder-val="{{ false }}">
+              <div style="flex:1; display:flex; flex-direction:column;">
+                <div onClick="{{ cGoHome }}" style="cursor:pointer; padding:10px 18px; font-family:'DM Mono',monospace; font-size:12px; color:#8D958F;">← ALL SECTIONS</div>
+                <div style="padding:0 18px 14px;"><div style="font-family:'DM Mono',monospace; font-size:11px; color:#8D958F;">05</div><div style="font-size:30px; font-weight:800; letter-spacing:-.03em;">GETTING AROUND</div></div>
+                <div style="height:180px; background:#171A18; border-top:1px solid #262A27; border-bottom:1px solid #262A27; display:flex; align-items:center; justify-content:center; font-family:'DM Mono',monospace; font-size:11px; color:#8D958F; letter-spacing:.14em;">MAP · CACHED OFFLINE</div>
+                <div style="padding:14px 18px; display:flex; flex-direction:column; gap:1px;">
+                  <div style="display:flex; align-items:center; gap:12px; padding:13px 0; border-bottom:1px solid #262A27;"><div style="width:34px; height:34px; border-radius:50%; background:#D6F24B; color:#0D0F0E; display:flex; align-items:center; justify-content:center; font-weight:800;">K</div><div style="flex:1;"><div style="font-size:14px; font-weight:700;">INGLESIDE · INBOUND</div><div style="font-family:'DM Mono',monospace; font-size:11px; color:#8D958F;">OCEAN AVE · 2 MIN WALK</div></div><div style="font-family:'DM Mono',monospace; font-size:16px; color:#D6F24B;">4′</div></div>
+                  <div style="display:flex; align-items:center; gap:12px; padding:13px 0; border-bottom:1px solid #262A27;"><div style="width:34px; height:34px; border-radius:50%; background:#F1F4F0; color:#0D0F0E; display:flex; align-items:center; justify-content:center; font-weight:800; font-size:11px;">BART</div><div style="flex:1;"><div style="font-size:14px; font-weight:700;">BALBOA PARK</div><div style="font-family:'DM Mono',monospace; font-size:11px; color:#8D958F;">9 MIN WALK · SFO DIRECT</div></div><div style="font-family:'DM Mono',monospace; font-size:16px; color:#D6F24B;">6′</div></div>
+                  <div style="display:flex; align-items:center; gap:12px; padding:13px 0; border-bottom:1px solid #262A27;"><div style="width:34px; height:34px; border-radius:50%; background:#171A18; border:1px solid #3A403C; display:flex; align-items:center; justify-content:center; font-weight:800; font-size:12px;">29</div><div style="flex:1;"><div style="font-size:14px; font-weight:700;">SUNSET</div><div style="font-family:'DM Mono',monospace; font-size:11px; color:#8D958F;">1 MIN WALK</div></div><div style="font-family:'DM Mono',monospace; font-size:16px; color:#D6F24B;">2′</div></div>
+                </div>
+                <div style="margin:0 18px; background:#171A18; border-left:3px solid #D6F24B; border-radius:0 12px 12px 0; padding:14px 16px; font-size:13px; line-height:1.6; color:#C6CCC7;">Add Clipper to Apple or Google Pay. Tap and go — no card, no machine.</div>
+              </div>
+            </sc-if>
+
+            <sc-if value="{{ cEat }}" hint-placeholder-val="{{ false }}">
+              <div style="flex:1; display:flex; flex-direction:column;">
+                <div onClick="{{ cGoHome }}" style="cursor:pointer; padding:10px 18px; font-family:'DM Mono',monospace; font-size:12px; color:#8D958F;">← ALL SECTIONS</div>
+                <div style="padding:0 18px 12px;"><div style="font-family:'DM Mono',monospace; font-size:11px; color:#8D958F;">06</div><div style="font-size:30px; font-weight:800; letter-spacing:-.03em;">EAT &amp; DRINK</div></div>
+                <div style="padding:0 18px 12px; display:flex; gap:6px; font-family:'DM Mono',monospace; font-size:11px;">
+                  <div style="padding:6px 11px; border-radius:6px; background:#D6F24B; color:#0D0F0E;">OPEN NOW</div>
+                  <div style="padding:6px 11px; border-radius:6px; background:#171A18; color:#8D958F;">&lt; 5 MIN</div>
+                  <div style="padding:6px 11px; border-radius:6px; background:#171A18; color:#8D958F;">COFFEE</div>
+                </div>
+                <div style="padding:0 18px; display:flex; flex-direction:column;">
+                  <div style="padding:14px 0; border-top:1px solid #262A27;"><div style="display:flex; justify-content:space-between; align-items:baseline;"><div style="font-size:17px; font-weight:700;">BEEPS BURGERS</div><div style="font-family:'DM Mono',monospace; font-size:12px; color:#D6F24B;">2 MIN</div></div><div style="font-size:13px; color:#A9B0AB; margin-top:4px; line-height:1.5;">My favorite burger in the city, around the corner.</div></div>
+                  <div style="padding:14px 0; border-top:1px solid #262A27;"><div style="display:flex; justify-content:space-between; align-items:baseline;"><div style="font-size:17px; font-weight:700;">PHILZ COFFEE</div><div style="font-family:'DM Mono',monospace; font-size:12px; color:#D6F24B;">2 MIN</div></div><div style="font-size:13px; color:#A9B0AB; margin-top:4px; line-height:1.5;">Order a Mint Mojito. Don't overthink it.</div></div>
+                  <div style="padding:14px 0; border-top:1px solid #262A27;"><div style="display:flex; justify-content:space-between; align-items:baseline;"><div style="font-size:17px; font-weight:700;">PAKWAN</div><div style="font-family:'DM Mono',monospace; font-size:12px; color:#D6F24B;">2 MIN</div></div><div style="font-size:13px; color:#A9B0AB; margin-top:4px; line-height:1.5;">Cheap, huge, better than it looks.</div></div>
+                  <div style="padding:14px 0; border-top:1px solid #262A27;"><div style="display:flex; justify-content:space-between; align-items:baseline;"><div style="font-size:17px; font-weight:700;">SAKESAN SUSHI</div><div style="font-family:'DM Mono',monospace; font-size:12px; color:#D6F24B;">6 MIN</div></div><div style="font-size:13px; color:#A9B0AB; margin-top:4px; line-height:1.5;">Where we go when we don't want to cook.</div></div>
+                  <div style="padding:14px 0; border-top:1px solid #262A27; border-bottom:1px solid #262A27;"><div style="display:flex; justify-content:space-between; align-items:baseline;"><div style="font-size:17px; font-weight:700;">CHAMPA GARDEN</div><div style="font-family:'DM Mono',monospace; font-size:12px; color:#D6F24B;">9 MIN</div></div><div style="font-size:13px; color:#A9B0AB; margin-top:4px; line-height:1.5;">Thai and Lao, worth the extra few blocks.</div></div>
+                </div>
+              </div>
+            </sc-if>
+
+            <sc-if value="{{ cOut }}" hint-placeholder-val="{{ false }}">
+              <div style="flex:1; display:flex; flex-direction:column;">
+                <div onClick="{{ cGoHome }}" style="cursor:pointer; padding:10px 18px; font-family:'DM Mono',monospace; font-size:12px; color:#8D958F;">← ALL SECTIONS</div>
+                <div style="padding:0 18px 14px;"><div style="font-family:'DM Mono',monospace; font-size:11px; color:#8D958F;">15 · TODAY</div><div style="font-size:30px; font-weight:800; letter-spacing:-.03em;">CHECKOUT 11:00</div></div>
+                <div style="padding:0 18px; display:flex; flex-direction:column;">
+                  <div style="display:flex; gap:12px; align-items:center; padding:14px 0; border-top:1px solid #262A27;"><div style="width:20px; height:20px; background:#D6F24B;"></div><div style="font-size:14px;">Lights, heaters, appliances off</div></div>
+                  <div style="display:flex; gap:12px; align-items:center; padding:14px 0; border-top:1px solid #262A27;"><div style="width:20px; height:20px; border:1.5px solid #3A403C;"></div><div style="font-size:14px;">Lock the cottage door and gate</div></div>
+                  <div style="display:flex; gap:12px; align-items:center; padding:14px 0; border-top:1px solid #262A27;"><div style="width:20px; height:20px; border:1.5px solid #3A403C;"></div><div style="font-size:14px;">Sign out of Netflix on both TVs</div></div>
+                  <div style="display:flex; gap:12px; align-items:center; padding:14px 0; border-top:1px solid #262A27; border-bottom:1px solid #262A27;"><div style="width:20px; height:20px; border:1.5px solid #3A403C;"></div><div style="font-size:14px;">Check drawers and outlets</div></div>
+                </div>
+                <div style="margin:18px; background:#D6F24B; color:#0D0F0E; border-radius:16px; padding:18px;">
+                  <div style="font-size:22px; font-weight:800; letter-spacing:-.02em; line-height:1.1;">COME BACK<br>WITHOUT THE FEES</div>
+                  <div style="font-size:13px; margin-top:8px; line-height:1.5; opacity:.8;">Book the cottage direct — same place, about 12% less.</div>
+                  <div style="margin-top:12px; background:#0D0F0E; color:#D6F24B; border-radius:8px; padding:11px; text-align:center; font-size:13px; font-weight:700;">BOOK DIRECT</div>
+                </div>
+                <div style="padding:0 18px; font-family:'DM Mono',monospace; font-size:12px; color:#8D958F; line-height:1.7;">WHAT WAS MISSING FROM THIS GUIDE? <span style="color:#D6F24B;">TELL KEITH →</span></div>
+              </div>
+            </sc-if>
+          </div>
+        </div>
+
+        <div style="display:flex; flex-direction:column; gap:10px;">
+          <div style="font-size:11px; letter-spacing:.14em; text-transform:uppercase; color:#7A756B;">Before arrival</div>
+          <div style="width:390px; height:844px; background:#0D0F0E; border-radius:38px; border:1px solid #2A2E2B; box-shadow:0 24px 60px rgba(13,15,14,.35); overflow:hidden; display:flex; flex-direction:column; font-family:'Archivo',sans-serif; color:#F1F4F0;">
+            <div style="height:280px; position:relative;">
+              <image-slot id="c-hero" shape="rect" placeholder="Cottage exterior photo"></image-slot>
+              <div style="position:absolute; left:18px; bottom:16px; background:#D6F24B; color:#0D0F0E; font-family:'DM Mono',monospace; font-size:11px; letter-spacing:.12em; padding:6px 10px; border-radius:6px; pointer-events:none;">CHECK-IN FRI · 3:00 PM</div>
+            </div>
+            <div style="flex:1; display:flex; flex-direction:column; gap:14px; padding:20px 18px;">
+              <div style="font-size:30px; font-weight:800; letter-spacing:-.03em; line-height:1.05;">SEE YOU<br>FRIDAY</div>
+              <div style="font-size:14px; color:#A9B0AB; line-height:1.6;">Your access code appears here the morning you arrive. Everything else is ready now.</div>
+              <div style="background:#171A18; border-radius:14px; padding:16px;">
+                <div style="font-family:'DM Mono',monospace; font-size:11px; color:#D6F24B; letter-spacing:.12em;">FROM SFO</div>
+                <div style="font-size:14px; margin-top:6px; line-height:1.6; color:#C6CCC7;">BART direct to Balboa Park, ~30 min, then an 8-minute walk. Cheapest and usually fastest.</div>
+              </div>
+              <div style="background:#171A18; border-radius:14px; padding:16px;">
+                <div style="font-family:'DM Mono',monospace; font-size:11px; color:#D6F24B; letter-spacing:.12em;">WHAT TO PACK</div>
+                <div style="font-size:14px; margin-top:6px; line-height:1.6; color:#C6CCC7;">Layers. 55–62° and fog most mornings. No A/C — you won't need it.</div>
+              </div>
+              <div style="background:#171A18; border-radius:14px; padding:16px; display:flex; justify-content:space-between; align-items:center;">
+                <div><div style="font-family:'DM Mono',monospace; font-size:11px; color:#D6F24B; letter-spacing:.12em;">ARRIVAL DAY</div><div style="font-size:14px; color:#C6CCC7; margin-top:5px;">Fog, clearing late</div></div>
+                <div style="font-size:34px; font-weight:800;">57°</div>
+              </div>
+              <div style="margin-top:auto; font-family:'DM Mono',monospace; font-size:11px; color:#8D958F; text-align:center; letter-spacing:.1em;">ADD TO HOME SCREEN · WORKS OFFLINE</div>
+            </div>
+          </div>
+        </div>
+
+        <div style="display:flex; flex-direction:column; gap:10px;">
+          <div style="font-size:11px; letter-spacing:.14em; text-transform:uppercase; color:#7A756B;">Generic visitor · no codes</div>
+          <div style="width:390px; height:844px; background:#0D0F0E; border-radius:38px; border:1px solid #2A2E2B; box-shadow:0 24px 60px rgba(13,15,14,.35); overflow:hidden; display:flex; flex-direction:column; font-family:'Archivo',sans-serif; color:#F1F4F0;">
+            <div style="display:flex; justify-content:space-between; padding:14px 26px 8px; font-size:13px; font-weight:600;"><span>9:41</span><span style="color:#8D958F;">5G ▮</span></div>
+            <div style="flex:1; display:flex; flex-direction:column; gap:14px; padding:10px 18px 20px;">
+              <div>
+                <div style="font-size:34px; font-weight:800; letter-spacing:-.03em; line-height:1;">THE SF<br>COTTAGE</div>
+                <div style="font-family:'DM Mono',monospace; font-size:11px; color:#8D958F; letter-spacing:.12em; margin-top:8px;">INGLESIDE · 2BR · SLEEPS 6</div>
+              </div>
+              <div style="height:160px; border-radius:14px; overflow:hidden;"><image-slot id="c-generic" shape="rect" placeholder="Interior photo"></image-slot></div>
+              <div style="background:#171A18; border:1px dashed #3A403C; border-radius:14px; padding:14px; font-family:'DM Mono',monospace; font-size:11px; color:#8D958F; line-height:1.7; letter-spacing:.04em;">WIFI + ACCESS CODE<br>UNLOCK WITH YOUR STAY LINK</div>
+              <div style="display:grid; grid-template-columns:1fr 1fr; gap:8px;">
+                <div style="background:#171A18; border-radius:12px; padding:14px; font-size:14px; font-weight:700; line-height:1.2;">GETTING<br>HERE</div>
+                <div style="background:#171A18; border-radius:12px; padding:14px; font-size:14px; font-weight:700; line-height:1.2;">THE<br>COTTAGE</div>
+                <div style="background:#171A18; border-radius:12px; padding:14px; font-size:14px; font-weight:700; line-height:1.2;">EAT &amp;<br>DRINK</div>
+                <div style="background:#171A18; border-radius:12px; padding:14px; font-size:14px; font-weight:700; line-height:1.2;">EXPLORE<br>SF</div>
+              </div>
+              <div style="margin-top:auto; background:#D6F24B; color:#0D0F0E; border-radius:16px; padding:18px;">
+                <div style="font-size:22px; font-weight:800; letter-spacing:-.02em; line-height:1.1;">BOOK DIRECT,<br>SKIP THE FEES</div>
+                <div style="font-size:13px; margin-top:8px; opacity:.8; line-height:1.5;">Same cottage, same host, about 12% less.</div>
+                <div style="margin-top:12px; background:#0D0F0E; color:#D6F24B; border-radius:8px; padding:11px; text-align:center; font-size:13px; font-weight:700;">CHECK DATES</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div style="display:flex; gap:28px; align-items:flex-start; margin-top:12px;">
+        <div style="display:flex; flex-direction:column; gap:10px;">
+          <div style="font-size:11px; letter-spacing:.14em; text-transform:uppercase; color:#7A756B;">Desktop / tablet · Explore SF by interest</div>
+          <div style="width:1180px; height:740px; background:#0D0F0E; border:1px solid #2A2E2B; border-radius:16px; overflow:hidden; box-shadow:0 24px 60px rgba(13,15,14,.3); display:flex; flex-direction:column; font-family:'Archivo',sans-serif; color:#F1F4F0;">
+            <div style="display:flex; align-items:center; gap:20px; padding:16px 30px; border-bottom:1px solid #262A27;">
+              <div style="font-size:18px; font-weight:800; letter-spacing:-.02em;">THE SF COTTAGE</div>
+              <div style="font-family:'DM Mono',monospace; font-size:11px; color:#8D958F; letter-spacing:.1em;">SARAH · GUEST GUIDE</div>
+              <div style="margin-left:auto; display:flex; gap:10px; align-items:center;">
+                <div style="background:#171A18; border-radius:8px; padding:8px 16px; font-family:'DM Mono',monospace; font-size:12px; color:#8D958F;">SEARCH THE GUIDE</div>
+                <div style="background:#D6F24B; color:#0D0F0E; border-radius:8px; padding:8px 16px; font-family:'DM Mono',monospace; font-size:13px; font-weight:500; letter-spacing:.1em;">CODE 4821</div>
+              </div>
+            </div>
+            <div style="flex:1; display:flex; overflow:hidden;">
+              <div style="width:210px; border-right:1px solid #262A27; padding:22px 18px; display:flex; flex-direction:column; gap:3px; font-family:'DM Mono',monospace; font-size:12px; color:#8D958F; letter-spacing:.06em;">
+                <div style="padding:5px 0;">01 WELCOME</div>
+                <div style="padding:5px 0;">02 ARRIVING</div>
+                <div style="padding:5px 0;">03 ABOUT THE SPACE</div>
+                <div style="padding:5px 0;">04 THE COTTAGE</div>
+                <div style="padding:5px 0;">05 GETTING AROUND</div>
+                <div style="padding:5px 0;">06 EAT &amp; DRINK</div>
+                <div style="padding:5px 0;">07 DELIVERY</div>
+                <div style="padding:5px 0;">08 GROCERIES</div>
+                <div style="padding:5px 0; color:#D6F24B;">09 EXPLORE SF</div>
+                <div style="padding:5px 0;">10 WORK</div>
+                <div style="padding:5px 0;">11 KIDS &amp; PETS</div>
+                <div style="padding:5px 0;">12 TIPS &amp; SAFETY</div>
+                <div style="padding:5px 0;">13 WHAT'S ON</div>
+                <div style="padding:5px 0;">14 EMERGENCY</div>
+                <div style="padding:5px 0;">15 CHECKOUT</div>
+              </div>
+              <div style="flex:1; padding:30px; display:flex; flex-direction:column; gap:20px; overflow:hidden;">
+                <div>
+                  <div style="font-size:50px; font-weight:800; letter-spacing:-.035em; line-height:1;">EXPLORE SF</div>
+                  <div style="font-size:15px; color:#A9B0AB; line-height:1.65; margin-top:10px; max-width:640px; text-wrap:pretty;">No fixed itineraries — tell me what you're into and I'll point you at the version of the city I'd actually send a friend to.</div>
+                </div>
+                <div style="display:flex; flex-direction:column; gap:10px;">
+                  <div style="display:flex; gap:8px; align-items:center; font-family:'DM Mono',monospace; font-size:12px;">
+                    <div style="color:#8D958F; width:110px; letter-spacing:.1em;">NEIGHBOURHOOD</div>
+                    <div style="padding:8px 14px; border-radius:8px; background:#171A18; color:#F1F4F0;">MISSION</div>
+                    <div style="padding:8px 14px; border-radius:8px; background:#171A18; color:#F1F4F0;">CHINATOWN</div>
+                    <div style="padding:8px 14px; border-radius:8px; background:#171A18; color:#F1F4F0;">GOLDEN GATE PARK</div>
+                    <div style="padding:8px 14px; border-radius:8px; background:#171A18; color:#F1F4F0;">SUNSET / OCEAN BEACH</div>
+                    <div style="padding:8px 14px; border-radius:8px; background:#171A18; color:#F1F4F0;">EMBARCADERO</div>
+                  </div>
+                  <div style="display:flex; gap:8px; align-items:center; font-family:'DM Mono',monospace; font-size:12px;">
+                    <div style="color:#8D958F; width:110px; letter-spacing:.1em;">INTEREST</div>
+                    <div style="padding:8px 14px; border-radius:8px; background:#D6F24B; color:#0D0F0E;">HIKING &amp; NATURE</div>
+                    <div style="padding:8px 14px; border-radius:8px; background:#171A18; color:#8D958F;">HAVE A CAR</div>
+                    <div style="padding:8px 14px; border-radius:8px; background:#171A18; color:#8D958F;">WINE</div>
+                    <div style="padding:8px 14px; border-radius:8px; background:#171A18; color:#8D958F;">MUSEUMS</div>
+                    <div style="padding:8px 14px; border-radius:8px; background:#171A18; color:#8D958F;">WITH KIDS</div>
+                  </div>
+                </div>
+                <div style="display:grid; grid-template-columns:repeat(3,1fr); gap:14px;">
+                  <div style="background:#171A18; border-radius:14px; overflow:hidden; display:flex; flex-direction:column;">
+                    <div style="height:130px;"><image-slot id="c-x1" shape="rect" placeholder="Lands End"></image-slot></div>
+                    <div style="padding:14px;"><div style="font-size:16px; font-weight:700;">LANDS END</div><div style="font-family:'DM Mono',monospace; font-size:11px; color:#D6F24B; margin-top:4px;">38 MIN · BUS 29 → 38</div><div style="font-size:13px; color:#A9B0AB; margin-top:6px; line-height:1.5;">Cliff trail with the bridge on one side and shipwrecks below.</div></div>
+                  </div>
+                  <div style="background:#171A18; border-radius:14px; overflow:hidden; display:flex; flex-direction:column;">
+                    <div style="height:130px;"><image-slot id="c-x2" shape="rect" placeholder="Twin Peaks"></image-slot></div>
+                    <div style="padding:14px;"><div style="font-size:16px; font-weight:700;">TWIN PEAKS</div><div style="font-family:'DM Mono',monospace; font-size:11px; color:#D6F24B; margin-top:4px;">30 MIN · K → 43</div><div style="font-size:13px; color:#A9B0AB; margin-top:6px; line-height:1.5;">Go at sunset, bring the warm layer you didn't think you'd need.</div></div>
+                  </div>
+                  <div style="background:#171A18; border-radius:14px; overflow:hidden; display:flex; flex-direction:column;">
+                    <div style="height:130px;"><image-slot id="c-x3" shape="rect" placeholder="Ocean Beach"></image-slot></div>
+                    <div style="padding:14px;"><div style="font-size:16px; font-weight:700;">OCEAN BEACH</div><div style="font-family:'DM Mono',monospace; font-size:11px; color:#D6F24B; margin-top:4px;">25 MIN · BUS 29</div><div style="font-size:13px; color:#A9B0AB; margin-top:6px; line-height:1.5;">Four miles of sand. Fire pits at the south end, fog optional.</div></div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div style="display:flex; flex-direction:column; gap:10px;">
+          <div style="font-size:11px; letter-spacing:.14em; text-transform:uppercase; color:#7A756B;">Printed essentials · letter</div>
+          <div style="width:612px; height:792px; background:#FFFFFF; border:1px solid #CFCCC5; box-shadow:0 24px 60px rgba(13,15,14,.14); display:flex; flex-direction:column; font-family:'Archivo',sans-serif; color:#0D0F0E;">
+            <div style="background:#0D0F0E; color:#F1F4F0; padding:30px 44px; display:flex; justify-content:space-between; align-items:flex-end;">
+              <div>
+                <div style="font-size:34px; font-weight:800; letter-spacing:-.03em; line-height:1;">THE SF COTTAGE</div>
+                <div style="font-family:'DM Mono',monospace; font-size:11px; color:#8D958F; letter-spacing:.1em; margin-top:8px;">251 HAROLD AVE · SF 94112 · STR 2022-010560</div>
+              </div>
+              <div style="background:#D6F24B; color:#0D0F0E; font-family:'DM Mono',monospace; font-size:11px; padding:6px 10px; letter-spacing:.1em;">ESSENTIALS</div>
+            </div>
+            <div style="flex:1; padding:32px 44px; display:flex; flex-direction:column; gap:22px;">
+              <div style="display:flex; gap:14px;">
+                <div style="flex:1; border:2px solid #0D0F0E; padding:16px;">
+                  <div style="font-family:'DM Mono',monospace; font-size:10px; letter-spacing:.16em;">WIFI</div>
+                  <div style="font-size:22px; font-weight:800; margin-top:6px;">SFCottage-5G</div>
+                  <div style="font-family:'DM Mono',monospace; font-size:18px; letter-spacing:.12em;">••••••••</div>
+                </div>
+                <div style="flex:1; background:#D6F24B; padding:16px;">
+                  <div style="font-family:'DM Mono',monospace; font-size:10px; letter-spacing:.16em;">ACCESS CODE · GATE + DOOR</div>
+                  <div style="font-family:'DM Mono',monospace; font-size:38px; font-weight:500; margin-top:8px; letter-spacing:.12em;">4821</div>
+                </div>
+                <div style="width:96px; height:96px; background:repeating-conic-gradient(#0D0F0E 0 25%, #FFFFFF 0 50%) 0 0/14px 14px;"></div>
+              </div>
+              <div>
+                <div style="font-size:20px; font-weight:800; letter-spacing:-.02em; border-bottom:2px solid #0D0F0E; padding-bottom:6px;">TRANSIT</div>
+                <div style="font-family:'DM Mono',monospace; font-size:12px; line-height:2.3; letter-spacing:.02em;">
+                  <div style="display:flex; justify-content:space-between; border-bottom:1px solid #E3E1DC;"><span>K INGLESIDE · OCEAN AVE</span><span>2 MIN WALK · 30 MIN DOWNTOWN</span></div>
+                  <div style="display:flex; justify-content:space-between; border-bottom:1px solid #E3E1DC;"><span>BART · BALBOA PARK</span><span>9 MIN WALK · SFO DIRECT</span></div>
+                  <div style="display:flex; justify-content:space-between; border-bottom:1px solid #E3E1DC;"><span>BUS 29 · 49 · 8 · 43 · 54</span><span>1–2 MIN WALK</span></div>
+                  <div style="display:flex; justify-content:space-between;"><span>CLIPPER IN APPLE / GOOGLE PAY</span><span>NO CARD NEEDED</span></div>
+                </div>
+              </div>
+              <div>
+                <div style="font-size:20px; font-weight:800; letter-spacing:-.02em; border-bottom:2px solid #0D0F0E; padding-bottom:6px;">CHECKOUT · 11:00 AM</div>
+                <div style="font-family:'DM Mono',monospace; font-size:12px; line-height:2.2; letter-spacing:.02em;">☐ LIGHTS, HEATERS, APPLIANCES OFF<br>☐ WINDOWS CLOSED · DOOR + GATE LOCKED<br>☐ SIGNED OUT OF NETFLIX ON BOTH TVS<br>☐ DRAWERS AND OUTLETS CHECKED</div>
+              </div>
+              <div style="margin-top:auto; background:#0D0F0E; color:#F1F4F0; padding:18px 20px; display:flex; justify-content:space-between; align-items:center;">
+                <div style="font-family:'DM Mono',monospace; font-size:12px; line-height:1.9; letter-spacing:.04em;">KEITH · REPLIES WITHIN THE HOUR<br><span style="color:#8D958F;">911 EMERGENCY · 415-553-0123 · 311 CITY</span></div>
+                <div style="width:58px; height:58px; background:repeating-conic-gradient(#F1F4F0 0 25%, #0D0F0E 0 50%) 0 0/10px 10px;"></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+</x-dc>
+<script type="text/x-dc" data-dc-script>
+class Component extends DCLogic {
+  state = { a: 'home', b: 'home', c: 'home', a2: 'home', b2: 'home', c2: 'home' };
+  go(k, v) { return () => this.setState({ [k]: v }); }
+  renderVals() {
+    const v = {};
+    ['a','b','c'].forEach(k => {
+      ['home','around','eat','out'].forEach(t => {
+        v[k + t.charAt(0).toUpperCase() + t.slice(1)] = this.state[k] === t;
+        v[k + 'Go' + t.charAt(0).toUpperCase() + t.slice(1)] = this.go(k, t);
+      });
+      v[k + 'NotHome'] = this.state[k] !== 'home';
+    });
+    const tabs = ['home','around','eat','out'];
+    tabs.forEach(t => {
+      const on = this.state.a === t;
+      v['aTab' + t] = { cursor:'pointer', display:'flex', flexDirection:'column', alignItems:'center', gap:'4px', padding:'8px 0', fontSize:'11px', fontWeight: on ? 600 : 500, color: on ? '#B3532E' : '#8B8175' };
+      const onB = this.state.b === t;
+      v['bChip' + t] = { cursor:'pointer', fontSize:'12px', fontWeight: onB ? 600 : 500, padding:'7px 14px', borderRadius:'999px', whiteSpace:'nowrap', background: onB ? '#2C6D61' : '#FFFFFF', color: onB ? '#F2F7F5' : '#14201D', border: onB ? '1px solid #2C6D61' : '1px solid #DCE4E1' };
+    });
+    const t5 = ['home','arrive','cottage','around','explore','help'];
+    const accent = { a2:'#B3532E', b2:'#2C6D61', c2:'#D6F24B' };
+    const idle = { a2:'#8B8175', b2:'#6E807B', c2:'#8D958F' };
+    ['a2','b2','c2'].forEach(k => {
+      t5.forEach(t => {
+        const on = this.state[k] === t;
+        v[k + t] = on;
+        v[k + 'Go' + t] = () => this.setState({ [k]: t });
+        v[k + 'Tab' + t] = k === 'b2'
+          ? { cursor:'pointer', fontSize:'12px', fontWeight: on ? 600 : 500, padding:'7px 13px', borderRadius:'999px', whiteSpace:'nowrap', background: on ? '#2C6D61' : '#FFFFFF', color: on ? '#F2F7F5' : '#14201D', border: on ? '1px solid #2C6D61' : '1px solid #DCE4E1' }
+          : { cursor:'pointer', display:'flex', flexDirection:'column', alignItems:'center', gap:'5px', padding:'8px 0', fontSize:'10px', letterSpacing:'.02em', fontWeight: on ? 700 : 500, color: on ? accent[k] : idle[k] };
+      });
+    });
+    return v;
+  }
+}
+</script>
+</body>
+</html>

@@ -1,0 +1,687 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Instrument+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+<script src="./image-slot.js"></script>
+<style>
+  html, body { margin: 0; height: 100%; background: #C9D2CE; }
+  a { color: #2C6D61; text-decoration: none; }
+  a:hover { text-decoration: underline; }
+  input { outline: none; }
+  ::-webkit-scrollbar { width: 0; height: 0; }
+</style>
+</helmet>
+
+<div style="max-width:430px; margin:0 auto; height:100vh; background:#EDF1EF; display:flex; flex-direction:column; font-family:'Instrument Sans',sans-serif; color:#14201D; overflow:hidden; box-shadow:0 0 60px rgba(20,32,29,.18);">
+
+  <div style="padding:12px 16px 10px; display:flex; flex-direction:column; gap:9px; border-bottom:1px solid #DCE4E1; background:#EDF1EF;">
+    <div style="display:flex; align-items:center; gap:10px;">
+      <div onClick="{{ goHome }}" style="cursor:pointer; font-family:'Instrument Serif',serif; font-size:20px;">The SF Cottage</div>
+      <div style="margin-left:auto; font-size:11px; color:#6E807B;">EN · translate works here</div>
+    </div>
+    <sc-if value="{{ isGuest }}" hint-placeholder-val="{{ true }}">
+      <div style="display:grid; grid-template-columns:1.15fr 1fr 1.1fr; gap:6px;">
+        <div onClick="{{ goArrive }}" style="cursor:pointer; background:#14201D; color:#EDF1EF; border-radius:12px; padding:8px 10px;"><div style="font-size:9px; letter-spacing:.16em; text-transform:uppercase; opacity:.6;">Code</div><div style="font-size:17px; font-weight:600; letter-spacing:.14em;">4821</div></div>
+        <div onClick="{{ goWifi }}" style="cursor:pointer; background:#FFFFFF; border:1px solid #DCE4E1; border-radius:12px; padding:8px 10px;"><div style="font-size:9px; letter-spacing:.16em; text-transform:uppercase; color:#6E807B;">WiFi</div><div style="font-size:15px; font-weight:600; color:#14201D;">Join ›</div></div>
+        <div onClick="{{ goNearby }}" style="cursor:pointer; background:#FFFFFF; border:1px solid #DCE4E1; border-radius:12px; padding:8px 10px;"><div style="font-size:9px; letter-spacing:.16em; text-transform:uppercase; color:#6E807B;">Next train</div><div style="display:flex; align-items:center; gap:5px;"><div style="width:16px; height:16px; border-radius:50%; background:#569BBE; color:#FFFFFF; display:flex; align-items:center; justify-content:center; font-size:10px; font-weight:700;">K</div><div style="font-size:13px; font-weight:600; color:#2C6D61;">4 min</div></div></div>
+      </div>
+    </sc-if>
+    <sc-if value="{{ isGeneric }}" hint-placeholder-val="{{ false }}">
+      <div style="background:#FFFFFF; border:1px dashed #C2CFCA; border-radius:12px; padding:10px 14px; font-size:12px; color:#5C716B; line-height:1.5;">WiFi and the door code unlock with your stay link once you've booked.</div>
+    </sc-if>
+  </div>
+
+  <div ref="{{ scrollRef }}" style="flex:1; overflow-y:auto;">
+
+    <sc-if value="{{ tabHome }}" hint-placeholder-val="{{ true }}">
+      <sc-if value="{{ showBefore }}" hint-placeholder-val="{{ false }}">
+        <div style="display:flex; flex-direction:column; gap:14px; padding:18px 16px 28px;">
+          <div style="height:190px; border-radius:18px; overflow:hidden;"><image-slot id="fog-hero" shape="rect" placeholder="Cottage exterior photo"></image-slot></div>
+          <div>
+            <div style="font-family:'Instrument Serif',serif; font-size:32px; line-height:1.1;">See you soon, {{ guestName }}.</div>
+            <div style="font-size:14px; color:#6E807B; margin-top:6px; line-height:1.6;">Check-in is any time from 3:00 PM. Your access code — one code for the gate and the door — appears above on the morning you arrive.</div>
+          </div>
+          <div onClick="{{ goArrive }}" style="cursor:pointer; background:#FFFFFF; border:1px solid #DCE4E1; border-radius:18px; padding:16px;"><div style="display:flex; justify-content:space-between;"><div style="font-size:15px; font-weight:600;">From SFO, take BART</div><span style="color:#9FB0AA;">→</span></div><div style="font-size:13px; color:#5C716B; line-height:1.6; margin-top:4px;">Straight to Balboa Park, about 30 minutes, then an 8-minute walk. Full directions in Arrive.</div></div>
+          <div style="background:#FFFFFF; border:1px solid #DCE4E1; border-radius:18px; padding:16px;"><div style="font-size:15px; font-weight:600;">Pack layers</div><div style="font-size:13px; color:#5C716B; line-height:1.6; margin-top:4px;">55–62° and foggy mornings this week. There's no A/C and you won't miss it.</div></div>
+          <div style="background:linear-gradient(160deg,#FDF6E7,#DFE9E5); border-radius:18px; padding:16px; display:flex; justify-content:space-between; align-items:center;"><div><div style="font-size:14px; font-weight:600;">Arrival day</div><div style="font-size:13px; color:#25423B; margin-top:2px;">Fog, clearing late</div></div><div style="display:flex; align-items:center; gap:10px;"><svg width="38" height="38" viewBox="0 0 46 46"><circle cx="26" cy="16" r="9" fill="#E8A03C"></circle><path d="M6 26h30M11 32h28M6 38h24" stroke="#9FB0AA" stroke-width="3.5" stroke-linecap="round" fill="none"></path></svg><div style="font-family:'Instrument Serif',serif; font-size:34px;">57°</div></div></div>
+          <div style="text-align:center; font-size:12px; color:#6E807B;">Add this guide to your home screen — it works offline.</div>
+        </div>
+      </sc-if>
+
+      <sc-if value="{{ showDuring }}" hint-placeholder-val="{{ true }}">
+        <div style="display:flex; flex-direction:column; gap:14px; padding:18px 16px 28px;">
+          <div style="font-family:'Instrument Serif',serif; font-size:32px; line-height:1.1;">Good morning, {{ guestName }}.<br><span style="color:#6E807B;">Here's your day in Ingleside.</span></div>
+          <div style="display:flex; gap:10px;">
+            <div style="flex:1; background:linear-gradient(160deg,#FDF6E7,#EAF1EC); border:1px solid #E4DFC9; border-radius:16px; padding:14px; position:relative; overflow:hidden;">
+              <svg width="46" height="46" viewBox="0 0 46 46" style="position:absolute; top:10px; right:10px;"><circle cx="26" cy="16" r="9" fill="#E8A03C"></circle><path d="M6 26h30M11 32h28M6 38h24" stroke="#9FB0AA" stroke-width="3.5" stroke-linecap="round" fill="none"></path></svg>
+              <div style="font-family:'Instrument Serif',serif; font-size:30px; line-height:1;">58°</div>
+              <div style="font-size:12px; color:#6E807B; margin-top:4px; line-height:1.4;">Fog till noon<br>Take a layer</div>
+            </div>
+            <div onClick="{{ goNearby }}" style="cursor:pointer; flex:1; background:#FFFFFF; border:1px solid #DCE4E1; border-radius:16px; padding:14px; position:relative;">
+              <div style="display:flex; align-items:center; gap:6px;">
+                <img src="assets/muni-logo.png" alt="Muni" style="height:14px; width:auto; display:block;">
+                <span style="font-size:12px; color:#6E807B;">metro</span>
+              </div>
+              <div style="font-family:'Instrument Serif',serif; font-size:29px; line-height:1; margin-top:9px; color:#2C6D61;">4 min</div>
+              <div style="display:flex; align-items:center; gap:5px; flex-wrap:wrap; font-size:12px; color:#6E807B; margin-top:5px; line-height:1.5;">
+                <span>until the next</span><div style="{{ kBadgeSm }}">K</div><span>· 2 min walk</span>
+              </div>
+            </div>
+          </div>
+          <input value="{{ query }}" onChange="{{ setQuery }}" placeholder="Search the guide — trash day, Keurig, loft…" style="width:100%; box-sizing:border-box; background:#FFFFFF; border:1px solid #DCE4E1; border-radius:999px; padding:11px 16px; font-size:14px; font-family:'Instrument Sans',sans-serif; color:#14201D;">
+          <sc-if value="{{ hasResults }}" hint-placeholder-val="{{ false }}">
+            <div style="background:#FFFFFF; border:1px solid #DCE4E1; border-radius:16px; padding:4px 16px;">
+              <sc-for list="{{ results }}" as="r" hint-placeholder-count="2">
+                <div onClick="{{ r.go }}" style="cursor:pointer; display:flex; justify-content:space-between; padding:10px 0; border-bottom:1px solid #E4EBE8;"><span style="font-size:14px;">{{ r.label }}</span><span style="font-size:12px; color:#6E807B;">{{ r.where }} →</span></div>
+              </sc-for>
+            </div>
+          </sc-if>
+          <div style="display:flex; flex-direction:column;">
+            <div style="font-size:11px; letter-spacing:.16em; text-transform:uppercase; color:#6E807B; margin-bottom:4px;">The guide</div>
+            <sc-for list="{{ sections }}" as="s" hint-placeholder-count="5">
+              <div onClick="{{ s.go }}" style="cursor:pointer; padding:13px 0; border-bottom:1px solid #DCE4E1;"><div style="display:flex; justify-content:space-between;"><span style="font-size:16px; font-weight:500;">{{ s.name }}</span><span style="color:#9FB0AA;">→</span></div><div style="font-size:12px; color:#6E807B; margin-top:2px;">{{ s.sub }}</div></div>
+            </sc-for>
+          </div>
+          <div style="font-family:'Instrument Serif',serif; font-style:italic; font-size:15px; color:#4A605A; line-height:1.6;">"My favorite burger in the city is 2 minutes away — it's in Around Here."</div>
+        </div>
+      </sc-if>
+
+      <sc-if value="{{ showCheckout }}" hint-placeholder-val="{{ false }}">
+        <div style="display:flex; flex-direction:column; gap:14px; padding:18px 16px 28px;">
+          <div style="font-family:'Instrument Serif',serif; font-size:32px; line-height:1.12;">Out by 11:00 AM.<br><span style="color:#6E807B;">Thanks for staying, {{ guestName }}.</span></div>
+          <div style="background:#FFFFFF; border:1px solid #DCE4E1; border-radius:18px; padding:4px 16px;">
+            <sc-for list="{{ checklist }}" as="c" hint-placeholder-count="4">
+              <div onClick="{{ c.toggle }}" style="cursor:pointer; display:flex; gap:12px; align-items:center; padding:13px 0; border-bottom:1px solid #E4EBE8;">
+                <div style="{{ c.boxStyle }}"></div>
+                <div style="{{ c.textStyle }}">{{ c.text }}</div>
+              </div>
+            </sc-for>
+          </div>
+          <div style="background:#14201D; color:#EDF1EF; border-radius:18px; padding:18px;">
+            <div style="font-family:'Instrument Serif',serif; font-size:22px;">Next time, book direct.</div>
+            <div style="font-size:13px; opacity:.72; margin-top:6px; line-height:1.55;">Same cottage, roughly 12% less without the platform fee.</div>
+            <div style="margin-top:12px; background:#2C6D61; border-radius:999px; padding:11px; text-align:center; font-size:13px; font-weight:600; cursor:pointer;">Check dates</div>
+          </div>
+          <div style="background:#FFFFFF; border:1px solid #DCE4E1; border-radius:18px; padding:16px;"><div style="font-size:14px; font-weight:600;">One question before you go</div><div style="font-size:13px; color:#5C716B; margin-top:3px;">What was missing from this guide? <a href="#">Tell Keith →</a></div></div>
+          <div style="font-size:13px; color:#6E807B; text-align:center;">If you enjoyed the stay, a review really does help. ✳</div>
+        </div>
+      </sc-if>
+
+      <sc-if value="{{ isGeneric }}" hint-placeholder-val="{{ false }}">
+        <div style="display:flex; flex-direction:column; gap:14px; padding:18px 16px 28px;">
+          <div style="height:190px; border-radius:18px; overflow:hidden;"><image-slot id="fog-hero-gen" shape="rect" placeholder="Cottage exterior photo"></image-slot></div>
+          <div>
+            <div style="font-family:'Instrument Serif',serif; font-size:34px; line-height:1.1;">The SF Cottage</div>
+            <div style="font-size:14px; color:#5C716B; margin-top:6px; line-height:1.65;">A quiet 2-bedroom cottage in Ingleside, two minutes from the K line. This is the same guide my guests use — minus the codes.</div>
+          </div>
+          <div style="display:flex; flex-direction:column;">
+            <sc-for list="{{ sections }}" as="s" hint-placeholder-count="5">
+              <div onClick="{{ s.go }}" style="cursor:pointer; padding:13px 0; border-bottom:1px solid #DCE4E1;"><div style="display:flex; justify-content:space-between;"><span style="font-size:16px; font-weight:500;">{{ s.name }}</span><span style="color:#9FB0AA;">→</span></div><div style="font-size:12px; color:#6E807B; margin-top:2px;">{{ s.sub }}</div></div>
+            </sc-for>
+          </div>
+          <div style="background:#14201D; color:#EDF1EF; border-radius:18px; padding:18px;">
+            <div style="font-family:'Instrument Serif',serif; font-size:22px;">Book direct, skip the fees.</div>
+            <div style="font-size:13px; opacity:.72; margin-top:6px; line-height:1.55;">About 12% less than the listing, straight with me. Sleeps 6 · 2BR · pets welcome.</div>
+            <div style="margin-top:12px; background:#2C6D61; border-radius:999px; padding:11px; text-align:center; font-size:13px; font-weight:600; cursor:pointer;">Check dates</div>
+          </div>
+        </div>
+      </sc-if>
+    </sc-if>
+
+    <sc-if value="{{ tabWifi }}" hint-placeholder-val="{{ false }}">
+      <div style="display:flex; flex-direction:column; gap:14px; padding:18px 16px 28px;">
+        <div onClick="{{ goHome }}" style="cursor:pointer; font-size:13px; color:#6E807B;">← Home</div>
+        <div style="font-family:'Instrument Serif',serif; font-size:32px; line-height:1.1;">WiFi</div>
+        <div style="font-size:14px; color:#5C716B; line-height:1.6;">817 Mbps, and it reaches the courtyard. Point your camera at the code — or just tap the button.</div>
+        <div style="background:#FFFFFF; border:1px solid #DCE4E1; border-radius:20px; padding:20px; display:flex; flex-direction:column; gap:16px; align-items:center;">
+          <div style="width:230px; max-width:100%;">{{ qr }}</div>
+          <div onClick="{{ joinWifi }}" style="cursor:pointer; width:100%; box-sizing:border-box; background:#2C6D61; color:#F2F7F5; border-radius:999px; padding:13px; text-align:center; font-size:15px; font-weight:600;">{{ joinLabel }}</div>
+          <div style="width:100%; display:flex; flex-direction:column; gap:2px;">
+            <div style="display:flex; justify-content:space-between; align-items:baseline; padding:11px 0; border-top:1px solid #E4EBE8;"><span style="font-size:13px; color:#6E807B;">Network</span><span style="font-family:'Instrument Serif',serif; font-size:20px;">{{ wifiNetwork }}</span></div>
+            <div style="display:flex; justify-content:space-between; align-items:baseline; padding:11px 0; border-top:1px solid #E4EBE8;"><span style="font-size:13px; color:#6E807B;">Password</span><span style="font-family:'Instrument Serif',serif; font-size:20px;">{{ wifiPassword }}</span></div>
+          </div>
+          <div onClick="{{ copyWifi }}" style="cursor:pointer; font-size:13px; color:{{ wifiColor }}; font-weight:600;">{{ wifiCopyLabel }}</div>
+        </div>
+        <div style="background:#DFE9E5; border-radius:16px; padding:14px 16px; font-size:13px; line-height:1.6; color:#25423B;">Dropping out? Unplug the white router under the desk for ten seconds — it's back in about two minutes.</div>
+      </div>
+    </sc-if>
+
+    <sc-if value="{{ tabArrive }}" hint-placeholder-val="{{ false }}">
+      <div style="display:flex; flex-direction:column; gap:14px; padding:18px 16px 28px;">
+        <div style="font-family:'Instrument Serif',serif; font-size:32px;">Arrive</div>
+        <div style="background:#FFFFFF; border:1px solid #DCE4E1; border-radius:18px; padding:16px;">
+          <div style="font-size:11px; letter-spacing:.16em; text-transform:uppercase; color:#2C6D61; margin-bottom:4px;">Getting in</div>
+          <sc-for list="{{ steps }}" as="st" hint-placeholder-count="5">
+            <div style="display:flex; gap:12px; padding:9px 0; border-bottom:1px solid #E4EBE8;"><div style="font-family:'Instrument Serif',serif; font-size:18px; color:#2C6D61; min-width:14px;">{{ st.n }}</div><div style="font-size:13px; color:#3B4E49; line-height:1.55;">{{ st.text }}</div></div>
+          </sc-for>
+          <div style="display:flex; gap:8px; margin-top:12px;">
+            <div style="flex:1; height:92px; border-radius:12px; overflow:hidden;"><image-slot id="fog-gate" shape="rect" placeholder="Gate keypad"></image-slot></div>
+            <div style="flex:1; height:92px; border-radius:12px; overflow:hidden;"><image-slot id="fog-door" shape="rect" placeholder="Door keypad"></image-slot></div>
+          </div>
+        </div>
+        <div style="background:#FFFFFF; border:1px solid #DCE4E1; border-radius:18px; padding:16px;"><div style="font-size:15px; font-weight:600;">From SFO</div><div style="font-size:13px; color:#5C716B; line-height:1.65; margin-top:4px;">BART direct to Balboa Park, about 30 minutes, then an 8-minute walk. Cheapest and usually fastest way in.</div></div>
+        <div style="background:#FFFFFF; border:1px solid #DCE4E1; border-radius:18px; padding:16px;"><div style="font-size:15px; font-weight:600;">From OAK</div><div style="font-size:13px; color:#5C716B; line-height:1.65; margin-top:4px;">BART toward SF, change at 19th St Oakland for the Balboa Park line. About an hour.</div></div>
+        <div style="background:#FFFFFF; border:1px solid #DCE4E1; border-radius:18px; padding:16px;"><div style="font-size:15px; font-weight:600;">Driving &amp; parking</div><div style="font-size:13px; color:#5C716B; line-height:1.65; margin-top:4px;">One free driveway space is yours. Street parking nearby is free too.</div></div>
+        <div style="background:#DFE9E5; border-radius:16px; padding:14px 16px; font-size:13px; line-height:1.6; color:#25423B;">The cottage is down a narrow alley — take big suitcases slowly. Arriving early? Message me and I'll see what I can do.</div>
+      </div>
+    </sc-if>
+
+    <sc-if value="{{ tabCottage }}" hint-placeholder-val="{{ false }}">
+      <div style="display:flex; flex-direction:column; gap:14px; padding:18px 16px 28px;">
+        <div style="font-family:'Instrument Serif',serif; font-size:32px;">The Cottage</div>
+        <div style="font-size:14px; color:#5C716B; line-height:1.65;">Six hundred square feet behind the main house, in Ingleside near City College. May and I have hosted here for 15 years — here's how everything works.</div>
+        <div>
+          <div style="font-size:11px; letter-spacing:.16em; text-transform:uppercase; color:#6E807B; margin-bottom:2px;">Room by room</div>
+          <sc-for list="{{ rooms }}" as="r" hint-placeholder-count="7">
+            <div style="padding:12px 0; border-bottom:1px solid #DCE4E1;"><div style="font-size:15px; font-weight:600;">{{ r.name }}</div><div style="font-size:13px; color:#5C716B; margin-top:3px; line-height:1.55;">{{ r.details }}</div></div>
+          </sc-for>
+        </div>
+        <div style="background:#FFFFFF; border:1px solid #DCE4E1; border-radius:18px; padding:16px;">
+          <div style="font-size:15px; font-weight:600; margin-bottom:8px;">WiFi &amp; appliances</div>
+          <div style="font-size:13px; color:#5C716B; line-height:1.9;">Keurig for one cup, the 12-cup drip for a crowd · Sodastream under the counter · TVs have Netflix — sign in to your own account · Washer/dryer behind the kitchen door, free · Heating + portable fans + air purifier; no A/C (you won't need it)</div>
+        </div>
+        <div style="background:#FFFFFF; border:1px solid #DCE4E1; border-radius:18px; padding:16px;">
+          <div style="font-size:15px; font-weight:600; margin-bottom:8px;">House rules</div>
+          <div style="font-size:13px; color:#5C716B; line-height:1.9;">6 guests max · shoes off preferred (slippers provided) · pets welcome, $60 fee (assistance animals free) · re-lock the gate and door when leaving</div>
+        </div>
+        <div style="background:#DFE9E5; border-radius:16px; padding:14px 16px;"><div style="font-size:14px; font-weight:600;">Trash goes out Tuesday</div><div style="font-size:13px; color:#25423B; line-height:1.6; margin-top:3px;">Blue recycling, green compost, black landfill. SF means it about compost — food scraps go green.</div></div>
+        <div>
+          <div style="font-size:11px; letter-spacing:.16em; text-transform:uppercase; color:#6E807B; margin-bottom:2px;">Troubleshooting</div>
+          <sc-for list="{{ faqs }}" as="q" hint-placeholder-count="4">
+            <div style="padding:12px 0; border-bottom:1px solid #DCE4E1;"><div style="font-size:14px; font-weight:600;">{{ q.q }}</div><div style="font-size:13px; color:#5C716B; margin-top:3px; line-height:1.55;">{{ q.a }}</div></div>
+          </sc-for>
+        </div>
+      </div>
+    </sc-if>
+
+    <sc-if value="{{ subNearby }}" hint-placeholder-val="{{ false }}">
+      <div style="display:flex; flex-direction:column; gap:14px; padding:18px 16px 28px;">
+        <div onClick="{{ backToAround }}" style="cursor:pointer; font-size:13px; color:#6E807B;">← Around Here</div>
+        <div style="display:flex; align-items:center; gap:7px;">
+          <img src="assets/muni-logo.png" alt="Muni" style="height:17px; width:auto; display:block;">
+          <span style="font-size:15px; color:#6E807B;">metro</span>
+          <span style="font-size:13px; color:#9FB0AA;">· and everything else nearby</span>
+        </div>
+        <div style="font-family:'Instrument Serif',serif; font-size:30px; line-height:1.1;">Getting somewhere</div>
+
+        <sc-if value="{{ notLocated }}" hint-placeholder-val="{{ true }}">
+          <div style="background:#FFFFFF; border:1px solid #DCE4E1; border-radius:18px; padding:18px; display:flex; flex-direction:column; gap:12px;">
+            <div style="display:flex; gap:12px; align-items:flex-start;">
+              <div style="width:36px; height:36px; border-radius:50%; background:#DFE9E5; display:flex; align-items:center; justify-content:center; color:#2C6D61; font-size:18px; flex-shrink:0;">◎</div>
+              <div><div style="font-size:15px; font-weight:600;">Use your location?</div><div style="font-size:13px; color:#5C716B; line-height:1.6; margin-top:3px;">So I can show the stops nearest you and the way back to the cottage. Nothing leaves your phone.</div></div>
+            </div>
+            <div onClick="{{ locate }}" style="cursor:pointer; background:#2C6D61; color:#F2F7F5; border-radius:999px; padding:13px; text-align:center; font-size:15px; font-weight:600;">Allow location</div>
+            <div onClick="{{ locate }}" style="cursor:pointer; text-align:center; font-size:13px; color:#6E807B;">Not now — use the cottage as my location</div>
+          </div>
+        </sc-if>
+
+        <sc-if value="{{ located }}" hint-placeholder-val="{{ false }}">
+          <div style="height:190px; border-radius:18px; border:1px solid #DCE4E1; background:linear-gradient(#E3EBE8,#D7E3DF); position:relative; overflow:hidden;">
+            <div style="position:absolute; left:50%; top:50%; transform:translate(-50%,-50%); width:14px; height:14px; border-radius:50%; background:#2C6D61; border:3px solid #FFFFFF; box-shadow:0 0 0 7px rgba(44,109,97,.16);"></div>
+            <div style="position:absolute; left:26px; top:40px; display:flex; align-items:center; gap:5px; background:#FFFFFF; border-radius:999px; padding:4px 9px 4px 4px; font-size:11px; box-shadow:0 2px 8px rgba(20,32,29,.12);"><div style="width:18px; height:18px; border-radius:50%; background:#569BBE; color:#fff; display:flex; align-items:center; justify-content:center; font-size:10px; font-weight:700;">K</div>4′</div>
+            <div style="position:absolute; right:24px; top:116px; display:flex; align-items:center; gap:5px; background:#FFFFFF; border-radius:999px; padding:4px 9px 4px 4px; font-size:11px; box-shadow:0 2px 8px rgba(20,32,29,.12);"><div style="width:18px; height:18px; border-radius:50%; background:#0077C0; color:#fff; display:flex; align-items:center; justify-content:center; font-size:9px; font-weight:700;">ba</div>6′</div>
+            <div style="position:absolute; left:118px; bottom:20px; display:flex; align-items:center; gap:5px; background:#FFFFFF; border-radius:999px; padding:4px 9px 4px 4px; font-size:11px; box-shadow:0 2px 8px rgba(20,32,29,.12);"><div style="width:18px; height:18px; border-radius:50%; background:#5A6B65; color:#fff; display:flex; align-items:center; justify-content:center; font-size:9px; font-weight:700;">29</div>2′</div>
+            <div style="position:absolute; left:12px; bottom:9px; font-size:10px; color:#6E807B; letter-spacing:.08em; text-transform:uppercase;">Live · cached offline</div>
+          </div>
+
+          <div onClick="{{ toggleBack }}" style="cursor:pointer; background:#14201D; color:#EDF1EF; border-radius:18px; padding:15px 18px; display:flex; align-items:center; gap:12px;">
+            <div style="width:34px; height:34px; border-radius:50%; background:#2C6D61; display:flex; align-items:center; justify-content:center; font-size:16px; flex-shrink:0;">⌂</div>
+            <div style="flex:1;"><div style="font-size:15px; font-weight:600;">Take me back to the cottage</div><div style="font-size:12px; opacity:.7; margin-top:2px;">251 Harold Ave · every way to get there</div></div>
+            <div style="opacity:.6;">▾</div>
+          </div>
+          <sc-if value="{{ backOpen }}" hint-placeholder-val="{{ false }}">
+            <div style="background:#FFFFFF; border:1px solid #DCE4E1; border-radius:18px; padding:4px 16px; margin-top:-8px;">
+              <sc-for list="{{ backHome }}" as="b" hint-placeholder-count="4">
+                <div style="display:flex; gap:12px; align-items:flex-start; padding:13px 0; border-bottom:1px solid #E4EBE8;">
+                  <div style="{{ b.bStyle }}">{{ b.icon }}</div>
+                  <div><div style="font-size:14px; font-weight:600;">{{ b.label }}</div><div style="font-size:13px; color:#5C716B; line-height:1.55; margin-top:2px;">{{ b.detail }}</div></div>
+                </div>
+              </sc-for>
+            </div>
+          </sc-if>
+
+          <div>
+            <div style="font-size:11px; letter-spacing:.16em; text-transform:uppercase; color:#6E807B;">Where are you trying to go?</div>
+            <input value="{{ dest }}" onChange="{{ setDest }}" placeholder="Type a place — or pick one below" style="width:100%; box-sizing:border-box; background:#FFFFFF; border:1px solid #DCE4E1; border-radius:999px; padding:11px 16px; font-size:14px; font-family:'Instrument Sans',sans-serif; color:#14201D; margin-top:7px;">
+            <div style="display:flex; flex-wrap:wrap; gap:6px; margin-top:8px;">
+              <sc-for list="{{ destSuggestions }}" as="d" hint-placeholder-count="5">
+                <div onClick="{{ d.pick }}" style="cursor:pointer; font-size:12px; padding:7px 13px; border-radius:999px; background:#FFFFFF; border:1px solid #DCE4E1; white-space:nowrap;">{{ d.label }}</div>
+              </sc-for>
+            </div>
+          </div>
+
+          <div>
+            <div style="font-size:11px; letter-spacing:.16em; text-transform:uppercase; color:#6E807B; margin-bottom:2px;">Nearest stops right now</div>
+            <sc-for list="{{ nearbyStops }}" as="s" hint-placeholder-count="5">
+              <div style="display:flex; align-items:center; gap:11px; padding:11px 0; border-bottom:1px solid #DCE4E1;">
+                <div style="{{ s.bStyle }}">{{ s.bLabel }}</div>
+                <div style="flex:1;"><div style="font-size:14px; font-weight:600;">{{ s.name }}</div><div style="font-size:12px; color:#6E807B; margin-top:1px;">{{ s.sub }} · {{ s.walk }}</div></div>
+                <div style="font-family:'Instrument Serif',serif; font-size:20px; color:#2C6D61; white-space:nowrap;">{{ s.times }}</div>
+              </div>
+            </sc-for>
+          </div>
+
+          <div>
+            <div style="font-size:11px; letter-spacing:.16em; text-transform:uppercase; color:#6E807B; margin-bottom:7px;">Or get a ride</div>
+            <div style="display:flex; gap:8px;">
+              <sc-for list="{{ rides }}" as="r" hint-placeholder-count="3">
+                <div style="flex:1; background:#FFFFFF; border:1px solid #DCE4E1; border-radius:16px; padding:13px 12px;">
+                  <div style="font-size:15px; font-weight:600; color:{{ r.color }};">{{ r.name }}</div>
+                  <div style="font-size:11px; color:#6E807B; line-height:1.4; margin-top:3px;">{{ r.note }}</div>
+                </div>
+              </sc-for>
+            </div>
+            <div style="font-size:12px; color:#6E807B; line-height:1.6; margin-top:8px;">No account yet? <a href="#">Grab a sign-up link</a> — first ride is usually discounted.</div>
+          </div>
+
+          <div onClick="{{ goHowToRide }}" style="cursor:pointer; background:#DFE9E5; border-radius:16px; padding:14px 16px; display:flex; justify-content:space-between; align-items:center;"><div><div style="font-size:14px; font-weight:600;">First time on Muni or BART?</div><div style="font-size:13px; color:#25423B; margin-top:2px;">How to ride, and how to pay</div></div><span style="color:#2C6D61;">→</span></div>
+        </sc-if>
+      </div>
+    </sc-if>
+
+    <sc-if value="{{ aroundMain }}" hint-placeholder-val="{{ false }}">
+      <div style="display:flex; flex-direction:column; gap:14px; padding:18px 16px 28px;">
+        <div style="font-family:'Instrument Serif',serif; font-size:32px;">Around Here</div>
+        <div onClick="{{ goNearby }}" style="cursor:pointer; height:170px; border-radius:18px; border:1px solid #DCE4E1; background:linear-gradient(#E3EBE8,#D7E3DF); display:flex; align-items:center; justify-content:center; font-size:12px; color:#6E807B; letter-spacing:.1em; text-transform:uppercase;">Map · pins &amp; walk times · offline</div>
+        <div onClick="{{ goHowToRide }}" style="cursor:pointer; background:#FFFFFF; border:1px solid #DCE4E1; border-radius:18px; padding:14px 16px; display:flex; align-items:center; gap:11px;">
+          <img src="assets/muni-logo.png" alt="Muni" style="height:15px; width:auto; display:block;">
+          <div style="flex:1;"><div style="font-size:14px; font-weight:600;">How to ride</div><div style="font-size:12px; color:#6E807B; margin-top:1px;">Muni, BART, Caltrain, regional buses — and how to pay</div></div>
+          <span style="color:#9FB0AA;">→</span>
+        </div>
+        <div>
+          <div style="font-size:11px; letter-spacing:.16em; text-transform:uppercase; color:#6E807B; margin-bottom:2px;">Transit</div>
+          <sc-for list="{{ transit }}" as="t" hint-placeholder-count="5">
+            <div style="display:flex; align-items:center; gap:11px; padding:11px 0; border-bottom:1px solid #DCE4E1;"><div style="{{ t.bStyle }}">{{ t.bLabel }}</div><div style="flex:1;"><div style="font-size:14px; font-weight:600;">{{ t.name }}</div><div style="font-size:12px; color:#6E807B; margin-top:1px;">{{ t.sub }}</div></div><div style="font-family:'Instrument Serif',serif; font-size:20px; color:#2C6D61; white-space:nowrap;">{{ t.times }}</div></div>
+          </sc-for>
+        </div>
+        <div style="background:#DFE9E5; border-radius:16px; padding:14px 16px; font-size:13px; line-height:1.6; color:#25423B;">You don't need a car, or a Clipper card — add Clipper to Apple or Google Pay and tap. Muni is the city, BART is the region. Under 18 rides Muni free. Google Maps isn't always right about Muni; I use the Transit app or 511.org.</div>
+        <div>
+          <div style="font-size:11px; letter-spacing:.16em; text-transform:uppercase; color:#6E807B; margin-bottom:2px;">Eat &amp; drink — all walkable</div>
+          <sc-for list="{{ food }}" as="fd" hint-placeholder-count="9">
+            <div style="padding:12px 0; border-bottom:1px solid #DCE4E1;"><div style="display:flex; justify-content:space-between;"><span style="font-size:15px; font-weight:600;">{{ fd.name }}</span><span style="font-size:12px; color:#6E807B; white-space:nowrap;">{{ fd.meta }}</span></div><div style="font-size:13px; color:#4A605A; margin-top:3px; line-height:1.5;">{{ fd.take }}</div></div>
+          </sc-for>
+        </div>
+        <div>
+          <div style="font-size:11px; letter-spacing:.16em; text-transform:uppercase; color:#6E807B; margin-bottom:2px;">Groceries &amp; essentials</div>
+          <sc-for list="{{ groceries }}" as="g" hint-placeholder-count="5">
+            <div style="display:flex; justify-content:space-between; padding:10px 0; border-bottom:1px solid #DCE4E1;"><span style="font-size:14px;">{{ g.name }}</span><span style="font-size:12px; color:#6E807B; text-align:right;">{{ g.meta }}</span></div>
+          </sc-for>
+        </div>
+        <div style="background:#FFFFFF; border:1px solid #DCE4E1; border-radius:18px; padding:16px;"><div style="font-size:15px; font-weight:600;">Delivery</div><div style="font-size:13px; color:#5C716B; line-height:1.65; margin-top:4px;">DoorDash, Uber Eats and Grubhub all cover us; Instacart and Amazon Fresh for groceries. Packages go to my front door — I'll bring them to yours, just message ahead.</div></div>
+      </div>
+    </sc-if>
+
+    <sc-if value="{{ subRide }}" hint-placeholder-val="{{ false }}">
+      <div style="display:flex; flex-direction:column; gap:14px; padding:18px 16px 28px;">
+        <div onClick="{{ backToAround }}" style="cursor:pointer; font-size:13px; color:#6E807B;">← Around Here</div>
+        <div style="font-family:'Instrument Serif',serif; font-size:32px; line-height:1.1;">How to ride</div>
+        <div style="font-size:14px; color:#5C716B; line-height:1.65;">Bay Area transit looks like alphabet soup from the outside. It isn't — here's the whole thing on one page.</div>
+
+        <div style="background:#FFFFFF; border:1px solid #DCE4E1; border-radius:18px; padding:16px;">
+          <div style="font-size:15px; font-weight:600; margin-bottom:6px;">Paying — pick one and forget it</div>
+          <div style="padding:10px 0; border-top:1px solid #E4EBE8;"><div style="font-size:14px; font-weight:600;">Clipper in Apple or Google Pay</div><div style="font-size:13px; color:#5C716B; line-height:1.55; margin-top:2px;">What I'd do. Add it once in Wallet, then hold your phone to the reader. Works on Muni, BART, Caltrain and every regional bus, and it gives you free transfers.</div></div>
+          <div style="padding:10px 0; border-top:1px solid #E4EBE8;"><div style="font-size:14px; font-weight:600;">Contactless bank card</div><div style="font-size:13px; color:#5C716B; line-height:1.55; margin-top:2px;">Tap your own card on Muni and BART. Simple, but no transfer credit.</div></div>
+          <div style="padding:10px 0; border-top:1px solid #E4EBE8;"><div style="font-size:14px; font-weight:600;">Physical Clipper card</div><div style="font-size:13px; color:#5C716B; line-height:1.55; margin-top:2px;">From the machines at Balboa Park BART if you'd rather not use a phone.</div></div>
+          <div style="padding:10px 0; border-top:1px solid #E4EBE8;"><div style="font-size:14px; font-weight:600;">Kids ride free</div><div style="font-size:13px; color:#5C716B; line-height:1.55; margin-top:2px;">Under 10 walks on with you on Muni — no tag, no fare. Youth up to 18 ride Muni free too, with a youth Clipper.</div></div>
+        </div>
+
+        <div style="background:#FFFFFF; border:1px solid #DCE4E1; border-radius:18px; padding:16px;">
+          <div style="display:flex; align-items:center; gap:8px; margin-bottom:6px;">
+            <img src="assets/muni-logo.png" alt="Muni" style="height:16px; width:auto; display:block;">
+            <div style="font-size:15px; font-weight:600;">Muni — the city itself</div>
+          </div>
+          <div style="font-size:13px; color:#5C716B; line-height:1.6;">Buses, trolleybuses, the Metro trains (J K L M N T) and the cable cars. One flat fare, ~$2.85, and it buys you 120 minutes of unlimited transfers if you tap with Clipper. Board at any door on the Metro; tap on entry on buses.</div>
+          <div style="display:flex; gap:6px; margin-top:10px;">
+            <div style="width:26px; height:26px; border-radius:50%; background:#E2A32B; color:#fff; display:flex; align-items:center; justify-content:center; font-size:13px; font-weight:700;">J</div>
+            <div style="width:26px; height:26px; border-radius:50%; background:#569BBE; color:#fff; display:flex; align-items:center; justify-content:center; font-size:13px; font-weight:700;">K</div>
+            <div style="width:26px; height:26px; border-radius:50%; background:#7B4B94; color:#fff; display:flex; align-items:center; justify-content:center; font-size:13px; font-weight:700;">L</div>
+            <div style="width:26px; height:26px; border-radius:50%; background:#008752; color:#fff; display:flex; align-items:center; justify-content:center; font-size:13px; font-weight:700;">M</div>
+            <div style="width:26px; height:26px; border-radius:50%; background:#16418B; color:#fff; display:flex; align-items:center; justify-content:center; font-size:13px; font-weight:700;">N</div>
+            <div style="width:26px; height:26px; border-radius:50%; background:#D31245; color:#fff; display:flex; align-items:center; justify-content:center; font-size:13px; font-weight:700;">T</div>
+            <div style="font-size:12px; color:#6E807B; align-self:center; margin-left:4px;">K stops 2 min from the gate</div>
+          </div>
+        </div>
+
+        <div style="background:#FFFFFF; border:1px solid #DCE4E1; border-radius:18px; padding:16px;">
+          <div style="display:flex; align-items:center; gap:9px; margin-bottom:6px;"><div style="width:26px; height:26px; border-radius:50%; background:#0077C0; color:#fff; display:flex; align-items:center; justify-content:center; font-size:10px; font-weight:700;">ba</div><div style="font-size:15px; font-weight:600;">BART — the region</div></div>
+          <div style="font-size:13px; color:#5C716B; line-height:1.6;">Regional trains to Oakland, Berkeley and SFO. Distance-based fare, so you tap in <em>and</em> tap out at the gates. Balboa Park is our station, 9 minutes on foot, and SFO is a straight ride.</div>
+        </div>
+
+        <div style="background:#FFFFFF; border:1px solid #DCE4E1; border-radius:18px; padding:16px;">
+          <div style="display:flex; align-items:center; gap:9px; margin-bottom:6px;"><div style="width:26px; height:26px; border-radius:6px; background:#DA1E5B; color:#fff; display:flex; align-items:center; justify-content:center; font-size:11px; font-weight:700;">CT</div><div style="font-size:15px; font-weight:600;">Caltrain — down the Peninsula</div></div>
+          <div style="font-size:13px; color:#5C716B; line-height:1.6;">Electric trains to Palo Alto, Mountain View and San José from 4th &amp; King. Tap in and out like BART. Take the K or T to get there. Worth it if you're heading to the South Bay for a day.</div>
+        </div>
+
+        <div style="background:#FFFFFF; border:1px solid #DCE4E1; border-radius:18px; padding:16px;">
+          <div style="font-size:15px; font-weight:600; margin-bottom:6px;">Leaving the city by bus</div>
+          <div style="font-size:13px; color:#5C716B; line-height:1.9;">AC Transit — Oakland, Berkeley, the East Bay<br>Golden Gate Transit &amp; Ferry — Marin, Sausalito, Larkspur<br>SamTrans — San Mateo County and the coast<br>All of them take the same Clipper in your Wallet.</div>
+        </div>
+
+        <div style="background:#DFE9E5; border-radius:16px; padding:14px 16px; font-size:13px; line-height:1.6; color:#25423B;">Two habits that make this easy: check departures before you walk out (Google Maps isn't reliable for Muni — use the Transit app or 511.org), and always tap off on BART and Caltrain.</div>
+      </div>
+    </sc-if>
+
+    <sc-if value="{{ tabExplore }}" hint-placeholder-val="{{ false }}">
+      <div style="display:flex; flex-direction:column; gap:14px; padding:18px 16px 28px;">
+        <div style="font-family:'Instrument Serif',serif; font-size:32px;">Explore SF</div>
+        <div style="font-size:13px; color:#6E807B; line-height:1.6;">No fixed itineraries — pick what you're into and I'll point you at the city I'd send a friend to.</div>
+        <div style="display:flex; flex-wrap:wrap; gap:6px;">
+          <sc-for list="{{ filters }}" as="fl" hint-placeholder-count="7">
+            <div onClick="{{ fl.pick }}" style="{{ fl.style }}">{{ fl.label }}</div>
+          </sc-for>
+        </div>
+        <div style="display:flex; flex-direction:column; gap:10px;">
+          <sc-for list="{{ places }}" as="p" hint-placeholder-count="5">
+            <div style="background:#FFFFFF; border:1px solid #DCE4E1; border-radius:18px; padding:15px 16px;">
+              <div style="display:flex; justify-content:space-between; align-items:baseline;"><div style="font-size:16px; font-weight:600;">{{ p.name }}</div><div style="font-size:11px; color:#6E807B; white-space:nowrap;">{{ p.tags }}</div></div>
+              <div style="font-size:12px; color:#2C6D61; font-weight:600; margin-top:2px;">{{ p.route }}</div>
+              <div style="font-size:13px; color:#5C716B; line-height:1.55; margin-top:5px;">{{ p.note }}</div>
+            </div>
+          </sc-for>
+        </div>
+        <div style="background:#FFFFFF; border:1px solid #DCE4E1; border-radius:18px; padding:16px;"><div style="font-size:15px; font-weight:600;">What's on</div><div style="font-size:13px; color:#5C716B; line-height:1.65; margin-top:4px;">{{ eventsNote }}</div></div>
+        <div style="background:#DFE9E5; border-radius:16px; padding:14px 16px;"><div style="font-size:14px; font-weight:600;">SF tips &amp; safety</div><div style="font-size:13px; color:#25423B; line-height:1.65; margin-top:4px;">Fog and wind are real — carry a layer even in July. Never leave anything visible in a parked car, not a jacket, not a charger. Tip 18–20% at restaurants. If the ground shakes: drop, cover, hold on.</div></div>
+      </div>
+    </sc-if>
+
+    <sc-if value="{{ tabHelp }}" hint-placeholder-val="{{ false }}">
+      <div style="display:flex; flex-direction:column; gap:14px; padding:18px 16px 28px;">
+        <div style="font-family:'Instrument Serif',serif; font-size:32px;">Help</div>
+        <div style="background:#FFFFFF; border:1px solid #DCE4E1; border-radius:18px; padding:16px; display:flex; gap:14px; align-items:center;">
+          <div style="width:46px; height:46px; border-radius:50%; flex-shrink:0; background:#DFE9E5; display:flex; align-items:center; justify-content:center; font-family:'Instrument Serif',serif; font-size:22px; color:#2C6D61;">K</div>
+          <div style="flex:1;"><div style="font-size:15px; font-weight:600;">Message Keith</div><div style="font-size:12px; color:#6E807B; margin-top:2px;">Usually replies within the hour · Airbnb or SMS</div></div>
+          <a href="sms:+14155550100" style="background:#2C6D61; color:#F2F7F5; border-radius:999px; padding:8px 16px; font-size:13px; font-weight:600;">Text</a>
+        </div>
+        <div style="background:#FFFFFF; border:1px solid #DCE4E1; border-radius:18px; padding:4px 16px;">
+          <div style="display:flex; justify-content:space-between; padding:12px 0; border-bottom:1px solid #E4EBE8;"><span style="font-size:14px;">Emergency</span><a href="tel:911" style="font-size:14px; font-weight:600;">911</a></div>
+          <div style="display:flex; justify-content:space-between; padding:12px 0; border-bottom:1px solid #E4EBE8;"><span style="font-size:14px;">SF non-emergency</span><a href="tel:4155530123" style="font-size:14px; font-weight:600;">415-553-0123</a></div>
+          <div style="display:flex; justify-content:space-between; padding:12px 0;"><span style="font-size:14px;">City services</span><a href="tel:311" style="font-size:14px; font-weight:600;">311</a></div>
+        </div>
+        <div style="background:#FFFFFF; border:1px solid #DCE4E1; border-radius:18px; padding:16px;"><div style="font-size:15px; font-weight:600;">In the cottage</div><div style="font-size:13px; color:#5C716B; line-height:1.8; margin-top:4px;">Fire extinguisher — under the kitchen sink<br>First-aid kit — bathroom cupboard<br>Breaker panel &amp; water shutoff — see Troubleshooting in The Cottage</div></div>
+        <div style="background:#FFFFFF; border:1px solid #DCE4E1; border-radius:18px; padding:16px;"><div style="font-size:15px; font-weight:600;">Nearest urgent care &amp; ER</div><div style="font-size:13px; color:#5C716B; line-height:1.65; margin-top:4px;">Kaiser Mission Bay urgent care (20 min by car); SF General for the ER. In doubt, call 911.</div></div>
+        <div style="background:#FFFFFF; border:1px solid #DCE4E1; border-radius:18px; padding:16px;">
+          <div style="font-size:15px; font-weight:600; margin-bottom:2px;">Checkout · 11:00 AM</div>
+          <sc-for list="{{ checklist }}" as="c" hint-placeholder-count="5">
+            <div onClick="{{ c.toggle }}" style="cursor:pointer; display:flex; gap:12px; align-items:center; padding:10px 0; border-bottom:1px solid #E4EBE8;">
+              <div style="{{ c.boxStyle }}"></div>
+              <div style="{{ c.textStyle }}">{{ c.text }}</div>
+            </div>
+          </sc-for>
+        </div>
+        <div style="background:#14201D; color:#EDF1EF; border-radius:18px; padding:16px;"><div style="font-family:'Instrument Serif',serif; font-size:20px;">Next time, book direct.</div><div style="font-size:13px; opacity:.72; margin-top:5px;">Roughly 12% less without the platform fee.</div></div>
+        <div style="font-size:13px; color:#6E807B; text-align:center;">What was missing from this guide? <a href="#">Tell Keith →</a></div>
+      </div>
+    </sc-if>
+  </div>
+
+  <div style="display:flex; border-top:1px solid #DCE4E1; background:#F6F8F7; padding:6px 4px 18px;">
+    <div onClick="{{ goHome }}" style="{{ tabStyleHome }}">⌂<span>Home</span></div>
+    <div onClick="{{ goArrive }}" style="{{ tabStyleArrive }}">⌖<span>Arrive</span></div>
+    <div onClick="{{ goCottage }}" style="{{ tabStyleCottage }}">▤<span>Cottage</span></div>
+    <div onClick="{{ goAround }}" style="{{ tabStyleAround }}">◍<span>Around</span></div>
+    <div onClick="{{ goExplore }}" style="{{ tabStyleExplore }}">↗<span>Explore</span></div>
+    <div onClick="{{ goHelp }}" style="{{ tabStyleHelp }}">✚<span>Help</span></div>
+  </div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;$preview&quot;:{&quot;width&quot;:430,&quot;height&quot;:900},&quot;phase&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;before&quot;,&quot;during&quot;,&quot;checkout&quot;],&quot;default&quot;:&quot;during&quot;,&quot;tsType&quot;:&quot;string&quot;,&quot;section&quot;:&quot;Stay&quot;},&quot;generic&quot;:{&quot;editor&quot;:&quot;boolean&quot;,&quot;default&quot;:false,&quot;tsType&quot;:&quot;boolean&quot;,&quot;section&quot;:&quot;Stay&quot;},&quot;guestName&quot;:{&quot;editor&quot;:&quot;text&quot;,&quot;default&quot;:&quot;Sarah&quot;,&quot;tsType&quot;:&quot;string&quot;,&quot;section&quot;:&quot;Stay&quot;}}">
+class Component extends DCLogic {
+  state = { tab: 'home', copied: false, query: '', filter: 'all', done: {}, sub: null, located: false, back: false, dest: '' };
+
+  goSub(sub) { return () => { this.setState({ tab: 'around', sub }); if (this._sc) this._sc.scrollTop = 0; }; }
+
+  qr() {
+    const N = 25, cell = 8, pad = 12;
+    let h = 2166136261;
+    const seed = 'WIFI:T:WPA;S:SFCottage-5G;P:foghorn-2024;;';
+    for (let i = 0; i < seed.length; i++) { h ^= seed.charCodeAt(i); h = Math.imul(h, 16777619); }
+    const rnd = () => { h ^= h << 13; h ^= h >>> 17; h ^= h << 5; return ((h >>> 0) % 1000) / 1000; };
+    const finder = (r, c) => (r < 7 && c < 7) || (r < 7 && c >= N - 7) || (r >= N - 7 && c < 7);
+    const rects = [];
+    for (let r = 0; r < N; r++) for (let c = 0; c < N; c++) {
+      if (finder(r, c)) continue;
+      if (rnd() > 0.52) rects.push(React.createElement('rect', { key: r + '-' + c, x: pad + c * cell, y: pad + r * cell, width: cell, height: cell, fill: '#14201D' }));
+    }
+    const eye = (r, c) => [
+      React.createElement('rect', { key: 'a' + r + c, x: pad + c * cell, y: pad + r * cell, width: cell * 7, height: cell * 7, fill: '#14201D' }),
+      React.createElement('rect', { key: 'b' + r + c, x: pad + (c + 1) * cell, y: pad + (r + 1) * cell, width: cell * 5, height: cell * 5, fill: '#FFFFFF' }),
+      React.createElement('rect', { key: 'c' + r + c, x: pad + (c + 2) * cell, y: pad + (r + 2) * cell, width: cell * 3, height: cell * 3, fill: '#2C6D61' }),
+    ];
+    const size = N * cell + pad * 2;
+    return React.createElement('svg', { width: '100%', viewBox: '0 0 ' + size + ' ' + size, style: { display: 'block' } },
+      React.createElement('rect', { x: 0, y: 0, width: size, height: size, fill: '#FFFFFF' }),
+      rects, eye(0, 0), eye(0, N - 7), eye(N - 7, 0));
+  }
+
+  go(tab) { return () => { this.setState({ tab, query: '', sub: null }); if (this._sc) this._sc.scrollTop = 0; }; }
+
+  renderVals() {
+    const phase = this.props.phase ?? 'during';
+    const generic = this.props.generic ?? false;
+    const guestName = this.props.guestName ?? 'Sarah';
+    const tabs = ['home','arrive','cottage','around','explore','help'];
+    const v = {
+      scrollRef: (el) => { this._sc = el; },
+      guestName,
+      isGuest: !generic, isGeneric: generic,
+      showBefore: !generic && phase === 'before',
+      showDuring: !generic && phase === 'during',
+      showCheckout: !generic && phase === 'checkout',
+      wifiCopyLabel: this.state.copied ? 'Password copied ✓' : 'Copy password',
+      wifiColor: this.state.copied ? '#2C6D61' : '#6E807B',
+      copyWifi: () => {
+        try { navigator.clipboard.writeText('foghorn-2024'); } catch (e) {}
+        this.setState({ copied: true });
+        clearTimeout(this._ct); this._ct = setTimeout(() => this.setState({ copied: false }), 1800);
+      },
+      query: this.state.query,
+      setQuery: (e) => this.setState({ query: e.target.value }),
+    };
+    tabs.forEach(t => {
+      const on = this.state.tab === t;
+      const cap = t.charAt(0).toUpperCase() + t.slice(1);
+      v['tab' + cap] = on;
+      v['go' + cap] = this.go(t);
+      v['tabStyle' + cap] = { flex:1, cursor:'pointer', display:'flex', flexDirection:'column', alignItems:'center', gap:'4px', padding:'8px 0', fontSize:'10px', fontWeight: on ? 700 : 500, color: on ? '#2C6D61' : '#6E807B' };
+    });
+
+    v.sections = [
+      { name:'Arrive', sub:'Getting here, parking, getting in' },
+      { name:'The Cottage', sub:'Rooms, appliances, rules, trash day' },
+      { name:'Around Here', sub:'Transit, food, groceries, delivery' },
+      { name:'Explore SF', sub:'Neighborhoods, interests, what\u2019s on' },
+      { name:'Help', sub:'Emergency, Keith, checkout' },
+    ].map((s, i) => ({ ...s, go: this.go(tabs[i + 1]) }));
+
+    v.steps = [
+      'Facing the house, look left of the front windows \u2014 the gate is just left of the front door.',
+      'The gate keypad is on its right. Press the large bottom button to wake it, enter 4821, then the checkmark.',
+      'Walk down the alley (it\u2019s lit \u2014 if the lights are out, let me know!) to the shared courtyard.',
+      'At the cottage door keypad, press unlock (lower left) to wake it, then enter the same code.',
+      'When leaving, close the door and press the right lock button \u2014 and please re-lock the gate the same way.',
+    ].map((text, i) => ({ n: i + 1, text }));
+
+    v.rooms = [
+      { name:'Living room', details:'Sectional converts to a bed \u2014 use the foam topper, it makes all the difference. 50" TV on a swing arm with Netflix; dining table seats 4 (2 extra chairs in the closet).' },
+      { name:'Bedroom 1 · main floor', details:'Full bed, 32" TV, desk.' },
+      { name:'Bedroom 2 · loft', details:'Queen bed, lots of closet. Low ceiling at the sides \u2014 watch your head getting up.' },
+      { name:'Kitchen', details:'Full-size fridge, dishwasher, microwave, trash compactor. Well-stocked for real cooking.' },
+      { name:'Bathroom', details:'Walk-in shower; hair dryer, shampoo, conditioner and body soap provided. Slippers at the shoe rack \u2014 shoes off preferred.' },
+      { name:'Laundry', details:'Free stackable washer/dryer behind the kitchen door.' },
+      { name:'Courtyard', details:'Shared patio with benches, a firepit and bike storage. Shared with us, but we rarely use it \u2014 it\u2019s yours.' },
+    ];
+
+    v.faqs = [
+      { q:'Power went out in one room', a:'Breaker panel is in the laundry nook \u2014 flip the tripped switch fully off, then on.' },
+      { q:'WiFi acting up', a:'Unplug the white router under the desk for 10 seconds. It\u2019s back in about two minutes \u2014 817 Mbps when it\u2019s happy.' },
+      { q:'Water needs shutting off', a:'The shutoff valve is under the kitchen sink, behind the compost bin.' },
+      { q:'Expecting a package?', a:'Deliveries go to my front door \u2014 I\u2019ll bring them to yours. Message ahead if it\u2019s something important.' },
+    ];
+
+    const badge = (bg, fs, sz) => ({ width:(sz||28)+'px', height:(sz||28)+'px', borderRadius:'50%', flexShrink:0, background:bg, color:'#FFFFFF', display:'flex', alignItems:'center', justifyContent:'center', fontSize:fs||'14px', fontWeight:700, letterSpacing:0 });
+    const LINE = { J:'#E2A32B', K:'#569BBE', L:'#7B4B94', M:'#008752', N:'#16418B', T:'#D31245', BART:'#0077C0', BUS:'#5A6B65' };
+    v.kBadgeSm = badge(LINE.K, '11px', 18);
+    v.kBadgeMd = badge(LINE.K, '15px', 28);
+    v.transit = [
+      { name:'Muni Metro K Ingleside', sub:'Ocean Ave \u00b7 2 min walk \u00b7 ~30 min downtown', times:'4, 16\u2032', bLabel:'K', bStyle:badge(LINE.K) },
+      { name:'BART \u00b7 Balboa Park', sub:'9 min walk \u00b7 12 min downtown \u00b7 SFO direct', times:'6, 21\u2032', bLabel:'ba', bStyle:badge(LINE.BART,'10px') },
+      { name:'Muni Metro J Church', sub:'10 min walk \u00b7 ~30 min downtown', times:'9\u2032', bLabel:'J', bStyle:badge(LINE.J) },
+      { name:'Muni Metro M Ocean View', sub:'15 min walk', times:'14\u2032', bLabel:'M', bStyle:badge(LINE.M) },
+      { name:'Buses 29 \u00b7 8 \u00b7 49 \u00b7 43 \u00b7 54', sub:'1\u20132 min walk', times:'2\u2032', bLabel:'29', bStyle:badge(LINE.BUS,'11px') },
+    ];
+
+    v.tabWifi = this.state.tab === 'wifi';
+    v.goWifi = this.go('wifi');
+    v.wifiNetwork = 'SFCottage-5G';
+    v.wifiPassword = 'foghorn-2024';
+    v.joined = this.state.joined;
+    v.joinWifi = () => { this.setState({ joined: true }); clearTimeout(this._jt); this._jt = setTimeout(() => this.setState({ joined: false }), 2200); };
+    v.joinLabel = this.state.joined ? 'Joining SFCottage-5G…' : 'Join this network';
+    v.qr = this.qr();
+
+    v.aroundMain = this.state.tab === 'around' && !this.state.sub;
+    v.subNearby = this.state.sub === 'nearby';
+    v.subRide = this.state.sub === 'ride';
+    v.subNone = !this.state.sub;
+    v.goNearby = this.goSub('nearby');
+    v.goHowToRide = this.goSub('ride');
+    v.backToAround = () => this.setState({ sub: null });
+    v.located = this.state.located;
+    v.notLocated = !this.state.located;
+    v.locate = () => this.setState({ located: true });
+    v.backOpen = this.state.back;
+    v.toggleBack = () => this.setState(s => ({ back: !s.back }));
+    v.dest = this.state.dest;
+    v.setDest = (e) => this.setState({ dest: e.target.value });
+
+    v.nearbyStops = [
+      { name:'Ocean Ave & Harold', sub:'K Ingleside \u00b7 inbound', walk:'2 min walk', times:'4, 16\u2032', bLabel:'K', bStyle:badge(LINE.K) },
+      { name:'Ocean Ave & Harold', sub:'K Ingleside \u00b7 outbound to Balboa Park', walk:'2 min walk', times:'7\u2032', bLabel:'K', bStyle:badge(LINE.K) },
+      { name:'Ocean Ave & Phelan', sub:'Bus 29 Sunset \u00b7 both directions', walk:'3 min walk', times:'2, 14\u2032', bLabel:'29', bStyle:badge(LINE.BUS,'11px') },
+      { name:'Balboa Park Station', sub:'BART \u00b7 Antioch & Richmond lines', walk:'9 min walk', times:'6, 21\u2032', bLabel:'ba', bStyle:badge(LINE.BART,'10px') },
+      { name:'Balboa Park \u00b7 upper yard', sub:'J Church terminal', walk:'10 min walk', times:'9\u2032', bLabel:'J', bStyle:badge(LINE.J) },
+    ];
+
+    v.backHome = [
+      { icon:'\u25CB', label:'Walking', detail:'From Ocean Ave, 2 minutes up Harold. From Balboa Park BART, 8 minutes.' },
+      { icon:'K', label:'Muni K, outbound', detail:'Get off at Ocean Ave & Harold \u2014 the gate is 60 seconds from the stop.', bStyle: badge(LINE.K,'12px',22) },
+      { icon:'ba', label:'BART to Balboa Park', detail:'Exit toward Ocean Ave, then 8 minutes on foot or one stop on the K.', bStyle: badge(LINE.BART,'9px',22) },
+      { icon:'\u2192', label:'Rideshare', detail:'Ask for 251 Harold Ave. Drivers can pull into the driveway.' },
+    ];
+
+    v.rides = [
+      { name:'Uber', note:'Usually 3\u20136 min away', color:'#14201D' },
+      { name:'Lyft', note:'Similar wait, often cheaper here', color:'#7A2E8E' },
+      { name:'Waymo', note:'Driverless \u00b7 covers Ingleside', color:'#0B7A5A' },
+    ];
+
+    v.destSuggestions = ['Downtown / Union Square','SFO','Golden Gate Park','The Mission','Ocean Beach'].map(d => ({ label:d, pick: () => this.setState({ dest: d }) }));
+
+    v.food = [
+      { name:'Beeps Burgers', meta:'2 min \u00b7 til 10', take:'My favorite burger in the city, and it\u2019s around the corner.' },
+      { name:'Philz Coffee', meta:'2 min', take:'Order a Mint Mojito. Don\u2019t overthink it.' },
+      { name:'Pakwan', meta:'2 min \u00b7 til 10', take:'Cheap, huge portions, better than it looks.' },
+      { name:'Poke Bowl', meta:'5 min \u00b7 til 9:30', take:'Solid quick dinner when you\u2019re beat.' },
+      { name:'Sakesan Sushi', meta:'6 min \u00b7 til 10:30', take:'Where we go when we don\u2019t want to cook.' },
+      { name:'Ocean Ave Alehouse', meta:'7 min \u00b7 til 9', take:'Good beer list, quiet on weeknights.' },
+      { name:'Golden Coast Dimsum', meta:'8 min \u00b7 til 8', take:'Go before 2pm for the full spread.' },
+      { name:'Java on Ocean', meta:'9 min', take:'The neighborhood\u2019s living room.' },
+      { name:'Champa Garden', meta:'9 min \u00b7 til 9', take:'Thai and Lao \u2014 worth the extra blocks.' },
+    ];
+
+    v.groceries = [
+      { name:'Whole Foods', meta:'4 min walk' },
+      { name:'Walgreens (pharmacy + ATM)', meta:'8 min walk' },
+      { name:'Safeway', meta:'15 min walk' },
+      { name:'Stonestown Galleria', meta:'15 min by bus \u00b7 Target, TJ\u2019s, food hall' },
+      { name:'Serramonte Center', meta:'10 min drive \u00b7 Target, Macy\u2019s' },
+    ];
+
+    const allPlaces = [
+      { name:'The Mission', tags:['hood'], route:'BART \u00b7 5 min from Balboa Park', note:'Murals on Balmy Alley, then a burrito. That\u2019s the whole plan and it\u2019s a good one.' },
+      { name:'Chinatown', tags:['hood'], route:'K to Powell, walk north \u00b7 ~40 min', note:'Go hungry, skip the main drag \u2014 the side alleys are the real thing.' },
+      { name:'Golden Gate Park', tags:['hood','kids','museums'], route:'Bus 29 \u00b7 20 min', note:'Cal Academy and the de Young sit side by side. Great on a foggy day.' },
+      { name:'Ocean Beach & the Sunset', tags:['hood','nature','dogs'], route:'Bus 29 \u00b7 25 min', note:'Four miles of sand, fire pits at the south end. Fog optional.' },
+      { name:'Downtown & Embarcadero', tags:['hood'], route:'K \u00b7 30 min to Powell', note:'Ferry Building for lunch, then walk the water to the bridge views.' },
+      { name:'Lands End', tags:['nature'], route:'Bus 29 \u2192 38 \u00b7 ~40 min', note:'Cliff trail with the Golden Gate on one side and shipwrecks below.' },
+      { name:'Twin Peaks', tags:['nature'], route:'K \u2192 bus 37 \u00b7 ~30 min', note:'Go at sunset. Bring the warm layer you didn\u2019t think you\u2019d need.' },
+      { name:'Muir Woods', tags:['car','nature'], route:'Car \u00b7 45 min \u00b7 reserve parking!', note:'Old-growth redwoods. Book the parking slot before you go \u2014 they enforce it.' },
+      { name:'Half Moon Bay', tags:['car','nature'], route:'Car \u00b7 40 min down Highway 1', note:'The drive is the attraction. Stop at every pullout that tempts you.' },
+      { name:'Sonoma & Napa', tags:['car','wine'], route:'Car \u00b7 ~1.5 hr', note:'Pick three wineries max. Sonoma square for lunch beats anything fancier.' },
+      { name:'SFMOMA', tags:['museums'], route:'BART to Montgomery \u00b7 25 min', note:'Free ground floor if you\u2019re short on time; the Richter rooms if you\u2019re not.' },
+      { name:'California Academy of Sciences', tags:['museums','kids'], route:'Bus 29 \u00b7 20 min', note:'Aquarium, planetarium and a rainforest under one living roof.' },
+      { name:'SF Zoo', tags:['kids'], route:'Bus 57 or L \u00b7 20 min', note:'Ten minutes from here \u2014 the gorilla preserve is the highlight.' },
+      { name:'Fort Funston', tags:['dogs','nature'], route:'Car \u00b7 10 min', note:'Off-leash dog heaven on the cliffs. Hang gliders overhead on windy days.' },
+    ];
+    const filterDefs = [
+      { id:'all', label:'Everything' },
+      { id:'hood', label:'Neighborhoods' },
+      { id:'nature', label:'Nature & hiking' },
+      { id:'car', label:'Got a car?' },
+      { id:'wine', label:'Wine' },
+      { id:'museums', label:'Museums' },
+      { id:'kids', label:'With kids' },
+      { id:'dogs', label:'Dog-friendly' },
+    ];
+    v.filters = filterDefs.map(fd => {
+      const on = this.state.filter === fd.id;
+      return { label: fd.label, pick: () => this.setState({ filter: fd.id }),
+        style: { cursor:'pointer', fontSize:'12px', fontWeight: on ? 600 : 500, padding:'7px 13px', borderRadius:'999px', whiteSpace:'nowrap', background: on ? '#2C6D61' : '#FFFFFF', color: on ? '#F2F7F5' : '#14201D', border: on ? '1px solid #2C6D61' : '1px solid #DCE4E1' } };
+    });
+    const tagNames = { hood:'neighborhood', nature:'nature', car:'car', wine:'wine', museums:'museums', kids:'kids', dogs:'dogs' };
+    v.places = allPlaces
+      .filter(p => this.state.filter === 'all' || p.tags.includes(this.state.filter))
+      .map(p => ({ ...p, tags: p.tags.map(t => tagNames[t]).join(' \u00b7 ') }));
+
+    v.eventsNote = generic
+      ? 'A running list of what\u2019s worth leaving the neighborhood for \u2014 street fairs, Fleet Week, Outside Lands. Windowed to your dates once you\u2019ve booked.'
+      : 'Outside Lands is on in Golden Gate Park this weekend \u2014 expect crowds on the N and the 29. Sunday: free day at the de Young.';
+
+    const items = ['Lights, heaters and appliances off','Windows closed; door and gate re-locked','Signed out of Netflix on both TVs','Dishes in the dishwasher, trash in the bins','Final walkthrough \u2014 drawers and outlets'];
+    v.checklist = items.map((text, i) => {
+      const done = !!this.state.done[i];
+      return { text,
+        toggle: () => this.setState(s => ({ done: { ...s.done, [i]: !s.done[i] } })),
+        boxStyle: { width:'19px', height:'19px', borderRadius:'50%', flexShrink:0, background: done ? '#2C6D61' : 'transparent', border: done ? '1.5px solid #2C6D61' : '1.5px solid #C2CFCA' },
+        textStyle: { fontSize:'14px', color: done ? '#9FB0AA' : '#14201D', textDecoration: done ? 'line-through' : 'none' } };
+    });
+
+    const index = [
+      { label:'Trash & recycling day', where:'The Cottage', tab:'cottage' },
+      { label:'Keurig vs drip coffee', where:'The Cottage', tab:'cottage' },
+      { label:'Loft low ceiling', where:'The Cottage', tab:'cottage' },
+      { label:'WiFi reboot', where:'The Cottage', tab:'cottage' },
+      { label:'House rules & pets', where:'The Cottage', tab:'cottage' },
+      { label:'Gate & door code steps', where:'Arrive', tab:'arrive' },
+      { label:'Parking', where:'Arrive', tab:'arrive' },
+      { label:'From SFO by BART', where:'Arrive', tab:'arrive' },
+      { label:'Live departures', where:'Around Here', tab:'around' },
+      { label:'Clipper on your phone', where:'Around Here', tab:'around' },
+      { label:'Beeps Burgers', where:'Around Here', tab:'around' },
+      { label:'Whole Foods', where:'Around Here', tab:'around' },
+      { label:'Delivery options', where:'Around Here', tab:'around' },
+      { label:'Muir Woods (need a car)', where:'Explore SF', tab:'explore' },
+      { label:'With kids: Cal Academy, zoo', where:'Explore SF', tab:'explore' },
+      { label:'Checkout checklist', where:'Help', tab:'help' },
+      { label:'Urgent care & ER', where:'Help', tab:'help' },
+      { label:'Fire extinguisher location', where:'Help', tab:'help' },
+    ];
+    const q = this.state.query.trim().toLowerCase();
+    v.results = q.length >= 2 ? index.filter(e => (e.label + ' ' + e.where).toLowerCase().includes(q)).slice(0, 5).map(e => ({ ...e, go: this.go(e.tab) })) : [];
+    v.hasResults = v.results.length > 0;
+
+    return v;
+  }
+}
+</script>
+</body>
+</html>

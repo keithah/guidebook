@@ -1,0 +1,123 @@
+{
+  "id": "sfcottage",
+  "slug": "sfcottage",
+  "name": "The SF Cottage",
+  "tagline": "Quiet 2BR cottage in Ingleside near City College — perfect for exploring SF by transit",
+  "airbnbUrl": "https://airbnb.com/h/sfcottage",
+  "registration": "2022-010560STR",
+  "address": {
+    "street": "251 Harold Ave",
+    "city": "San Francisco",
+    "state": "CA",
+    "zip": "94112",
+    "neighborhood": "Ingleside",
+    "lat": 37.7226,
+    "lng": -122.4547,
+    "_note": "TODO: verify exact lat/lng"
+  },
+  "host": {
+    "name": "Keith",
+    "coHost": "May",
+    "phone": "TODO",
+    "email": "keith@kodi.tv",
+    "responseTime": "Usually within an hour",
+    "bio": "Superhost, 15 years hosting. SF resident 10+ years, visited 60+ countries. Happy to share local tips — just reach out!"
+  },
+  "capacity": { "guests": 6, "bedrooms": 2, "beds": 3, "baths": 1, "sqft": 600 },
+  "checkin": {
+    "time": "3:00 PM",
+    "checkout": "11:00 AM",
+    "type": "Self check-in with smart lock",
+    "earlyArrival": "TODO: policy for early arrivals / luggage",
+    "steps": [
+      "Facing the house, look left of the front windows — there's a gate to the left of the front door. That's your gate.",
+      "The gate has a white keypad on its right. Press the large button on the bottom to light it up, enter the access code, then press the checkmark.",
+      "Walk down the alley (it's lit — if the lights are out, let me know!) to the shared courtyard.",
+      "At the cottage door keypad, press the unlock button (lower left) to light it up, then enter the code.",
+      "When leaving: close the door and press the right lock button. Please also re-lock the gate the same way."
+    ],
+    "codes": { "gate": "TODO-per-stay", "door": "TODO-per-stay" }
+  },
+  "wifi": { "network": "TODO", "password": "TODO", "speed": "817 Mbps" },
+  "parking": {
+    "driveway": "1 free driveway space on premises",
+    "street": "Free street parking nearby",
+    "notes": "TODO: any street cleaning days / driveway instructions"
+  },
+  "spaces": [
+    { "name": "Living Room", "details": "Sectional sofa converts to bed (use the foam topper for comfort!), 50\" TV on swinging arm with Netflix, dining table seats 4 (2 extra chairs available)." },
+    { "name": "Bedroom 1 (main floor)", "details": "Full bed, 32\" TV, desk." },
+    { "name": "Bedroom 2 (loft)", "details": "Queen bed, ample closet space. Low ceiling on the sides — watch your head!" },
+    { "name": "Kitchen", "details": "Full-size fridge, microwave, dishwasher, Sodastream, 12-cup coffee maker, Keurig. Well-stocked for cooking. Trash compactor." },
+    { "name": "Bathroom", "details": "Walk-in shower. Hair dryer, shampoo, conditioner, body soap provided. Shoe rack at entrance — slippers provided (shoes-off preferred)." },
+    { "name": "Laundry", "details": "Free in-unit stackable washer/dryer behind the kitchen door." },
+    { "name": "Backyard / Courtyard", "details": "Shared patio, benches, firepit, fully fenced backyard, bike storage. Shared with host but rarely used." }
+  ],
+  "amenities": {
+    "highlights": ["Full kitchen", "Fast WiFi (817 Mbps)", "Dedicated workspace (2 desks)", "Free driveway parking", "Pets allowed ($60 fee)", "55\" HDTV with Netflix", "In-unit washer/dryer", "Private entrance", "Self check-in / smart lock", "Portable fans + heating"],
+    "safety": ["Smoke alarm", "Carbon monoxide alarm", "Fire extinguisher", "First aid kit", "Exterior security cameras (backyard, pathway, front of house — all visible)"],
+    "notIncluded": ["Air conditioning (portable fans provided; SF rarely needs it)"],
+    "family": ["Pack-and-play available on request"]
+  },
+  "houseRules": [
+    "Check-in after 3:00 PM, checkout before 11:00 AM",
+    "6 guests maximum",
+    "Pets allowed with $60 fee (assistance animals always free)",
+    "Shoes off inside preferred — slippers provided",
+    "Please re-lock the gate and cottage door when leaving",
+    "TODO: quiet hours, smoking policy, parties"
+  ],
+  "transit": {
+    "intro": "You don't need a car! Use Clipper via Apple/Google Pay — no physical card needed. Works on all Muni and BART. Free for riders under 18. Muni = city buses/light rail; BART = regional trains.",
+    "options": [
+      { "name": "Muni K Ingleside Light Rail", "walk": "2 min (Ocean Ave)", "detail": "~30 min to downtown Powell St", "stopId": "TODO" },
+      { "name": "BART Balboa Park", "walk": "8-10 min", "detail": "12 min to downtown, 5 min to Mission; direct to SFO", "stopId": "TODO" },
+      { "name": "Muni J Church", "walk": "10 min", "detail": "~30 min to downtown" },
+      { "name": "Muni M Ocean View", "walk": "15 min", "detail": "~45 min to downtown" },
+      { "name": "Buses within 2 blocks", "walk": "1-2 min", "detail": "Routes 29, 8, 49, 43, 54" }
+    ],
+    "apps": "Real-time: 511.org / Transit app / UMO (ex-NextBus). Google Maps isn't always accurate for Muni.",
+    "airport": "From SFO: BART direct to Balboa Park (~30 min), then 8-min walk. Cheapest and often fastest way in."
+  },
+  "food": [
+    { "name": "Philz Coffee", "type": "Coffee", "walk": "2 min", "note": "SF institution — try a Mint Mojito" },
+    { "name": "Beeps Burgers", "type": "Burgers", "walk": "2 min", "hours": "until 10pm", "note": "Old-school SF burger stand, around the corner" },
+    { "name": "Pakwan", "type": "Pakistani/Indian", "walk": "2 min", "hours": "until 10pm" },
+    { "name": "Poke Bowl", "type": "Hawaiian", "walk": "5 min", "hours": "until 9:30pm" },
+    { "name": "Sakesan Sushi", "type": "Sushi", "walk": "6 min", "hours": "until 10:30pm" },
+    { "name": "Ocean Ave Alehouse", "type": "Beer + pub food", "walk": "7 min", "hours": "until 9pm" },
+    { "name": "Golden Coast Dimsum", "type": "Dim sum", "walk": "8 min", "hours": "until 8pm" },
+    { "name": "Java on Ocean", "type": "Coffee", "walk": "9 min" },
+    { "name": "Champa Garden", "type": "Thai/Lao", "walk": "9 min", "hours": "until 9pm" }
+  ],
+  "groceries": [
+    { "name": "Whole Foods", "walk": "4 min" },
+    { "name": "Walgreens", "walk": "8 min" },
+    { "name": "Safeway", "walk": "15 min" },
+    { "name": "Stonestown Galleria", "walk": "15 min by bus", "note": "Target, Whole Foods, Trader Joe's, food hall" },
+    { "name": "Serramonte Center", "walk": "10 min drive", "note": "Target, Nordstrom Rack, TJ Maxx, Macy's" }
+  ],
+  "attractions": { "_note": "TODO: curate — e.g. Golden Gate Park, Ocean Beach, Twin Peaks, Mission murals, Ferry Building, cable cars, Alcatraz booking tips, City College / Balboa Park local color" },
+  "emergency": {
+    "numbers": "911 for emergencies; SF non-emergency: 415-553-0123; 311 for city services",
+    "hospital": "TODO: nearest ER/urgent care (e.g. SF General / Kaiser)",
+    "fireExtinguisher": "TODO: location",
+    "firstAidKit": "TODO: location",
+    "waterShutoff": "TODO",
+    "breakerPanel": "TODO"
+  },
+  "checkout": [
+    "Checkout by 11:00 AM",
+    "Turn off lights, heaters, appliances, and electronics",
+    "Close and lock all windows and doors; lock the cottage door and gate keypads",
+    "Sign out of your streaming accounts on the TVs",
+    "Do a final walkthrough — check drawers and outlets for personal items",
+    "TODO: dishes/trash expectations"
+  ],
+  "faqs": [
+    { "q": "Packages and mail?", "a": "Deliveries go to the host's front door; Keith will bring packages to your door. Message ahead if expecting something." },
+    { "q": "Luggage note", "a": "The cottage is reached via a narrow alley — with very large suitcases, take it slow through the gate and alley." },
+    { "q": "Traveling with kids?", "a": "Pack-and-play available — just ask." },
+    { "q": "Cameras?", "a": "Exterior only: backyard, pathway, front of house. None inside." }
+  ]
+}
