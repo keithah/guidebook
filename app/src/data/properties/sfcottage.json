@@ -1,0 +1,236 @@
+{
+  "id": "sfcottage",
+  "slug": "sfcottage",
+  "name": "The SF Cottage",
+  "tagline": "Quiet 2BR cottage in Ingleside near City College — perfect for exploring SF by transit",
+  "airbnbUrl": "https://airbnb.com/h/sfcottage",
+  "registration": "2022-010560STR",
+  "address": {
+    "street": "251 Harold Ave",
+    "city": "San Francisco",
+    "state": "CA",
+    "zip": "94112",
+    "neighborhood": "Ingleside",
+    "lat": 37.7226,
+    "lng": -122.4547,
+    "_todo": "verify exact lat/lng against the parcel"
+  },
+  "host": {
+    "name": "Keith",
+    "coHost": "May",
+    "phone": "+14155550100",
+    "phoneDisplay": "(415) 555-0100",
+    "smsHref": "sms:+14155550100",
+    "email": "keith@kodi.tv",
+    "responseTime": "Usually within an hour",
+    "bio": "Superhost, 15 years hosting. SF resident 10+ years, visited 60+ countries. Happy to share local tips — just reach out!",
+    "_todo": "phone is a plausible stand-in — replace with Keith's real number / Airbnb thread link"
+  },
+  "capacity": { "guests": 6, "bedrooms": 2, "beds": 3, "baths": 1, "sqft": 600 },
+  "checkin": {
+    "time": "3:00 PM",
+    "checkoutTime": "11:00 AM",
+    "type": "Self check-in with smart lock",
+    "earlyArrival": "Arriving early? Message Keith and he'll see what he can do.",
+    "steps": [
+      "Facing the house, look left of the front windows — the gate is just left of the front door.",
+      "The gate keypad is on its right. Press the large bottom button to wake it, enter the code, then the checkmark.",
+      "Walk down the alley (it's lit — if the lights are out, let Keith know!) to the shared courtyard.",
+      "At the cottage door keypad, press unlock (lower left) to wake it, then enter the same code.",
+      "When leaving, close the door and press the right lock button — and please re-lock the gate the same way."
+    ],
+    "singleCode": true,
+    "code": "4821",
+    "_todo": "code is a plausible stand-in — real codes are generated per stay"
+  },
+  "wifi": {
+    "network": "SFCottage-5G",
+    "password": "foghorn-2024",
+    "speed": "817 Mbps",
+    "troubleshoot": "Dropping out? Unplug the white router under the desk for ten seconds — it's back in about two minutes.",
+    "_todo": "network/password are plausible stand-ins — replace with the real ones"
+  },
+  "parking": {
+    "driveway": "1 free driveway space on premises",
+    "street": "Free street parking nearby",
+    "notes": "TODO: any street cleaning days / driveway instructions"
+  },
+  "spaces": [
+    { "name": "Living room", "details": "Sectional converts to a bed — use the foam topper, it makes all the difference. 50\" TV on a swing arm with Netflix; dining table seats 4 (2 extra chairs in the closet)." },
+    { "name": "Bedroom 1 · main floor", "details": "Full bed, 32\" TV, desk." },
+    { "name": "Bedroom 2 · loft", "details": "Queen bed, lots of closet. Low ceiling at the sides — watch your head getting up." },
+    { "name": "Kitchen", "details": "Full-size fridge, dishwasher, microwave, trash compactor. Well-stocked for real cooking." },
+    { "name": "Bathroom", "details": "Walk-in shower; hair dryer, shampoo, conditioner and body soap provided. Slippers at the shoe rack — shoes off preferred." },
+    { "name": "Laundry", "details": "Free stackable washer/dryer behind the kitchen door." },
+    { "name": "Courtyard", "details": "Shared patio with benches, a firepit and bike storage. Shared with Keith and May, but rarely used — it's yours." }
+  ],
+  "applianceNote": "Keurig for one cup, the 12-cup drip for a crowd · Sodastream under the counter · TVs have Netflix — sign in to your own account · Washer/dryer behind the kitchen door, free · Heating + portable fans + air purifier; no A/C (you won't need it)",
+  "houseRulesNote": "6 guests max · shoes off preferred (slippers provided) · pets welcome, $60 fee (assistance animals free) · re-lock the gate and door when leaving",
+  "trash": {
+    "day": "Tuesday",
+    "note": "Blue recycling, green compost, black landfill. SF means it about compost — food scraps go green."
+  },
+  "faqs": [
+    { "q": "Power went out in one room", "a": "Breaker panel is in the laundry nook — flip the tripped switch fully off, then on." },
+    { "q": "WiFi acting up", "a": "Unplug the white router under the desk for 10 seconds. It's back in about two minutes — 817 Mbps when it's happy." },
+    { "q": "Water needs shutting off", "a": "The shutoff valve is under the kitchen sink, behind the compost bin." },
+    { "q": "Expecting a package?", "a": "Deliveries go to Keith's front door — he'll bring them to yours. Message ahead if it's something important." }
+  ],
+  "transit": {
+    "intro": "You don't need a car, or a Clipper card — add Clipper to Apple or Google Pay and tap. Muni is the city, BART is the region. Under 18 rides Muni free. Google Maps isn't always right about Muni; use the Transit app or 511.org.",
+    "options": [
+      { "name": "Muni Metro K Ingleside", "line": "K", "sub": "Ocean Ave · 2 min walk · ~30 min downtown", "walkMin": 2, "times": "4, 16′", "lat": 37.72405, "lng": -122.45495, "_todo": "verify exact stop coordinates" },
+      { "name": "BART · Balboa Park", "line": "BART", "sub": "9 min walk · 12 min downtown · SFO direct", "walkMin": 9, "times": "6, 21′", "lat": 37.72167, "lng": -122.44750, "_todo": "verify exact stop coordinates" },
+      { "name": "Muni Metro J Church", "line": "J", "sub": "10 min walk · ~30 min downtown", "walkMin": 10, "times": "9′", "lat": 37.72167, "lng": -122.44750, "_todo": "verify exact stop coordinates" },
+      { "name": "Muni Metro M Ocean View", "line": "M", "sub": "15 min walk", "walkMin": 15, "times": "14′", "lat": 37.71980, "lng": -122.46310, "_todo": "verify exact stop coordinates" },
+      { "name": "Buses 29 · 8 · 49 · 43 · 54", "line": "BUS", "sub": "1–2 min walk", "walkMin": 2, "times": "2′", "lat": 37.72290, "lng": -122.45330, "_todo": "verify exact stop coordinates" }
+    ],
+    "nearbyStops": [
+      { "name": "Ocean Ave & Harold", "sub": "K Ingleside · inbound", "line": "K", "walkMin": 2, "times": "4, 16′", "lat": 37.72405, "lng": -122.45495 },
+      { "name": "Ocean Ave & Harold", "sub": "K Ingleside · outbound to Balboa Park", "line": "K", "walkMin": 2, "times": "7′", "lat": 37.72398, "lng": -122.45470 },
+      { "name": "Ocean Ave & Phelan", "sub": "Bus 29 Sunset · both directions", "line": "BUS", "walkMin": 3, "times": "2, 14′", "lat": 37.72290, "lng": -122.45330 },
+      { "name": "Balboa Park Station", "sub": "BART · Antioch & Richmond lines", "line": "BART", "walkMin": 9, "times": "6, 21′", "lat": 37.72167, "lng": -122.44750 },
+      { "name": "Balboa Park · upper yard", "sub": "J Church terminal", "line": "J", "walkMin": 10, "times": "9′", "lat": 37.72167, "lng": -122.44750 }
+    ],
+    "backHome": [
+      { "icon": "walk", "label": "Walking", "detail": "From Ocean Ave, 2 minutes up Harold. From Balboa Park BART, 8 minutes." },
+      { "icon": "K", "label": "Muni K, outbound", "detail": "Get off at Ocean Ave & Harold — the gate is 60 seconds from the stop.", "line": "K" },
+      { "icon": "ba", "label": "BART to Balboa Park", "detail": "Exit toward Ocean Ave, then 8 minutes on foot or one stop on the K.", "line": "BART" },
+      { "icon": "ride", "label": "Rideshare", "detail": "Ask for 251 Harold Ave. Drivers can pull into the driveway." }
+    ],
+    "destSuggestions": ["Downtown / Union Square", "SFO", "Golden Gate Park", "The Mission", "Ocean Beach"],
+    "rides": [
+      { "name": "Uber", "note": "Usually 3–6 min away", "color": "#14201D", "referralUrl": "#", "_todo": "add real Uber referral link" },
+      { "name": "Lyft", "note": "Similar wait, often cheaper here", "color": "#7A2E8E", "referralUrl": "#", "_todo": "add real Lyft referral link" },
+      { "name": "Waymo", "note": "Driverless · covers Ingleside", "color": "#0B7A5A", "referralUrl": "#", "_todo": "add real Waymo referral link" }
+    ],
+    "apps": "Real-time: 511.org / Transit app / UMO (ex-NextBus). Google Maps isn't always accurate for Muni.",
+    "airport": "From SFO: BART direct to Balboa Park (~30 min), then 8-min walk. Cheapest and often fastest way in.",
+    "sfoDirections": "BART direct to Balboa Park, about 30 minutes, then an 8-minute walk. Cheapest and usually fastest way in.",
+    "oakDirections": "BART toward SF, change at 19th St Oakland for the Balboa Park line. About an hour.",
+    "drivingDirections": "One free driveway space is yours. Street parking nearby is free too."
+  },
+  "howToRide": {
+    "intro": "Bay Area transit looks like alphabet soup from the outside. It isn't — here's the whole thing on one page.",
+    "payment": [
+      { "name": "Clipper in Apple or Google Pay", "detail": "What Keith would do. Add it once in Wallet, then hold your phone to the reader. Works on Muni, BART, Caltrain and every regional bus, and it gives you free transfers.", "recommended": true },
+      { "name": "Contactless bank card", "detail": "Tap your own card on Muni and BART. Simple, but no transfer credit." },
+      { "name": "Physical Clipper card", "detail": "From the machines at Balboa Park BART if you'd rather not use a phone." },
+      { "name": "Kids ride free", "detail": "Under 10 walks on with you on Muni — no tag, no fare. Youth up to 18 ride Muni free too, with a youth Clipper." }
+    ],
+    "muni": {
+      "detail": "Buses, trolleybuses, the Metro trains (J K L M N T) and the cable cars. One flat fare, ~$2.85, and it buys you 120 minutes of unlimited transfers if you tap with Clipper. Board at any door on the Metro; tap on entry on buses.",
+      "lines": ["J", "K", "L", "M", "N", "T"],
+      "note": "K stops 2 min from the gate"
+    },
+    "bart": { "detail": "Regional trains to Oakland, Berkeley and SFO. Distance-based fare, so you tap in and out at the gates. Balboa Park is our station, 9 minutes on foot, and SFO is a straight ride." },
+    "caltrain": { "detail": "Electric trains to Palo Alto, Mountain View and San José from 4th & King. Tap in and out like BART. Take the K or T to get there. Worth it if you're heading to the South Bay for a day." },
+    "regionalBus": { "detail": "AC Transit — Oakland, Berkeley, the East Bay\nGolden Gate Transit & Ferry — Marin, Sausalito, Larkspur\nSamTrans — San Mateo County and the coast\nAll of them take the same Clipper in your Wallet." },
+    "tip": "Two habits that make this easy: check departures before you walk out (Google Maps isn't reliable for Muni — use the Transit app or 511.org), and always tap off on BART and Caltrain."
+  },
+  "food": [
+    { "name": "Beeps Burgers", "type": "Burgers", "walkMin": 2, "hours": "til 10", "take": "My favorite burger in the city, and it's around the corner." },
+    { "name": "Philz Coffee", "type": "Coffee", "walkMin": 2, "take": "Order a Mint Mojito. Don't overthink it." },
+    { "name": "Pakwan", "type": "Pakistani/Indian", "walkMin": 2, "hours": "til 10", "take": "Cheap, huge portions, better than it looks." },
+    { "name": "Poke Bowl", "type": "Hawaiian", "walkMin": 5, "hours": "til 9:30", "take": "Solid quick dinner when you're beat." },
+    { "name": "Sakesan Sushi", "type": "Sushi", "walkMin": 6, "hours": "til 10:30", "take": "Where we go when we don't want to cook." },
+    { "name": "Ocean Ave Alehouse", "type": "Beer + pub food", "walkMin": 7, "hours": "til 9", "take": "Good beer list, quiet on weeknights." },
+    { "name": "Golden Coast Dimsum", "type": "Dim sum", "walkMin": 8, "hours": "til 8", "take": "Go before 2pm for the full spread." },
+    { "name": "Java on Ocean", "type": "Coffee", "walkMin": 9, "take": "The neighborhood's living room." },
+    { "name": "Champa Garden", "type": "Thai/Lao", "walkMin": 9, "hours": "til 9", "take": "Thai and Lao — worth the extra blocks." }
+  ],
+  "groceries": [
+    { "name": "Whole Foods", "meta": "4 min walk" },
+    { "name": "Walgreens (pharmacy + ATM)", "meta": "8 min walk" },
+    { "name": "Safeway", "meta": "15 min walk" },
+    { "name": "Stonestown Galleria", "meta": "15 min by bus · Target, TJ's, food hall" },
+    { "name": "Serramonte Center", "meta": "10 min drive · Target, Macy's" }
+  ],
+  "delivery": {
+    "note": "DoorDash, Uber Eats and Grubhub all cover us; Instacart and Amazon Fresh for groceries. Packages go to Keith's front door — he'll bring them to yours, just message ahead."
+  },
+  "explore": {
+    "filters": [
+      { "id": "all", "label": "Everything" },
+      { "id": "hood", "label": "Neighborhoods" },
+      { "id": "nature", "label": "Nature & hiking" },
+      { "id": "car", "label": "Got a car?" },
+      { "id": "wine", "label": "Wine" },
+      { "id": "museums", "label": "Museums" },
+      { "id": "kids", "label": "With kids" },
+      { "id": "dogs", "label": "Dog-friendly" }
+    ],
+    "places": [
+      { "name": "The Mission", "tags": ["hood"], "route": "BART · 5 min from Balboa Park", "note": "Murals on Balmy Alley, then a burrito. That's the whole plan and it's a good one." },
+      { "name": "Chinatown", "tags": ["hood"], "route": "K to Powell, walk north · ~40 min", "note": "Go hungry, skip the main drag — the side alleys are the real thing." },
+      { "name": "Golden Gate Park", "tags": ["hood", "kids", "museums"], "route": "Bus 29 · 20 min", "note": "Cal Academy and the de Young sit side by side. Great on a foggy day." },
+      { "name": "Ocean Beach & the Sunset", "tags": ["hood", "nature", "dogs"], "route": "Bus 29 · 25 min", "note": "Four miles of sand, fire pits at the south end. Fog optional." },
+      { "name": "Downtown & Embarcadero", "tags": ["hood"], "route": "K · 30 min to Powell", "note": "Ferry Building for lunch, then walk the water to the bridge views." },
+      { "name": "Lands End", "tags": ["nature"], "route": "Bus 29 → 38 · ~40 min", "note": "Cliff trail with the Golden Gate on one side and shipwrecks below." },
+      { "name": "Twin Peaks", "tags": ["nature"], "route": "K → bus 37 · ~30 min", "note": "Go at sunset. Bring the warm layer you didn't think you'd need." },
+      { "name": "Muir Woods", "tags": ["car", "nature"], "route": "Car · 45 min · reserve parking!", "note": "Old-growth redwoods. Book the parking slot before you go — they enforce it." },
+      { "name": "Half Moon Bay", "tags": ["car", "nature"], "route": "Car · 40 min down Highway 1", "note": "The drive is the attraction. Stop at every pullout that tempts you." },
+      { "name": "Sonoma & Napa", "tags": ["car", "wine"], "route": "Car · ~1.5 hr", "note": "Pick three wineries max. Sonoma square for lunch beats anything fancier." },
+      { "name": "SFMOMA", "tags": ["museums"], "route": "BART to Montgomery · 25 min", "note": "Free ground floor if you're short on time; the Richter rooms if you're not." },
+      { "name": "California Academy of Sciences", "tags": ["museums", "kids"], "route": "Bus 29 · 20 min", "note": "Aquarium, planetarium and a rainforest under one living roof." },
+      { "name": "SF Zoo", "tags": ["kids"], "route": "Bus 57 or L · 20 min", "note": "Ten minutes from here — the gorilla preserve is the highlight." },
+      { "name": "Fort Funston", "tags": ["dogs", "nature"], "route": "Car · 10 min", "note": "Off-leash dog heaven on the cliffs. Hang gliders overhead on windy days." }
+    ],
+    "eventsGeneric": "A running list of what's worth leaving the neighborhood for — street fairs, Fleet Week, Outside Lands. Windowed to your dates once you've booked.",
+    "eventsSample": "Outside Lands is on in Golden Gate Park this weekend — expect crowds on the N and the 29. Sunday: free day at the de Young.",
+    "tips": "Fog and wind are real — carry a layer even in July. Never leave anything visible in a parked car, not a jacket, not a charger. Tip 18–20% at restaurants. If the ground shakes: drop, cover, hold on."
+  },
+  "emergency": {
+    "numbers": { "emergency": "911", "nonEmergency": "415-553-0123", "cityServices": "311" },
+    "hospital": "Kaiser Mission Bay urgent care (20 min by car); SF General for the ER. In doubt, call 911.",
+    "fireExtinguisher": "Under the kitchen sink",
+    "firstAidKit": "Bathroom cupboard",
+    "waterShutoff": "Under the kitchen sink, behind the compost bin",
+    "breakerPanel": "Laundry nook",
+    "_todo": "hospital pick is a plausible stand-in — confirm nearest urgent care / ER with Keith"
+  },
+  "checkout": {
+    "time": "11:00 AM",
+    "checklist": [
+      "Lights, heaters and appliances off",
+      "Windows closed; door and gate re-locked",
+      "Signed out of Netflix on both TVs",
+      "Dishes in the dishwasher, trash in the bins",
+      "Final walkthrough — drawers and outlets"
+    ],
+    "feedbackPrompt": "What was missing from this guide?",
+    "reviewNudge": "If you enjoyed the stay, a review really does help."
+  },
+  "bookDirect": {
+    "pitchDuring": "Same cottage, roughly 12% less without the platform fee.",
+    "pitchGeneric": "About 12% less than the listing, straight with Keith. Sleeps 6 · 2BR · pets welcome.",
+    "cta": "Check dates"
+  },
+  "searchIndex": [
+    { "label": "Trash & recycling day", "where": "The Cottage", "tab": "cottage" },
+    { "label": "Keurig vs drip coffee", "where": "The Cottage", "tab": "cottage" },
+    { "label": "Loft low ceiling", "where": "The Cottage", "tab": "cottage" },
+    { "label": "WiFi reboot", "where": "The Cottage", "tab": "cottage" },
+    { "label": "House rules & pets", "where": "The Cottage", "tab": "cottage" },
+    { "label": "Gate & door code steps", "where": "Arrive", "tab": "arrive" },
+    { "label": "Parking", "where": "Arrive", "tab": "arrive" },
+    { "label": "From SFO by BART", "where": "Arrive", "tab": "arrive" },
+    { "label": "Live departures", "where": "Around Here", "tab": "around" },
+    { "label": "Clipper on your phone", "where": "Around Here", "tab": "around" },
+    { "label": "Beeps Burgers", "where": "Around Here", "tab": "around" },
+    { "label": "Whole Foods", "where": "Around Here", "tab": "around" },
+    { "label": "Delivery options", "where": "Around Here", "tab": "around" },
+    { "label": "Muir Woods (need a car)", "where": "Explore SF", "tab": "explore" },
+    { "label": "With kids: Cal Academy, zoo", "where": "Explore SF", "tab": "explore" },
+    { "label": "Checkout checklist", "where": "Help", "tab": "help" },
+    { "label": "Urgent care & ER", "where": "Help", "tab": "help" },
+    { "label": "Fire extinguisher location", "where": "Help", "tab": "help" }
+  ],
+  "sections": [
+    { "tab": "arrive", "name": "Arrive", "sub": "Getting here, parking, getting in" },
+    { "tab": "cottage", "name": "The Cottage", "sub": "Rooms, appliances, rules, trash day" },
+    { "tab": "around", "name": "Around Here", "sub": "Transit, food, groceries, delivery" },
+    { "tab": "explore", "name": "Explore SF", "sub": "Neighborhoods, interests, what's on" },
+    { "tab": "help", "name": "Help", "sub": "Emergency, Keith, checkout" }
+  ]
+}

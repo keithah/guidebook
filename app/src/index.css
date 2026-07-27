@@ -1,0 +1,31 @@
+html,
+body {
+  margin: 0;
+  height: 100%;
+  background: #c9d2ce;
+}
+
+#root {
+  height: 100%;
+}
+
+a {
+  color: #2c6d61;
+  text-decoration: none;
+}
+a:hover {
+  text-decoration: underline;
+}
+
+input {
+  outline: none;
+}
+
+::-webkit-scrollbar {
+  width: 0;
+  height: 0;
+}
+
+.leaflet-container {
+  font-family: 'Instrument Sans', sans-serif;
+}

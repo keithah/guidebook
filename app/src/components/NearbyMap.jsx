@@ -1,0 +1,66 @@
+import { useMemo } from 'react';
+import { MapContainer, TileLayer, Marker, Popup } from 'react-leaflet';
+import L from 'leaflet';
+import 'leaflet/dist/leaflet.css';
+import { lineColors, lineLabel } from '../theme.js';
+
+function lineDivIcon(line, size = 30) {
+  const bg = lineColors[line] || '#5A6B65';
+  const label = lineLabel(line);
+  const fontSize = label.length > 1 ? Math.round(size * 0.36) : Math.round(size * 0.5);
+  return L.divIcon({
+    className: 'sfc-line-pin',
+    html: `<div style="width:${size}px;height:${size}px;border-radius:50%;background:${bg};color:#fff;display:flex;align-items:center;justify-content:center;font:${fontSize}px/1 'Instrument Sans',sans-serif;font-weight:700;box-shadow:0 2px 6px rgba(20,32,29,.35);border:2px solid #fff;">${label}</div>`,
+    iconSize: [size, size],
+    iconAnchor: [size / 2, size / 2],
+  });
+}
+
+function homeDivIcon() {
+  return L.divIcon({
+    className: 'sfc-home-pin',
+    html: `<div style="width:22px;height:22px;border-radius:50%;background:#2C6D61;border:3px solid #fff;box-shadow:0 0 0 6px rgba(44,109,97,.18);"></div>`,
+    iconSize: [22, 22],
+    iconAnchor: [11, 11],
+  });
+}
+
+function meDivIcon() {
+  return L.divIcon({
+    className: 'sfc-me-pin',
+    html: `<div style="width:16px;height:16px;border-radius:50%;background:#14201D;border:3px solid #fff;box-shadow:0 0 0 5px rgba(20,32,29,.18);"></div>`,
+    iconSize: [16, 16],
+    iconAnchor: [8, 8],
+  });
+}
+
+export default function NearbyMap({ center, cottage, stops, showMe }) {
+  const homeIcon = useMemo(() => homeDivIcon(), []);
+  const meIcon = useMemo(() => meDivIcon(), []);
+
+  return (
+    <MapContainer center={[center.lat, center.lng]} zoom={15} scrollWheelZoom={false} style={{ height: '100%', width: '100%' }}>
+      <TileLayer
+        attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+        url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+      />
+      <Marker position={[cottage.lat, cottage.lng]} icon={homeIcon}>
+        <Popup>The SF Cottage</Popup>
+      </Marker>
+      {showMe && (
+        <Marker position={[center.lat, center.lng]} icon={meIcon}>
+          <Popup>You are here</Popup>
+        </Marker>
+      )}
+      {stops.map((s, i) => (
+        <Marker key={i} position={[s.lat, s.lng]} icon={lineDivIcon(s.line)}>
+          <Popup>
+            {s.name}
+            <br />
+            {s.sub}
+          </Popup>
+        </Marker>
+      ))}
+    </MapContainer>
+  );
+}
