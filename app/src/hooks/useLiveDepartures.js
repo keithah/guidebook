@@ -1,7 +1,10 @@
 import { useEffect, useState } from 'react';
 import { fetchStopDepartures } from '../lib/transit511.js';
 
-const REFRESH_MS = 60_000;
+// 511 keys default to 60 requests/hour — with ~4 monitored stops, a 5-minute
+// refresh keeps one active guest at ~48/hr. Don't lower this without a rate
+// increase from 511.
+const REFRESH_MS = 5 * 60_000;
 
 function formatMinutes(list) {
   if (!list || !list.length) return null;
