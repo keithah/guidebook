@@ -1,3 +1,4 @@
+import { useState } from 'react';
 import { AppProvider, useApp } from './context/AppContext.jsx';
 import { colors, fonts } from './theme.js';
 import TopBar from './components/TopBar.jsx';
@@ -32,6 +33,7 @@ function Screen() {
 
 function Shell() {
   const { scrollRef } = useApp();
+  const [showTop, setShowTop] = useState(false);
   return (
     <div
       className="app-shell"
@@ -50,12 +52,43 @@ function Shell() {
       }}
     >
       <TopBar />
-      <div ref={scrollRef} className="app-scroll" style={{ flex: 1, overflowY: 'auto' }}>
+      <div
+        ref={scrollRef}
+        className="app-scroll"
+        onScroll={(e) => setShowTop(e.currentTarget.scrollTop > 400)}
+        style={{ flex: 1, overflowY: 'auto' }}
+      >
         <Screen />
         <div className="print-hide">
           <GuestPreviewBar />
         </div>
       </div>
+      {showTop && (
+        <div
+          className="print-hide"
+          onClick={() => scrollRef.current && scrollRef.current.scrollTo({ top: 0, behavior: 'smooth' })}
+          aria-label="Back to top"
+          style={{
+            position: 'absolute',
+            right: 14,
+            bottom: 78,
+            width: 40,
+            height: 40,
+            borderRadius: '50%',
+            background: colors.ink,
+            color: colors.bg,
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            fontSize: 18,
+            cursor: 'pointer',
+            boxShadow: '0 4px 14px rgba(20,32,29,.3)',
+            zIndex: 30,
+          }}
+        >
+          ↑
+        </div>
+      )}
       <div className="print-hide">
         <BottomNav />
         <WeatherPanel />
