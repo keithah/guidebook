@@ -4,6 +4,7 @@ import { readStayFromLocation, computeStayPhase, encodeStay } from '../lib/stayH
 import { fetchCurrentWeather, fetchWeatherForDate, fetchForecastDays } from '../lib/weather.js';
 import { getCurrentPosition } from '../lib/geo.js';
 import { useLocalStorageState } from '../hooks/useLocalStorageState.js';
+import { useLiveDepartures } from '../hooks/useLiveDepartures.js';
 
 const AppContext = createContext(null);
 
@@ -191,6 +192,11 @@ export function AppProvider({ children }) {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [phase === 'before', stay?.checkin]);
 
+  // ---- Live K departures (511) for Home / TopBar ---------------------------
+  const optionsLive = useLiveDepartures(property.transit.options);
+  const kIndex = property.transit.options.findIndex((o) => o.line === 'K');
+  const kTimes = optionsLive[kIndex] ?? property.transit.options[kIndex]?.times;
+
   // ---- Temperature unit + forecast panel -----------------------------------
   const [unit, setUnit] = useLocalStorageState('sfcottage:temp-unit', 'F');
   const toggleUnit = useCallback(() => setUnit((u) => (u === 'F' ? 'C' : 'F')), [setUnit]);
@@ -250,6 +256,7 @@ export function AppProvider({ children }) {
       formatTemp,
       weatherOpen,
       setWeatherOpen,
+      kTimes,
     }),
     [
       isGuest,
@@ -290,6 +297,7 @@ export function AppProvider({ children }) {
       toggleUnit,
       formatTemp,
       weatherOpen,
+      kTimes,
     ]
   );
 

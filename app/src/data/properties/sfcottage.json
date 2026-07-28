@@ -126,7 +126,8 @@
         "times": "4, 16′",
         "lat": 37.72405,
         "lng": -122.45495,
-        "_todo": "verify exact stop coordinates"
+        "stopCode": "15794",
+        "agency": "SF"
       },
       {
         "name": "BART · Balboa Park",
@@ -171,31 +172,37 @@
     ],
     "nearbyStops": [
       {
-        "name": "Ocean Ave & Harold",
-        "sub": "K Ingleside · inbound",
+        "name": "Ocean Ave & Lee St",
+        "sub": "K Ingleside · inbound downtown",
         "line": "K",
         "walkMin": 2,
         "times": "4, 16′",
-        "lat": 37.72405,
-        "lng": -122.45495
+        "lat": 37.723459,
+        "lng": -122.453999,
+        "stopCode": "15794",
+        "agency": "SF"
       },
       {
-        "name": "Ocean Ave & Harold",
+        "name": "Ocean Ave & Lee St",
         "sub": "K Ingleside · outbound to Balboa Park",
         "line": "K",
         "walkMin": 2,
-        "times": "7′",
-        "lat": 37.72398,
-        "lng": -122.4547
+        "times": "6, 21′",
+        "lat": 37.723397,
+        "lng": -122.454423,
+        "stopCode": "15795",
+        "agency": "SF"
       },
       {
-        "name": "Ocean Ave & Phelan",
-        "sub": "Bus 29 Sunset · both directions",
+        "name": "Plymouth Ave & Ocean",
+        "sub": "Bus 29 Sunset",
         "line": "BUS",
         "walkMin": 3,
-        "times": "2, 14′",
-        "lat": 37.7229,
-        "lng": -122.4533
+        "times": "2′",
+        "lat": 37.722745,
+        "lng": -122.456354,
+        "stopCode": "15975",
+        "agency": "SF"
       },
       {
         "name": "Balboa Park Station",

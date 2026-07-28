@@ -110,10 +110,10 @@ function BeforeHome() {
 }
 
 function DuringHome() {
-  const { guestName, goSub, weather, query, setQuery, results, property, formatTemp, setWeatherOpen } = useApp();
+  const { guestName, goSub, weather, query, setQuery, results, property, formatTemp, setWeatherOpen, kTimes } = useApp();
   const w = WeatherLine({ weather, fallbackTemp: 58, fallbackShort: 'Fog till noon' });
   const kOption = property.transit.options.find((o) => o.line === 'K');
-  const kMin = firstMinutes(kOption?.times);
+  const kMin = firstMinutes(kTimes);
   return (
     <div style={screenPad}>
       <div style={{ fontFamily: fonts.serif, fontSize: 32, lineHeight: 1.1 }}>

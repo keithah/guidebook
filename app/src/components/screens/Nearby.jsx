@@ -5,6 +5,7 @@ import MuniLogo from '../MuniLogo.jsx';
 import LineBadge from '../LineBadge.jsx';
 import NearbyMap from '../NearbyMap.jsx';
 import { geocodePlace, distanceMiles } from '../../lib/geocode.js';
+import { useLiveDepartures } from '../../hooks/useLiveDepartures.js';
 
 const BACK_HOME_ICON = {
   walk: { glyph: '○', style: { background: colors.sage, color: colors.teal } },
@@ -30,6 +31,7 @@ export default function Nearby() {
 
   const cottage = { lat: property.address.lat, lng: property.address.lng };
   const showMe = !!(coords && (coords.lat !== cottage.lat || coords.lng !== cottage.lng));
+  const liveTimes = useLiveDepartures(property.transit.nearbyStops);
 
   // ---- In-app destination search (Photon geocoder, no key) ----------------
   const [searching, setSearching] = useState(false);
@@ -269,7 +271,12 @@ export default function Nearby() {
                     {s.sub} · {s.walkMin} min walk
                   </div>
                 </div>
-                <div style={{ fontFamily: fonts.serif, fontSize: 20, color: colors.teal, whiteSpace: 'nowrap' }}>{s.times}</div>
+                {liveTimes[i] && (
+                  <span style={{ width: 7, height: 7, borderRadius: '50%', background: '#3BA55D', flexShrink: 0 }} title="Live" />
+                )}
+                <div style={{ fontFamily: fonts.serif, fontSize: 20, color: colors.teal, whiteSpace: 'nowrap' }}>
+                  {liveTimes[i] ?? s.times}
+                </div>
               </div>
             ))}
           </div>

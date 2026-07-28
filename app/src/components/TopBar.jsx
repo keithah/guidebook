@@ -4,9 +4,8 @@ import LineBadge from './LineBadge.jsx';
 import { firstMinutes } from '../lib/transitDisplay.js';
 
 export default function TopBar() {
-  const { property, isGuest, isGeneric, goTab, goSub, accessCode } = useApp();
-  const kOption = property.transit.options.find((o) => o.line === 'K');
-  const kMin = firstMinutes(kOption?.times);
+  const { isGuest, isGeneric, goTab, goSub, accessCode, kTimes, property } = useApp();
+  const kMin = firstMinutes(kTimes);
 
   return (
     <div
