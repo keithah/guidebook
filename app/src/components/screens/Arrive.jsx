@@ -100,9 +100,9 @@ export default function Arrive() {
           {steps.map((text, i) => {
             const side =
               i === 1
-                ? { src: photos.gateKeypad, alt: 'The white gate keypad', caption: 'Gate keypad' }
+                ? { src: photos.gateKeypad, alt: 'The white gate keypad' }
                 : i === 4
-                  ? { src: photos.doorKeypad, alt: 'The cottage keypad', caption: 'Cottage keypad' }
+                  ? { src: photos.doorKeypad, alt: 'The cottage keypad' }
                   : null;
             return (
               <div key={i}>
@@ -110,14 +110,11 @@ export default function Arrive() {
                   <div style={{ fontFamily: fonts.serif, fontSize: 18, color: colors.teal, minWidth: 14 }}>{i + 1}</div>
                   <div style={{ flex: 1, fontSize: 13, color: '#3B4E49', lineHeight: 1.55 }}>{text}</div>
                   {side && (
-                    <div style={{ width: 84, flexShrink: 0 }}>
-                      <img
-                        src={img(side.src)}
-                        alt={side.alt}
-                        style={{ display: 'block', width: 84, height: 104, objectFit: 'cover', borderRadius: 10 }}
-                      />
-                      <div style={{ fontSize: 10, color: colors.muted, marginTop: 3, textAlign: 'center' }}>{side.caption}</div>
-                    </div>
+                    <img
+                      src={img(side.src)}
+                      alt={side.alt}
+                      style={{ display: 'block', width: 54, height: 68, objectFit: 'cover', borderRadius: 8, flexShrink: 0 }}
+                    />
                   )}
                 </div>
                 {i === 3 && (

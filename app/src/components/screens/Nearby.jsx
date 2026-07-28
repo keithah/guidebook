@@ -87,48 +87,25 @@ export default function Nearby() {
             <NearbyMap center={coords} cottage={cottage} stops={property.transit.nearbyStops} showMe={showMe} />
           </div>
 
-          <div
-            onClick={() => setBackOpen((b) => !b)}
-            style={{ cursor: 'pointer', background: colors.ink, color: colors.bg, borderRadius: 18, padding: '15px 18px', display: 'flex', alignItems: 'center', gap: 12 }}
-          >
-            <div style={{ width: 34, height: 34, borderRadius: '50%', background: colors.teal, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 16, flexShrink: 0 }}>
-              ⌂
-            </div>
-            <div style={{ flex: 1 }}>
-              <div style={{ fontSize: 15, fontWeight: 600 }}>Take me back to the cottage</div>
-              <div style={{ fontSize: 12, opacity: 0.7, marginTop: 2 }}>{property.address.street} · every way to get there</div>
-            </div>
-            <div style={{ opacity: 0.6 }}>{backOpen ? '▴' : '▾'}</div>
-          </div>
-          {backOpen && (
-            <div style={{ background: colors.white, border: `1px solid ${colors.border}`, borderRadius: 18, padding: '4px 16px', marginTop: -8 }}>
-              {property.transit.backHome.map((b, i) => (
-                <div key={i} style={{ display: 'flex', gap: 12, alignItems: 'flex-start', padding: '13px 0', borderBottom: `1px solid ${colors.borderSoft}` }}>
-                  {b.line ? (
-                    <LineBadge line={b.line} size={22} fontSize={b.line === 'BART' ? '9px' : '12px'} />
-                  ) : (
-                    <div style={{ width: 22, height: 22, borderRadius: '50%', flexShrink: 0, fontSize: 12, display: 'flex', alignItems: 'center', justifyContent: 'center', ...BACK_HOME_ICON[b.icon]?.style }}>
-                      {BACK_HOME_ICON[b.icon]?.glyph}
-                    </div>
-                  )}
-                  <div>
-                    <div style={{ fontSize: 14, fontWeight: 600 }}>{b.label}</div>
-                    <div style={{ fontSize: 13, color: colors.mutedText, lineHeight: 1.55, marginTop: 2 }}>{b.detail}</div>
-                  </div>
-                </div>
-              ))}
-            </div>
-          )}
-
           <div>
             <div style={{ fontSize: 11, letterSpacing: '.16em', textTransform: 'uppercase', color: colors.muted }}>Where are you trying to go?</div>
             <input
               value={dest}
               onChange={(e) => setDest(e.target.value)}
-              placeholder="Type a place — or pick one below"
+              placeholder="Type in address or place"
               style={{ width: '100%', boxSizing: 'border-box', background: colors.white, border: `1px solid ${colors.border}`, borderRadius: 999, padding: '11px 16px', fontSize: 14, fontFamily: fonts.sans, color: colors.ink, marginTop: 7 }}
             />
             <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6, marginTop: 8 }}>
+              <div
+                onClick={() => {
+                  setDest(property.address.street);
+                  setBackOpen(true);
+                  if (!showMe) allowLocation();
+                }}
+                style={{ cursor: 'pointer', fontSize: 12, fontWeight: 600, padding: '7px 13px', borderRadius: 999, background: colors.teal, color: '#F2F7F5', whiteSpace: 'nowrap' }}
+              >
+                ⌂ Take me back to the cottage
+              </div>
               {property.transit.destSuggestions.map((d) => (
                 <div
                   key={d}
@@ -139,6 +116,34 @@ export default function Nearby() {
                 </div>
               ))}
             </div>
+            {backOpen && (
+              <div style={{ background: colors.white, border: `1px solid ${colors.border}`, borderRadius: 18, padding: '4px 16px', marginTop: 10 }}>
+                <div
+                  onClick={() => setBackOpen(false)}
+                  style={{ cursor: 'pointer', display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '10px 0', borderBottom: `1px solid ${colors.borderSoft}` }}
+                >
+                  <div style={{ fontSize: 11, letterSpacing: '.16em', textTransform: 'uppercase', color: colors.teal }}>
+                    Suggestions · back to {property.address.street}
+                  </div>
+                  <div style={{ color: colors.faint, fontSize: 13 }}>▴</div>
+                </div>
+                {property.transit.backHome.map((b, i) => (
+                  <div key={i} style={{ display: 'flex', gap: 12, alignItems: 'flex-start', padding: '13px 0', borderBottom: `1px solid ${colors.borderSoft}` }}>
+                    {b.line ? (
+                      <LineBadge line={b.line} size={22} fontSize={b.line === 'BART' ? '9px' : '12px'} />
+                    ) : (
+                      <div style={{ width: 22, height: 22, borderRadius: '50%', flexShrink: 0, fontSize: 12, display: 'flex', alignItems: 'center', justifyContent: 'center', ...BACK_HOME_ICON[b.icon]?.style }}>
+                        {BACK_HOME_ICON[b.icon]?.glyph}
+                      </div>
+                    )}
+                    <div>
+                      <div style={{ fontSize: 14, fontWeight: 600 }}>{b.label}</div>
+                      <div style={{ fontSize: 13, color: colors.mutedText, lineHeight: 1.55, marginTop: 2 }}>{b.detail}</div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
           </div>
 
           <div>
