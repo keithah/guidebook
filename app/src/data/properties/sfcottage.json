@@ -37,13 +37,13 @@
     "time": "3:00 PM",
     "checkoutTime": "11:00 AM",
     "type": "Self check-in with smart lock",
-    "earlyArrival": "Arriving early? Message Keith and he'll see what he can do.",
     "steps": [
-      "Facing the house, look left of the front windows — the gate is just left of the front door.",
-      "The gate keypad is on its right. Press the large bottom button to wake it, enter the code, then the checkmark.",
-      "Walk down the alley (it's lit — if the lights are out, let Keith know!) to the shared courtyard.",
-      "At the cottage door keypad, press unlock (lower left) to wake it, then enter the same code.",
-      "When leaving, close the door and press the right lock button — and please re-lock the gate the same way."
+      "Facing the house (pic above), look left of the windows — the gate is in front of the walkway on the side of the house.",
+      "The gate keypad is white and at eye level (see pic below). Tap the screen to wake it up, then tap 'PIN' to enter the number — it unlocks automatically and locks itself when the gate closes.",
+      "Walk down the alley to the shared courtyard.",
+      "If the half gate is closed, reach around it and lift the lever up to open it.",
+      "At the cottage door keypad, press unlock (lower left) to wake it up, then enter the same code.",
+      "When leaving, close the cottage door and press the right lock button — you'll hear it lock."
     ],
     "singleCode": true,
     "code": "4821",
@@ -794,6 +794,12 @@
         "outro": "There's more parking a little farther out with no 2-hour limit. The SpotAngels app is great for finding it — or just ask Keith.",
         "spotAngelsUrl": "https://www.spotangels.com/"
       }
+    },
+    "gettingInPhotos": {
+      "house": "images/house-front.jpg",
+      "gateKeypad": "images/gate-keypad.jpg",
+      "doorKeypad": "images/door-keypad.jpg",
+      "cottage": "images/cottage-front.jpg"
     }
   }
 }

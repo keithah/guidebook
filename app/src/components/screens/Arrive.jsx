@@ -1,7 +1,6 @@
 import { useEffect } from 'react';
 import { useApp } from '../../context/AppContext.jsx';
 import { colors, fonts, screenPad, card } from '../../theme.js';
-import ImageSlot from '../ImageSlot.jsx';
 import Drill from '../Drill.jsx';
 
 export const ARRIVE_SECTIONS = [
@@ -49,8 +48,10 @@ function Airport({ airport }) {
 
 export default function Arrive() {
   const { property, arriveTarget, clearArriveTarget } = useApp();
-  const { steps, earlyArrival } = property.checkin;
+  const { steps } = property.checkin;
   const arrive = property.arrive;
+  const photos = arrive.gettingInPhotos;
+  const img = (p) => import.meta.env.BASE_URL + p;
 
   useEffect(() => {
     if (!arriveTarget) return;
@@ -93,22 +94,40 @@ export default function Arrive() {
       </div>
 
       <SectionHeader id="gettingin" title="Getting In" />
-      <div style={card}>
-        {steps.map((text, i) => (
-          <div key={i} style={{ display: 'flex', gap: 12, padding: '9px 0', borderBottom: `1px solid ${colors.borderSoft}` }}>
-            <div style={{ fontFamily: fonts.serif, fontSize: 18, color: colors.teal, minWidth: 14 }}>{i + 1}</div>
-            <div style={{ fontSize: 13, color: '#3B4E49', lineHeight: 1.55 }}>{text}</div>
+      <div style={{ ...card, padding: 0, overflow: 'hidden' }}>
+        <img src={img(photos.house)} alt="The front of the house" style={{ display: 'block', width: '100%', height: 'auto' }} />
+        <div style={{ padding: 16 }}>
+          {steps.map((text, i) => (
+            <div key={i} style={{ display: 'flex', gap: 12, padding: '9px 0', borderBottom: `1px solid ${colors.borderSoft}` }}>
+              <div style={{ fontFamily: fonts.serif, fontSize: 18, color: colors.teal, minWidth: 14 }}>{i + 1}</div>
+              <div style={{ fontSize: 13, color: '#3B4E49', lineHeight: 1.55 }}>{text}</div>
+            </div>
+          ))}
+          <div style={{ display: 'flex', gap: 8, marginTop: 12 }}>
+            <div style={{ flex: 1 }}>
+              <img
+                src={img(photos.gateKeypad)}
+                alt="The white gate keypad"
+                style={{ display: 'block', width: '100%', height: 150, objectFit: 'cover', borderRadius: 12 }}
+              />
+              <div style={{ fontSize: 11, color: colors.muted, marginTop: 4, textAlign: 'center' }}>Gate keypad</div>
+            </div>
+            <div style={{ flex: 1 }}>
+              <img
+                src={img(photos.doorKeypad)}
+                alt="The cottage door keypad"
+                style={{ display: 'block', width: '100%', height: 150, objectFit: 'cover', borderRadius: 12 }}
+              />
+              <div style={{ fontSize: 11, color: colors.muted, marginTop: 4, textAlign: 'center' }}>Door keypad</div>
+            </div>
           </div>
-        ))}
-        <div style={{ display: 'flex', gap: 8, marginTop: 12 }}>
-          <div style={{ flex: 1, height: 92, borderRadius: 12, overflow: 'hidden' }}>
-            <ImageSlot id="fog-gate" placeholder="Gate keypad" radius={12} />
-          </div>
-          <div style={{ flex: 1, height: 92, borderRadius: 12, overflow: 'hidden' }}>
-            <ImageSlot id="fog-door" placeholder="Door keypad" radius={12} />
-          </div>
+          <img
+            src={img(photos.cottage)}
+            alt="The front of the cottage"
+            style={{ display: 'block', width: '100%', height: 'auto', borderRadius: 12, marginTop: 10 }}
+          />
+          <div style={{ fontSize: 11, color: colors.muted, marginTop: 4, textAlign: 'center' }}>The cottage, at the end of the walkway</div>
         </div>
-        <div style={{ ...bodyText, marginTop: 10 }}>{earlyArrival}</div>
       </div>
 
       <SectionHeader id="plane" title="By Plane" />
