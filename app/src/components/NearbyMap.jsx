@@ -1,5 +1,5 @@
-import { useMemo } from 'react';
-import { MapContainer, TileLayer, Marker, Popup } from 'react-leaflet';
+import { useEffect, useMemo } from 'react';
+import { MapContainer, TileLayer, Marker, Popup, useMap } from 'react-leaflet';
 import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
 import { lineColors, lineLabel } from '../theme.js';
@@ -34,9 +34,37 @@ function meDivIcon() {
   });
 }
 
-export default function NearbyMap({ center, cottage, stops, showMe }) {
+function destDivIcon() {
+  return L.divIcon({
+    className: 'sfc-dest-pin',
+    html: `<div style="width:26px;height:26px;border-radius:50% 50% 50% 0;transform:rotate(-45deg);background:#E8A03C;border:3px solid #fff;box-shadow:0 2px 6px rgba(20,32,29,.35);"></div>`,
+    iconSize: [26, 26],
+    iconAnchor: [13, 24],
+  });
+}
+
+// Re-fit the view when a searched destination appears/changes so both the
+// origin and the pin are visible.
+function FitToDest({ center, dest }) {
+  const map = useMap();
+  useEffect(() => {
+    if (dest) {
+      map.fitBounds(
+        [
+          [center.lat, center.lng],
+          [dest.lat, dest.lng],
+        ],
+        { padding: [30, 30] }
+      );
+    }
+  }, [map, center.lat, center.lng, dest?.lat, dest?.lng]); // eslint-disable-line react-hooks/exhaustive-deps
+  return null;
+}
+
+export default function NearbyMap({ center, cottage, stops, showMe, dest }) {
   const homeIcon = useMemo(() => homeDivIcon(), []);
   const meIcon = useMemo(() => meDivIcon(), []);
+  const destIcon = useMemo(() => destDivIcon(), []);
 
   return (
     <MapContainer center={[center.lat, center.lng]} zoom={15} scrollWheelZoom={false} style={{ height: '100%', width: '100%' }}>
@@ -61,6 +89,12 @@ export default function NearbyMap({ center, cottage, stops, showMe }) {
           </Popup>
         </Marker>
       ))}
+      {dest && (
+        <Marker position={[dest.lat, dest.lng]} icon={destIcon}>
+          <Popup>{dest.name}</Popup>
+        </Marker>
+      )}
+      <FitToDest center={center} dest={dest} />
     </MapContainer>
   );
 }

@@ -1,8 +1,10 @@
+import { useState } from 'react';
 import { useApp } from '../../context/AppContext.jsx';
 import { colors, fonts, screenPad, card, backLink } from '../../theme.js';
 import MuniLogo from '../MuniLogo.jsx';
 import LineBadge from '../LineBadge.jsx';
 import NearbyMap from '../NearbyMap.jsx';
+import { geocodePlace, distanceMiles } from '../../lib/geocode.js';
 
 const BACK_HOME_ICON = {
   walk: { glyph: '○', style: { background: colors.sage, color: colors.teal } },
@@ -28,6 +30,46 @@ export default function Nearby() {
 
   const cottage = { lat: property.address.lat, lng: property.address.lng };
   const showMe = !!(coords && (coords.lat !== cottage.lat || coords.lng !== cottage.lng));
+
+  // ---- In-app destination search (Photon geocoder, no key) ----------------
+  const [searching, setSearching] = useState(false);
+  const [destPlace, setDestPlace] = useState(null);
+  const [altResults, setAltResults] = useState([]);
+  const [searchError, setSearchError] = useState(null);
+
+  const runSearch = async (q) => {
+    const query = (q ?? dest).trim();
+    if (!query) return;
+    setSearching(true);
+    setSearchError(null);
+    setBackOpen(false);
+    const res = await geocodePlace(query, coords || cottage);
+    setSearching(false);
+    if (!res.ok) {
+      setSearchError('Search is unavailable right now — try again in a moment.');
+      return;
+    }
+    if (!res.results.length) {
+      setDestPlace(null);
+      setAltResults([]);
+      setSearchError(`No Bay Area match for “${query}” — try adding a street or neighborhood.`);
+      return;
+    }
+    setDestPlace(res.results[0]);
+    setAltResults(res.results.slice(1, 4));
+  };
+
+  const clearSearch = () => {
+    setDestPlace(null);
+    setAltResults([]);
+    setSearchError(null);
+  };
+
+  const origin = showMe ? `${coords.lat},${coords.lng}` : `${property.address.street}, ${property.address.city}`;
+  const directionsUrl = (place, mode) =>
+    `https://www.google.com/maps/dir/?api=1&origin=${encodeURIComponent(origin)}&destination=${encodeURIComponent(
+      `${place.lat},${place.lng}`
+    )}&travelmode=${mode}`;
 
   return (
     <div style={screenPad}>
@@ -84,21 +126,88 @@ export default function Nearby() {
       {located && coords && (
         <>
           <div style={{ height: 220, borderRadius: 18, border: `1px solid ${colors.border}`, overflow: 'hidden' }}>
-            <NearbyMap center={coords} cottage={cottage} stops={property.transit.nearbyStops} showMe={showMe} />
+            <NearbyMap center={coords} cottage={cottage} stops={property.transit.nearbyStops} showMe={showMe} dest={destPlace} />
           </div>
 
           <div>
             <div style={{ fontSize: 11, letterSpacing: '.16em', textTransform: 'uppercase', color: colors.muted }}>Where are you trying to go?</div>
-            <input
-              value={dest}
-              onChange={(e) => setDest(e.target.value)}
-              placeholder="Type in address or place"
-              style={{ width: '100%', boxSizing: 'border-box', background: colors.white, border: `1px solid ${colors.border}`, borderRadius: 999, padding: '11px 16px', fontSize: 14, fontFamily: fonts.sans, color: colors.ink, marginTop: 7 }}
-            />
+            <div style={{ display: 'flex', gap: 7, marginTop: 7 }}>
+              <input
+                value={dest}
+                onChange={(e) => {
+                  setDest(e.target.value);
+                  if (!e.target.value.trim()) clearSearch();
+                }}
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter') runSearch();
+                }}
+                placeholder="Type in address or place"
+                style={{ flex: 1, boxSizing: 'border-box', background: colors.white, border: `1px solid ${colors.border}`, borderRadius: 999, padding: '11px 16px', fontSize: 14, fontFamily: fonts.sans, color: colors.ink }}
+              />
+              <div
+                onClick={() => runSearch()}
+                style={{ cursor: 'pointer', background: colors.ink, color: colors.bg, borderRadius: 999, padding: '11px 17px', fontSize: 14, fontWeight: 600, flexShrink: 0 }}
+              >
+                {searching ? '…' : 'Go'}
+              </div>
+            </div>
+            {searchError && <div style={{ fontSize: 12, color: '#b3261e', marginTop: 7, lineHeight: 1.5 }}>{searchError}</div>}
+            {destPlace && (
+              <div style={{ background: colors.white, border: `1px solid ${colors.border}`, borderRadius: 18, padding: 14, marginTop: 10 }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: 10 }}>
+                  <div>
+                    <div style={{ fontSize: 15, fontWeight: 600 }}>{destPlace.name}</div>
+                    <div style={{ fontSize: 12, color: colors.muted, marginTop: 2 }}>
+                      {destPlace.label !== destPlace.name ? destPlace.label + ' · ' : ''}
+                      {distanceMiles(showMe ? coords : cottage, destPlace).toFixed(1)} mi from {showMe ? 'you' : 'the cottage'}
+                    </div>
+                  </div>
+                  <div onClick={clearSearch} style={{ cursor: 'pointer', color: colors.faint, fontSize: 16, lineHeight: 1 }}>
+                    ✕
+                  </div>
+                </div>
+                <div style={{ display: 'flex', gap: 7, marginTop: 11 }}>
+                  <a
+                    href={directionsUrl(destPlace, 'transit')}
+                    target="_blank"
+                    rel="noreferrer"
+                    style={{ flex: 1, background: colors.teal, color: '#F2F7F5', borderRadius: 999, padding: '10px 0', textAlign: 'center', fontSize: 13, fontWeight: 600 }}
+                  >
+                    Transit directions
+                  </a>
+                  <a
+                    href={directionsUrl(destPlace, 'walking')}
+                    target="_blank"
+                    rel="noreferrer"
+                    style={{ flex: 1, background: colors.white, border: `1px solid ${colors.border}`, color: colors.ink, borderRadius: 999, padding: '10px 0', textAlign: 'center', fontSize: 13, fontWeight: 600 }}
+                  >
+                    Walking
+                  </a>
+                </div>
+                {altResults.length > 0 && (
+                  <div style={{ marginTop: 10, borderTop: `1px solid ${colors.borderSoft}`, paddingTop: 8 }}>
+                    <div style={{ fontSize: 11, color: colors.muted }}>Not it? Also found:</div>
+                    {altResults.map((r, i) => (
+                      <div
+                        key={i}
+                        onClick={() => {
+                          setDestPlace(r);
+                          setAltResults(altResults.filter((_, j) => j !== i).concat(destPlace));
+                        }}
+                        style={{ cursor: 'pointer', fontSize: 13, color: colors.teal, padding: '5px 0' }}
+                      >
+                        {r.label} →
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
+            )}
             <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6, marginTop: 8 }}>
               <div
                 onClick={() => {
                   setDest(property.address.street);
+                  clearSearch();
                   setBackOpen(true);
                   if (!showMe) allowLocation();
                 }}
@@ -109,7 +218,10 @@ export default function Nearby() {
               {property.transit.destSuggestions.map((d) => (
                 <div
                   key={d}
-                  onClick={() => setDest(d)}
+                  onClick={() => {
+                    setDest(d);
+                    runSearch(d);
+                  }}
                   style={{ cursor: 'pointer', fontSize: 12, padding: '7px 13px', borderRadius: 999, background: colors.white, border: `1px solid ${colors.border}`, whiteSpace: 'nowrap' }}
                 >
                   {d}
