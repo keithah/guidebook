@@ -13,8 +13,12 @@ async function getJson(url) {
 }
 
 let cachedPointForecastUrl = null;
+let cachedPeriods = null;
+let cachedPeriodsAt = 0;
+const PERIODS_TTL_MS = 5 * 60 * 1000;
 
 async function fetchPeriods(lat, lng) {
+  if (cachedPeriods && Date.now() - cachedPeriodsAt < PERIODS_TTL_MS) return cachedPeriods;
   if (!cachedPointForecastUrl) {
     const point = await getJson(`https://api.weather.gov/points/${lat},${lng}`);
     cachedPointForecastUrl = point?.properties?.forecast;
@@ -23,6 +27,8 @@ async function fetchPeriods(lat, lng) {
   const forecast = await getJson(cachedPointForecastUrl);
   const periods = forecast?.properties?.periods;
   if (!periods || !periods.length) throw new Error('no forecast periods');
+  cachedPeriods = periods;
+  cachedPeriodsAt = Date.now();
   return periods;
 }
 
@@ -36,6 +42,26 @@ export async function fetchCurrentWeather(lat, lng) {
       isDaytime: period.isDaytime,
       windSpeed: period.windSpeed,
     };
+  } catch (err) {
+    return { ok: false, error: String(err && err.message ? err.message : err) };
+  }
+}
+
+// One entry per calendar day across the NWS window (~7 days), preferring the
+// daytime period's high; today may only have a night period left, in which
+// case that's what NWS knows.
+export async function fetchForecastDays(lat, lng) {
+  try {
+    const periods = await fetchPeriods(lat, lng);
+    const byDate = new Map();
+    for (const p of periods) {
+      const date = p.startTime.slice(0, 10);
+      const existing = byDate.get(date);
+      if (!existing || (p.isDaytime && !existing.isDaytime)) {
+        byDate.set(date, { date, tempF: p.temperature, short: p.shortForecast, isDaytime: p.isDaytime });
+      }
+    }
+    return { ok: true, days: [...byDate.values()] };
   } catch (err) {
     return { ok: false, error: String(err && err.message ? err.message : err) };
   }

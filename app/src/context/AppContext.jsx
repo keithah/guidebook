@@ -1,7 +1,7 @@
 import { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState } from 'react';
 import property from '../data/properties/sfcottage.json';
 import { readStayFromLocation, computeStayPhase, encodeStay } from '../lib/stayHash.js';
-import { fetchCurrentWeather, fetchWeatherForDate } from '../lib/weather.js';
+import { fetchCurrentWeather, fetchWeatherForDate, fetchForecastDays } from '../lib/weather.js';
 import { getCurrentPosition } from '../lib/geo.js';
 import { useLocalStorageState } from '../hooks/useLocalStorageState.js';
 
@@ -148,22 +148,43 @@ export function AppProvider({ children }) {
   }, []);
 
   // ---- Weather (NWS, no API key) -------------------------------------------
+  // `weather` is always today's conditions; before a stay starts we also fetch
+  // the arrival-day outlook so the home card can show both. All three requests
+  // share one cached NWS periods fetch (see weather.js).
   const [weather, setWeather] = useState({ ok: false, loading: true });
+  const [arrivalWeather, setArrivalWeather] = useState(null);
+  const [forecastDays, setForecastDays] = useState(null);
   useEffect(() => {
     let cancelled = false;
-    const request =
-      phase === 'before' && stay?.checkin
-        ? fetchWeatherForDate(property.address.lat, property.address.lng, stay.checkin)
-        : fetchCurrentWeather(property.address.lat, property.address.lng);
-    request.then((res) => {
+    const { lat, lng } = property.address;
+    fetchCurrentWeather(lat, lng).then((res) => {
       if (!cancelled) setWeather({ ...res, loading: false });
     });
+    fetchForecastDays(lat, lng).then((res) => {
+      if (!cancelled) setForecastDays(res.ok ? res.days : []);
+    });
+    if (phase === 'before' && stay?.checkin) {
+      fetchWeatherForDate(lat, lng, stay.checkin).then((res) => {
+        if (!cancelled) setArrivalWeather(res.ok ? res : null);
+      });
+    } else {
+      setArrivalWeather(null);
+    }
     return () => {
       cancelled = true;
     };
     // Re-fetch only when the phase we need weather framed for changes.
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [phase === 'before']);
+  }, [phase === 'before', stay?.checkin]);
+
+  // ---- Temperature unit + forecast panel -----------------------------------
+  const [unit, setUnit] = useLocalStorageState('sfcottage:temp-unit', 'F');
+  const toggleUnit = useCallback(() => setUnit((u) => (u === 'F' ? 'C' : 'F')), [setUnit]);
+  const formatTemp = useCallback(
+    (tempF) => (tempF == null ? '—' : Math.round(unit === 'C' ? ((tempF - 32) * 5) / 9 : tempF) + '°'),
+    [unit]
+  );
+  const [weatherOpen, setWeatherOpen] = useState(false);
 
   const value = useMemo(
     () => ({
@@ -204,6 +225,14 @@ export function AppProvider({ children }) {
       dest,
       setDest,
       weather,
+      arrivalWeather,
+      forecastDays,
+      stay,
+      unit,
+      toggleUnit,
+      formatTemp,
+      weatherOpen,
+      setWeatherOpen,
     }),
     [
       isGuest,
@@ -234,6 +263,13 @@ export function AppProvider({ children }) {
       backOpen,
       dest,
       weather,
+      arrivalWeather,
+      forecastDays,
+      stay,
+      unit,
+      toggleUnit,
+      formatTemp,
+      weatherOpen,
     ]
   );
 

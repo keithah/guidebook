@@ -22,7 +22,7 @@ export default function Home() {
 }
 
 function BeforeHome() {
-  const { guestName, goTab, weather, property } = useApp();
+  const { guestName, goTab, weather, arrivalWeather, property, formatTemp, setWeatherOpen } = useApp();
   const w = WeatherLine({ weather, fallbackTemp: 57, fallbackShort: 'Fog, clearing late' });
   return (
     <div style={screenPad}>
@@ -52,22 +52,41 @@ function BeforeHome() {
         </div>
       </div>
       <div
+        onClick={() => setWeatherOpen(true)}
         style={{
+          cursor: 'pointer',
           background: 'linear-gradient(160deg,#FDF6E7,#DFE9E5)',
           borderRadius: 18,
           padding: 16,
-          display: 'flex',
-          justifyContent: 'space-between',
-          alignItems: 'center',
         }}
       >
-        <div>
-          <div style={{ fontSize: 14, fontWeight: 600 }}>Arrival day</div>
-          <div style={{ fontSize: 13, color: colors.tealText, marginTop: 2 }}>{w.short}</div>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+          <div>
+            <div style={{ fontSize: 14, fontWeight: 600 }}>Right now</div>
+            <div style={{ fontSize: 13, color: colors.tealText, marginTop: 2 }}>{w.short}</div>
+          </div>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+            <WeatherIcon />
+            <div style={{ fontFamily: fonts.serif, fontSize: 34 }}>{formatTemp(w.tempF)}</div>
+          </div>
         </div>
-        <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-          <WeatherIcon />
-          <div style={{ fontFamily: fonts.serif, fontSize: 34 }}>{w.tempF}°</div>
+        <div
+          style={{
+            display: 'flex',
+            justifyContent: 'space-between',
+            alignItems: 'center',
+            marginTop: 10,
+            paddingTop: 10,
+            borderTop: '1px solid rgba(20,32,29,.1)',
+          }}
+        >
+          <div>
+            <div style={{ fontSize: 14, fontWeight: 600 }}>Arrival day</div>
+            <div style={{ fontSize: 13, color: colors.tealText, marginTop: 2 }}>
+              {arrivalWeather ? arrivalWeather.short : 'Tap for the outlook'}
+            </div>
+          </div>
+          <div style={{ fontFamily: fonts.serif, fontSize: 26 }}>{arrivalWeather ? formatTemp(arrivalWeather.tempF) : '→'}</div>
         </div>
       </div>
       <div style={{ textAlign: 'center', fontSize: 12, color: colors.muted }}>
@@ -78,7 +97,7 @@ function BeforeHome() {
 }
 
 function DuringHome() {
-  const { guestName, goSub, weather, query, setQuery, results, property } = useApp();
+  const { guestName, goSub, weather, query, setQuery, results, property, formatTemp, setWeatherOpen } = useApp();
   const w = WeatherLine({ weather, fallbackTemp: 58, fallbackShort: 'Fog till noon' });
   const kOption = property.transit.options.find((o) => o.line === 'K');
   const kMin = firstMinutes(kOption?.times);
@@ -91,7 +110,9 @@ function DuringHome() {
       </div>
       <div style={{ display: 'flex', gap: 10 }}>
         <div
+          onClick={() => setWeatherOpen(true)}
           style={{
+            cursor: 'pointer',
             flex: 1,
             background: 'linear-gradient(160deg,#FDF6E7,#EAF1EC)',
             border: '1px solid #E4DFC9',
@@ -104,7 +125,7 @@ function DuringHome() {
           <div style={{ position: 'absolute', top: 10, right: 10 }}>
             <WeatherIcon size={46} />
           </div>
-          <div style={{ fontFamily: fonts.serif, fontSize: 30, lineHeight: 1 }}>{w.tempF}°</div>
+          <div style={{ fontFamily: fonts.serif, fontSize: 30, lineHeight: 1 }}>{formatTemp(w.tempF)}</div>
           <div style={{ fontSize: 12, color: colors.muted, marginTop: 4, lineHeight: 1.4 }}>
             {w.short}
             <br />
@@ -182,7 +203,8 @@ function CheckoutHome() {
 }
 
 function GenericHome() {
-  const { property } = useApp();
+  const { property, weather, formatTemp, setWeatherOpen } = useApp();
+  const w = WeatherLine({ weather, fallbackTemp: 57, fallbackShort: 'Fog, clearing late' });
   return (
     <div style={screenPad}>
       <div style={{ height: 190, borderRadius: 18, overflow: 'hidden' }}>
@@ -193,6 +215,27 @@ function GenericHome() {
         <div style={{ fontSize: 14, color: colors.mutedText, marginTop: 6, lineHeight: 1.65 }}>
           A quiet 2-bedroom cottage in {property.address.neighborhood}, two minutes from the K line. This is the same guide my
           guests use — minus the codes.
+        </div>
+      </div>
+      <div
+        onClick={() => setWeatherOpen(true)}
+        style={{
+          cursor: 'pointer',
+          background: 'linear-gradient(160deg,#FDF6E7,#DFE9E5)',
+          borderRadius: 18,
+          padding: '13px 16px',
+          display: 'flex',
+          justifyContent: 'space-between',
+          alignItems: 'center',
+        }}
+      >
+        <div>
+          <div style={{ fontSize: 14, fontWeight: 600 }}>Today in {property.address.neighborhood}</div>
+          <div style={{ fontSize: 13, color: colors.tealText, marginTop: 2 }}>{w.short}</div>
+        </div>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+          <WeatherIcon size={32} />
+          <div style={{ fontFamily: fonts.serif, fontSize: 30 }}>{formatTemp(w.tempF)}</div>
         </div>
       </div>
       <SectionsList />

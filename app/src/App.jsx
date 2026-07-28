@@ -12,6 +12,7 @@ import HowToRide from './components/screens/HowToRide.jsx';
 import Explore from './components/screens/Explore.jsx';
 import Help from './components/screens/Help.jsx';
 import GuestPreviewBar from './components/GuestPreviewBar.jsx';
+import WeatherPanel from './components/WeatherPanel.jsx';
 
 function Screen() {
   const { tab, sub } = useApp();
@@ -43,6 +44,7 @@ function Shell() {
         fontFamily: fonts.sans,
         color: colors.ink,
         overflow: 'hidden',
+        position: 'relative',
         boxShadow: '0 0 60px rgba(20,32,29,.18)',
       }}
     >
@@ -52,6 +54,7 @@ function Shell() {
         <GuestPreviewBar />
       </div>
       <BottomNav />
+      <WeatherPanel />
     </div>
   );
 }
