@@ -27,6 +27,16 @@ function Airport({ airport }) {
   return (
     <Drill title={`From ${airport.name}`} sub={airport.sub}>
       <div style={bodyText}>{airport.summary}</div>
+      {airport.mapUrl && (
+        <a
+          href={airport.mapUrl}
+          target="_blank"
+          rel="noreferrer"
+          style={{ display: 'inline-block', marginTop: 6, fontSize: 13, fontWeight: 600 }}
+        >
+          Route map to the cottage →
+        </a>
+      )}
       <div style={subLabel}>Public transit</div>
       <div style={bodyText}>{airport.transit}</div>
       <div style={subLabel}>Rental car</div>

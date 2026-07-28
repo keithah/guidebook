@@ -741,36 +741,40 @@
         "name": "San Francisco (SFO)",
         "sub": "Closest — about 13 miles",
         "summary": "The easiest airport by far. BART runs from the terminal straight to Balboa Park, a short walk from the cottage.",
-        "transit": "Follow signs for BART (it's in the International Terminal — take AirTrain if you land at a domestic terminal). Any San Francisco-bound train stops at Balboa Park, about 30 minutes. From there it's an 8-minute walk, or one stop on the K toward City College. Add a Clipper card to Apple/Google Pay and just tap — no ticket machine needed.",
+        "transit": "Follow signs for BART (it's in the International Terminal — take AirTrain if you land at a domestic terminal). Any San Francisco-bound train stops at Balboa Park, about 30 minutes. Contactless cards work here, or you can buy from the vending machine. It's around $10 per person, so if you have more than 3, consider ride share apps. From there it's an 8-minute walk, but it is uphill — you can also take a bus or train from Balboa Park (see the Around tab), or any ride sharing app for under $10 if you have bags.",
         "rentalCar": "Take AirTrain Blue Line to the Rental Car Center. From the airport it's I-380 W to I-280 N, exit Ocean Ave — about 20 minutes without traffic.",
-        "rideshare": "Uber/Lyft pick up on level 5 of the domestic garage (follow the signs from baggage claim). Roughly $30–45 and 20–25 minutes to the cottage."
+        "rideshare": "Uber/Lyft pick up on level 5 of the domestic garage (follow the signs from baggage claim). Roughly $30–45 and 20–25 minutes to the cottage.",
+        "mapUrl": "https://www.google.com/maps/dir/?api=1&origin=San%20Francisco%20International%20Airport%20%28SFO%29&destination=251%20Harold%20Ave%2C%20San%20Francisco%2C%20CA%2094112&travelmode=transit"
       },
       {
         "id": "oak",
         "name": "Oakland (OAK)",
         "sub": "Across the bay — about an hour by BART",
-        "summary": "Often the cheapest Southwest flights. BART gets you here without a car.",
-        "transit": "Take the BART Airport Connector tram to Coliseum station, then a San Francisco-bound train. Daly City trains stop at Balboa Park directly; otherwise change at 19th St Oakland. About an hour total, then the 8-minute walk.",
+        "summary": "Across the bay — BART gets you here without a car.",
+        "transit": "Take the BART Airport Connector tram to Coliseum station, then a San Francisco-bound train. Daly City trains stop at Balboa Park directly; otherwise change at 19th St Oakland. About an hour total and roughly $12 per person (the airport tram is included in the fare) — contactless cards work at the gates, or buy from the vending machine. Then the 8-minute uphill walk, a bus, or a short ride share from Balboa Park.",
         "rentalCar": "Rental shuttle from outside baggage claim. Drive I-880 N over the Bay Bridge, then US-101 S to I-280 S, exit Ocean Ave — 45 minutes to an hour depending on bridge traffic.",
-        "rideshare": "Pickup is on the curb outside arrivals. Expect $60–80 and 35–50 minutes depending on bridge traffic."
+        "rideshare": "Pickup is on the curb outside arrivals. Expect $60–80 and 35–50 minutes depending on bridge traffic.",
+        "mapUrl": "https://www.google.com/maps/dir/?api=1&origin=Oakland%20International%20Airport%20%28OAK%29&destination=251%20Harold%20Ave%2C%20San%20Francisco%2C%20CA%2094112&travelmode=transit"
       },
       {
         "id": "sjc",
         "name": "San Jose (SJC)",
         "sub": "South Bay — plan on a car or a long transit ride",
         "summary": "About 45 miles south. Fine if the fare is right, but budget real travel time.",
-        "transit": "It's a trek: the free VTA 60 bus to Santa Clara Caltrain, Caltrain north to San Francisco, then Muni to the cottage — about 2 to 2.5 hours. Doable, but a car is much faster from here.",
+        "transit": "It's a trek: the free VTA 60 bus to Santa Clara Caltrain, Caltrain north to San Francisco, then Muni to the cottage — about 2 to 2.5 hours and roughly $15 per person all-in. Doable, but a car is much faster from here.",
         "rentalCar": "Rental cars are a shuttle ride from the terminals. Drive US-101 N or I-280 N (prettier) to the Ocean Ave exit — about 50 minutes without traffic.",
-        "rideshare": "Pickup zones are outside each terminal. Expect $80–110 and about an hour."
+        "rideshare": "Pickup zones are outside each terminal. Expect $80–110 and about an hour.",
+        "mapUrl": "https://www.google.com/maps/dir/?api=1&origin=San%20Jose%20Mineta%20International%20Airport%20%28SJC%29&destination=251%20Harold%20Ave%2C%20San%20Francisco%2C%20CA%2094112&travelmode=transit"
       },
       {
         "id": "sts",
         "name": "Santa Rosa (STS)",
         "sub": "Sonoma County — 1.5+ hours north",
         "summary": "Tiny wine-country airport about 60 miles north. Honestly, rent a car.",
-        "transit": "Possible but slow: SMART train from the airport area to Larkspur, Golden Gate Ferry to the Embarcadero, then Muni — close to 3 hours, though the ferry ride is gorgeous.",
-        "rentalCar": "Rental counters are right in the small terminal. US-101 S across the Golden Gate Bridge, then I-280 S to Ocean Ave — about 1.5 hours outside rush hour.",
-        "rideshare": "Availability up there is thin and it's a long ride — $120+ when you can get one. A rental is almost always the better call."
+        "transit": "Possible but slow: SMART train from the airport area to Larkspur, Golden Gate Ferry to the Embarcadero, then Muni — close to 3 hours and about $25–30 per person, though the ferry ride is gorgeous.",
+        "rentalCar": "Rental counters are right in the small terminal. US-101 S across the Golden Gate Bridge, then I-280 S to Ocean Ave — about 1.5 hours outside rush hour. Heads up: the Golden Gate Bridge toll (about $10) is charged heading into the city and is all-electronic — no toll booths. Rental cars bill it through their toll program (often with a fee), or you can pay it yourself online within 48 hours.",
+        "rideshare": "Availability up there is thin and it's a long ride — $120+ when you can get one. A rental is almost always the better call.",
+        "mapUrl": "https://www.google.com/maps/dir/?api=1&origin=Charles%20M.%20Schulz%20Sonoma%20County%20Airport%20%28STS%29&destination=251%20Harold%20Ave%2C%20San%20Francisco%2C%20CA%2094112&travelmode=driving"
       }
     ],
     "driving": "From either direction on I-280, take the Ocean Ave exit and head west — the cottage is a few blocks up on Harold Ave, just off Ocean. Your parking spot is the paved space directly in front of the house, between the sidewalk and the front windows (details under Parking). The cottage is down a narrow alley left of the front windows.",
