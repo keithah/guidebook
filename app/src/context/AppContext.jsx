@@ -76,6 +76,20 @@ export function AppProvider({ children }) {
     resetScroll();
   }, [resetScroll]);
 
+  // Deep link into a section of the Arrive page (home-screen quick links).
+  const [arriveTarget, setArriveTarget] = useState(null);
+  const goArrive = useCallback(
+    (section) => () => {
+      setTab('arrive');
+      setSub(null);
+      setQuery('');
+      setArriveTarget(section);
+      resetScroll();
+    },
+    [resetScroll]
+  );
+  const clearArriveTarget = useCallback(() => setArriveTarget(null), []);
+
   // ---- Search ---------------------------------------------------------------
   const q = query.trim().toLowerCase();
   const results =
@@ -203,6 +217,9 @@ export function AppProvider({ children }) {
       goTab,
       goSub,
       backToAround,
+      arriveTarget,
+      goArrive,
+      clearArriveTarget,
       query,
       setQuery,
       results,
@@ -245,6 +262,9 @@ export function AppProvider({ children }) {
       goTab,
       goSub,
       backToAround,
+      arriveTarget,
+      goArrive,
+      clearArriveTarget,
       query,
       results,
       wifiCopied,

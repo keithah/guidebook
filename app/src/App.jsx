@@ -34,6 +34,7 @@ function Shell() {
   const { scrollRef } = useApp();
   return (
     <div
+      className="app-shell"
       style={{
         maxWidth: 430,
         margin: '0 auto',
@@ -49,12 +50,16 @@ function Shell() {
       }}
     >
       <TopBar />
-      <div ref={scrollRef} style={{ flex: 1, overflowY: 'auto' }}>
+      <div ref={scrollRef} className="app-scroll" style={{ flex: 1, overflowY: 'auto' }}>
         <Screen />
-        <GuestPreviewBar />
+        <div className="print-hide">
+          <GuestPreviewBar />
+        </div>
       </div>
-      <BottomNav />
-      <WeatherPanel />
+      <div className="print-hide">
+        <BottomNav />
+        <WeatherPanel />
+      </div>
     </div>
   );
 }

@@ -6,6 +6,7 @@ import LineBadge from '../LineBadge.jsx';
 import Checklist from '../Checklist.jsx';
 import { firstMinutes } from '../../lib/transitDisplay.js';
 import MuniLogo from '../MuniLogo.jsx';
+import { ARRIVE_SECTIONS } from './Arrive.jsx';
 
 function WeatherLine({ weather, fallbackTemp, fallbackShort }) {
   const tempF = weather.ok ? Math.round(weather.tempF) : fallbackTemp;
@@ -22,7 +23,7 @@ export default function Home() {
 }
 
 function BeforeHome() {
-  const { guestName, goTab, weather, arrivalWeather, property, formatTemp, setWeatherOpen } = useApp();
+  const { guestName, goArrive, weather, arrivalWeather, property, formatTemp, setWeatherOpen } = useApp();
   const w = WeatherLine({ weather, fallbackTemp: 57, fallbackShort: 'Fog, clearing late' });
   return (
     <div style={screenPad}>
@@ -36,14 +37,23 @@ function BeforeHome() {
           the morning you arrive.
         </div>
       </div>
-      <div onClick={goTab('arrive')} style={{ ...card, cursor: 'pointer' }}>
-        <div style={{ display: 'flex', justifyContent: 'space-between' }}>
-          <div style={{ fontSize: 15, fontWeight: 600 }}>From SFO, take BART</div>
-          <span style={{ color: colors.faint }}>→</span>
+      <div style={{ ...card, paddingTop: 6, paddingBottom: 6 }}>
+        <div style={{ fontSize: 11, letterSpacing: '.16em', textTransform: 'uppercase', color: colors.teal, padding: '8px 0 2px' }}>
+          Getting here
         </div>
-        <div style={{ fontSize: 13, color: colors.mutedText, lineHeight: 1.6, marginTop: 4 }}>
-          Straight to Balboa Park, about 30 minutes, then an 8-minute walk. Full directions in Arrive.
-        </div>
+        {ARRIVE_SECTIONS.map((s) => (
+          <div
+            key={s.id}
+            onClick={goArrive(s.id)}
+            style={{ cursor: 'pointer', padding: '11px 0', borderBottom: `1px solid ${colors.borderSoft}` }}
+          >
+            <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+              <span style={{ fontSize: 15, fontWeight: 500 }}>{s.name}</span>
+              <span style={{ color: colors.faint }}>→</span>
+            </div>
+            <div style={{ fontSize: 12, color: colors.muted, marginTop: 2 }}>{s.sub}</div>
+          </div>
+        ))}
       </div>
       <div style={card}>
         <div style={{ fontSize: 15, fontWeight: 600 }}>Pack layers</div>

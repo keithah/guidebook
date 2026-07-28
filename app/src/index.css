@@ -29,3 +29,40 @@ input {
 .leaflet-container {
   font-family: 'Instrument Sans', sans-serif;
 }
+
+/* Drill-in rows: body stays in the DOM so print can force it visible. */
+.drill-body {
+  display: none;
+}
+.drill-body.open {
+  display: block;
+}
+
+@media print {
+  html,
+  body {
+    background: #fff;
+    height: auto;
+  }
+  #root {
+    height: auto;
+  }
+  .app-shell {
+    height: auto !important;
+    max-width: 100% !important;
+    overflow: visible !important;
+    box-shadow: none !important;
+  }
+  .app-scroll {
+    overflow: visible !important;
+  }
+  .print-hide {
+    display: none !important;
+  }
+  .drill-body {
+    display: block !important;
+  }
+  .drill-chevron {
+    display: none !important;
+  }
+}
