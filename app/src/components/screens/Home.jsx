@@ -48,10 +48,13 @@ function BeforeHome() {
             style={{ cursor: 'pointer', padding: '11px 0', borderBottom: `1px solid ${colors.borderSoft}` }}
           >
             <div style={{ display: 'flex', justifyContent: 'space-between' }}>
-              <span style={{ fontSize: 15, fontWeight: 500 }}>{s.name}</span>
+              <span style={{ fontSize: 15, fontWeight: 500 }}>
+                <span style={{ marginRight: 8 }}>{s.emoji}</span>
+                {s.name}
+              </span>
               <span style={{ color: colors.faint }}>→</span>
             </div>
-            <div style={{ fontSize: 12, color: colors.muted, marginTop: 2 }}>{s.sub}</div>
+            <div style={{ fontSize: 12, color: colors.muted, marginTop: 2, paddingLeft: 28 }}>{s.sub}</div>
           </div>
         ))}
       </div>

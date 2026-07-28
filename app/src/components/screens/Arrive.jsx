@@ -1,15 +1,15 @@
 import { useEffect } from 'react';
 import { useApp } from '../../context/AppContext.jsx';
-import { colors, fonts, screenPad, card, tip } from '../../theme.js';
+import { colors, fonts, screenPad, card } from '../../theme.js';
 import ImageSlot from '../ImageSlot.jsx';
 import Drill from '../Drill.jsx';
 
 export const ARRIVE_SECTIONS = [
-  { id: 'plane', name: 'By Plane', sub: 'SFO · OAK · SJC · STS' },
-  { id: 'driving', name: 'Driving', sub: 'I-280 to Ocean Ave' },
-  { id: 'transit', name: 'By Public Transit', sub: 'BART, the K, and buses' },
-  { id: 'parking', name: 'Parking', sub: 'Your spot + street rules' },
-  { id: 'gettingin', name: 'Getting In', sub: 'Gate and door codes' },
+  { id: 'gettingin', name: 'Getting In', sub: 'Gate and door codes', emoji: '🚪' },
+  { id: 'plane', name: 'By Plane', sub: 'SFO · OAK · SJC · STS', emoji: '✈️' },
+  { id: 'driving', name: 'Driving', sub: 'I-280 to Ocean Ave', emoji: '🚗' },
+  { id: 'parking', name: 'Parking', sub: 'Your spot + street rules', emoji: '🅿️' },
+  { id: 'transit', name: 'By Public Transit', sub: 'You don’t need a car', emoji: '🚌' },
 ];
 
 const bodyText = { fontSize: 13, color: colors.mutedText, lineHeight: 1.65 };
@@ -59,9 +59,57 @@ export default function Arrive() {
     clearArriveTarget();
   }, [arriveTarget, clearArriveTarget]);
 
+  const jumpTo = (id) => () => {
+    const el = document.getElementById(`arrive-${id}`);
+    if (el) el.scrollIntoView({ block: 'start', behavior: 'smooth' });
+  };
+
   return (
     <div style={screenPad}>
       <div style={{ fontFamily: fonts.serif, fontSize: 32 }}>Arrive</div>
+
+      <div className="print-hide" style={{ display: 'flex', gap: 8 }}>
+        {ARRIVE_SECTIONS.map((s) => (
+          <div
+            key={s.id}
+            onClick={jumpTo(s.id)}
+            title={s.name}
+            style={{
+              cursor: 'pointer',
+              flex: 1,
+              background: colors.white,
+              border: `1px solid ${colors.border}`,
+              borderRadius: 12,
+              padding: '9px 0 7px',
+              textAlign: 'center',
+            }}
+          >
+            <div style={{ fontSize: 20, lineHeight: 1 }}>{s.emoji}</div>
+            <div style={{ fontSize: 9, letterSpacing: '.06em', textTransform: 'uppercase', color: colors.muted, marginTop: 4 }}>
+              {s.id === 'gettingin' ? 'Get in' : s.id === 'transit' ? 'Transit' : s.name.replace('By ', '')}
+            </div>
+          </div>
+        ))}
+      </div>
+
+      <SectionHeader id="gettingin" title="Getting In" />
+      <div style={card}>
+        {steps.map((text, i) => (
+          <div key={i} style={{ display: 'flex', gap: 12, padding: '9px 0', borderBottom: `1px solid ${colors.borderSoft}` }}>
+            <div style={{ fontFamily: fonts.serif, fontSize: 18, color: colors.teal, minWidth: 14 }}>{i + 1}</div>
+            <div style={{ fontSize: 13, color: '#3B4E49', lineHeight: 1.55 }}>{text}</div>
+          </div>
+        ))}
+        <div style={{ display: 'flex', gap: 8, marginTop: 12 }}>
+          <div style={{ flex: 1, height: 92, borderRadius: 12, overflow: 'hidden' }}>
+            <ImageSlot id="fog-gate" placeholder="Gate keypad" radius={12} />
+          </div>
+          <div style={{ flex: 1, height: 92, borderRadius: 12, overflow: 'hidden' }}>
+            <ImageSlot id="fog-door" placeholder="Door keypad" radius={12} />
+          </div>
+        </div>
+        <div style={{ ...bodyText, marginTop: 10 }}>{earlyArrival}</div>
+      </div>
 
       <SectionHeader id="plane" title="By Plane" />
       <div style={{ ...card, paddingTop: 4, paddingBottom: 4 }}>
@@ -73,11 +121,6 @@ export default function Arrive() {
       <SectionHeader id="driving" title="Driving" />
       <div style={card}>
         <div style={bodyText}>{arrive.driving}</div>
-      </div>
-
-      <SectionHeader id="transit" title="By Public Transit" />
-      <div style={card}>
-        <div style={bodyText}>{arrive.publicTransit}</div>
       </div>
 
       <SectionHeader id="parking" title="Parking" />
@@ -112,26 +155,9 @@ export default function Arrive() {
         </div>
       </div>
 
-      <SectionHeader id="gettingin" title="Getting In" />
+      <SectionHeader id="transit" title="By Public Transit" />
       <div style={card}>
-        {steps.map((text, i) => (
-          <div key={i} style={{ display: 'flex', gap: 12, padding: '9px 0', borderBottom: `1px solid ${colors.borderSoft}` }}>
-            <div style={{ fontFamily: fonts.serif, fontSize: 18, color: colors.teal, minWidth: 14 }}>{i + 1}</div>
-            <div style={{ fontSize: 13, color: '#3B4E49', lineHeight: 1.55 }}>{text}</div>
-          </div>
-        ))}
-        <div style={{ display: 'flex', gap: 8, marginTop: 12 }}>
-          <div style={{ flex: 1, height: 92, borderRadius: 12, overflow: 'hidden' }}>
-            <ImageSlot id="fog-gate" placeholder="Gate keypad" radius={12} />
-          </div>
-          <div style={{ flex: 1, height: 92, borderRadius: 12, overflow: 'hidden' }}>
-            <ImageSlot id="fog-door" placeholder="Door keypad" radius={12} />
-          </div>
-        </div>
-      </div>
-
-      <div style={tip}>
-        The cottage is down a narrow alley — take big suitcases slowly. {earlyArrival}
+        <div style={bodyText}>{arrive.publicTransit}</div>
       </div>
     </div>
   );
