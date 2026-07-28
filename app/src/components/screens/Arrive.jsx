@@ -97,36 +97,44 @@ export default function Arrive() {
       <div style={{ ...card, padding: 0, overflow: 'hidden' }}>
         <img src={img(photos.house)} alt="The front of the house" style={{ display: 'block', width: '100%', height: 'auto' }} />
         <div style={{ padding: 16 }}>
-          {steps.map((text, i) => (
-            <div key={i} style={{ display: 'flex', gap: 12, padding: '9px 0', borderBottom: `1px solid ${colors.borderSoft}` }}>
-              <div style={{ fontFamily: fonts.serif, fontSize: 18, color: colors.teal, minWidth: 14 }}>{i + 1}</div>
-              <div style={{ fontSize: 13, color: '#3B4E49', lineHeight: 1.55 }}>{text}</div>
-            </div>
-          ))}
-          <div style={{ display: 'flex', gap: 8, marginTop: 12 }}>
-            <div style={{ flex: 1 }}>
-              <img
-                src={img(photos.gateKeypad)}
-                alt="The white gate keypad"
-                style={{ display: 'block', width: '100%', height: 150, objectFit: 'cover', borderRadius: 12 }}
-              />
-              <div style={{ fontSize: 11, color: colors.muted, marginTop: 4, textAlign: 'center' }}>Gate keypad</div>
-            </div>
-            <div style={{ flex: 1 }}>
-              <img
-                src={img(photos.doorKeypad)}
-                alt="The cottage door keypad"
-                style={{ display: 'block', width: '100%', height: 150, objectFit: 'cover', borderRadius: 12 }}
-              />
-              <div style={{ fontSize: 11, color: colors.muted, marginTop: 4, textAlign: 'center' }}>Door keypad</div>
-            </div>
-          </div>
-          <img
-            src={img(photos.cottage)}
-            alt="The front of the cottage"
-            style={{ display: 'block', width: '100%', height: 'auto', borderRadius: 12, marginTop: 10 }}
-          />
-          <div style={{ fontSize: 11, color: colors.muted, marginTop: 4, textAlign: 'center' }}>The cottage, at the end of the walkway</div>
+          {steps.map((text, i) => {
+            const side =
+              i === 1
+                ? { src: photos.gateKeypad, alt: 'The white gate keypad', caption: 'Gate keypad' }
+                : i === 4
+                  ? { src: photos.doorKeypad, alt: 'The cottage keypad', caption: 'Cottage keypad' }
+                  : null;
+            return (
+              <div key={i}>
+                <div style={{ display: 'flex', gap: 12, padding: '9px 0', borderBottom: `1px solid ${colors.borderSoft}` }}>
+                  <div style={{ fontFamily: fonts.serif, fontSize: 18, color: colors.teal, minWidth: 14 }}>{i + 1}</div>
+                  <div style={{ flex: 1, fontSize: 13, color: '#3B4E49', lineHeight: 1.55 }}>{text}</div>
+                  {side && (
+                    <div style={{ width: 84, flexShrink: 0 }}>
+                      <img
+                        src={img(side.src)}
+                        alt={side.alt}
+                        style={{ display: 'block', width: 84, height: 104, objectFit: 'cover', borderRadius: 10 }}
+                      />
+                      <div style={{ fontSize: 10, color: colors.muted, marginTop: 3, textAlign: 'center' }}>{side.caption}</div>
+                    </div>
+                  )}
+                </div>
+                {i === 3 && (
+                  <div style={{ padding: '10px 0', borderBottom: `1px solid ${colors.borderSoft}` }}>
+                    <img
+                      src={img(photos.cottage)}
+                      alt="The front of the cottage"
+                      style={{ display: 'block', width: '100%', height: 'auto', borderRadius: 12 }}
+                    />
+                    <div style={{ fontSize: 11, color: colors.muted, marginTop: 4, textAlign: 'center' }}>
+                      The cottage, at the end of the walkway
+                    </div>
+                  </div>
+                )}
+              </div>
+            );
+          })}
         </div>
       </div>
 
