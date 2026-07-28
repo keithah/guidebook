@@ -39,6 +39,31 @@ export async function geocodePlace(query, bias) {
   }
 }
 
+export function bearingDeg(a, b) {
+  const toRad = (x) => (x * Math.PI) / 180;
+  const dLng = toRad(b.lng - a.lng);
+  const y = Math.sin(dLng) * Math.cos(toRad(b.lat));
+  const x =
+    Math.cos(toRad(a.lat)) * Math.sin(toRad(b.lat)) -
+    Math.sin(toRad(a.lat)) * Math.cos(toRad(b.lat)) * Math.cos(dLng);
+  return ((Math.atan2(y, x) * 180) / Math.PI + 360) % 360;
+}
+
+// Does riding from `stop` toward one of its line's `headsTo` targets move you
+// toward `dest`? True when the destination sits within ±65° of a direction
+// the line actually travels (or is basically at the stop already).
+export function stopHeadsToward(stop, dest) {
+  if (!stop.headsTo || !dest) return null;
+  if (distanceMiles(stop, dest) < 0.4) return { label: 'right there' };
+  const destBearing = bearingDeg(stop, dest);
+  for (const t of stop.headsTo) {
+    let diff = Math.abs(bearingDeg(stop, t) - destBearing);
+    if (diff > 180) diff = 360 - diff;
+    if (diff <= 65) return t;
+  }
+  return false;
+}
+
 export function distanceMiles(a, b) {
   const R = 3958.8;
   const dLat = ((b.lat - a.lat) * Math.PI) / 180;

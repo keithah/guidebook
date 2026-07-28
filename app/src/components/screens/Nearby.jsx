@@ -4,7 +4,7 @@ import { colors, fonts, screenPad, card, backLink } from '../../theme.js';
 import MuniLogo from '../MuniLogo.jsx';
 import LineBadge from '../LineBadge.jsx';
 import NearbyMap from '../NearbyMap.jsx';
-import { geocodePlace, distanceMiles } from '../../lib/geocode.js';
+import { geocodePlace, distanceMiles, stopHeadsToward } from '../../lib/geocode.js';
 import { useLiveDepartures } from '../../hooks/useLiveDepartures.js';
 
 const BACK_HOME_ICON = {
@@ -66,6 +66,15 @@ export default function Nearby() {
     setAltResults([]);
     setSearchError(null);
   };
+
+  // A guest previewing from another city (or a flaky IP-based location) makes
+  // "X mi from you" nonsense — beyond ~60 mi, measure from the cottage.
+  const nearBase = showMe && distanceMiles(coords, cottage) < 60 ? { point: coords, label: 'you' } : { point: cottage, label: 'the cottage' };
+
+  // With a destination set, rank the curated stops by whether their line
+  // actually heads that way, and tag/dim rows accordingly.
+  const stopRows = property.transit.nearbyStops.map((s, i) => ({ s, i, toward: destPlace ? stopHeadsToward(s, destPlace) : null }));
+  const orderedStops = destPlace ? [...stopRows].sort((a, b) => (b.toward ? 1 : 0) - (a.toward ? 1 : 0)) : stopRows;
 
   const origin = showMe ? `${coords.lat},${coords.lng}` : `${property.address.street}, ${property.address.city}`;
   const directionsUrl = (place, mode) =>
@@ -161,7 +170,7 @@ export default function Nearby() {
                     <div style={{ fontSize: 15, fontWeight: 600 }}>{destPlace.name}</div>
                     <div style={{ fontSize: 12, color: colors.muted, marginTop: 2 }}>
                       {destPlace.label !== destPlace.name ? destPlace.label + ' · ' : ''}
-                      {distanceMiles(showMe ? coords : cottage, destPlace).toFixed(1)} mi from {showMe ? 'you' : 'the cottage'}
+                      {distanceMiles(nearBase.point, destPlace).toFixed(1)} mi from {nearBase.label}
                     </div>
                   </div>
                   <div onClick={clearSearch} style={{ cursor: 'pointer', color: colors.faint, fontSize: 16, lineHeight: 1 }}>
@@ -261,15 +270,26 @@ export default function Nearby() {
           </div>
 
           <div>
-            <div style={{ fontSize: 11, letterSpacing: '.16em', textTransform: 'uppercase', color: colors.muted, marginBottom: 2 }}>Nearest stops right now</div>
-            {property.transit.nearbyStops.map((s, i) => (
-              <div key={i} style={{ display: 'flex', alignItems: 'center', gap: 11, padding: '11px 0', borderBottom: `1px solid ${colors.border}` }}>
+            <div style={{ fontSize: 11, letterSpacing: '.16em', textTransform: 'uppercase', color: colors.muted, marginBottom: 2 }}>
+              {destPlace ? `Stops toward ${destPlace.name}` : 'Nearest stops right now'}
+            </div>
+            {orderedStops.map(({ s, i, toward }) => (
+              <div
+                key={i}
+                style={{ display: 'flex', alignItems: 'center', gap: 11, padding: '11px 0', borderBottom: `1px solid ${colors.border}`, opacity: destPlace && !toward ? 0.45 : 1 }}
+              >
                 <LineBadge line={s.line} size={s.line === 'BART' || s.line === 'BUS' ? 26 : 28} fontSize={s.line === 'BART' ? '10px' : s.line === 'BUS' ? '11px' : undefined} />
                 <div style={{ flex: 1 }}>
                   <div style={{ fontSize: 14, fontWeight: 600 }}>{s.name}</div>
                   <div style={{ fontSize: 12, color: colors.muted, marginTop: 1 }}>
                     {s.sub} · {s.walkMin} min walk
                   </div>
+                  {toward && (
+                    <div style={{ fontSize: 12, color: colors.teal, fontWeight: 600, marginTop: 2 }}>
+                      {toward.label === 'right there' ? '→ closest stop to it' : `→ heads toward ${toward.label}`}
+                    </div>
+                  )}
+                  {destPlace && !toward && <div style={{ fontSize: 11, color: colors.muted, marginTop: 2 }}>heads the other way</div>}
                 </div>
                 {liveTimes[i] && (
                   <span style={{ width: 7, height: 7, borderRadius: '50%', background: '#3BA55D', flexShrink: 0 }} title="Live" />

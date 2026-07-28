@@ -180,7 +180,19 @@
         "lat": 37.723459,
         "lng": -122.453999,
         "stopCode": "15794",
-        "agency": "SF"
+        "agency": "SF",
+        "headsTo": [
+          {
+            "lat": 37.7844,
+            "lng": -122.4078,
+            "label": "downtown / Union Square"
+          },
+          {
+            "lat": 37.7401,
+            "lng": -122.4663,
+            "label": "West Portal"
+          }
+        ]
       },
       {
         "name": "Ocean Ave & Lee St",
@@ -191,7 +203,14 @@
         "lat": 37.723397,
         "lng": -122.454423,
         "stopCode": "15795",
-        "agency": "SF"
+        "agency": "SF",
+        "headsTo": [
+          {
+            "lat": 37.7216,
+            "lng": -122.4475,
+            "label": "Balboa Park"
+          }
+        ]
       },
       {
         "name": "Plymouth Ave & Ocean",
@@ -202,7 +221,19 @@
         "lat": 37.722745,
         "lng": -122.456354,
         "stopCode": "15975",
-        "agency": "SF"
+        "agency": "SF",
+        "headsTo": [
+          {
+            "lat": 37.7846,
+            "lng": -122.4727,
+            "label": "the Richmond / Presidio"
+          },
+          {
+            "lat": 37.734,
+            "lng": -122.3912,
+            "label": "Bayview"
+          }
+        ]
       },
       {
         "name": "Balboa Park Station",
@@ -211,7 +242,19 @@
         "walkMin": 9,
         "times": "6, 21′",
         "lat": 37.72167,
-        "lng": -122.4475
+        "lng": -122.4475,
+        "headsTo": [
+          {
+            "lat": 37.7893,
+            "lng": -122.4011,
+            "label": "downtown / East Bay"
+          },
+          {
+            "lat": 37.6161,
+            "lng": -122.3924,
+            "label": "Daly City / SFO"
+          }
+        ]
       },
       {
         "name": "Balboa Park · upper yard",
@@ -220,7 +263,14 @@
         "walkMin": 10,
         "times": "9′",
         "lat": 37.72167,
-        "lng": -122.4475
+        "lng": -122.4475,
+        "headsTo": [
+          {
+            "lat": 37.7683,
+            "lng": -122.4292,
+            "label": "the Mission / Castro / downtown"
+          }
+        ]
       }
     ],
     "backHome": [
