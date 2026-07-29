@@ -1,0 +1,452 @@
+{
+  "routes": [
+    {
+      "id": "route-k",
+      "notices": [
+        {
+          "code": "excessiveWaitingTime",
+          "title": "Allow extra time at West Portal",
+          "severity": "info"
+        }
+      ],
+      "sections": [
+        {
+          "id": "route-k-walk-out",
+          "type": "pedestrian",
+          "departure": {
+            "time": "2026-07-28T18:00:00-07:00",
+            "place": {
+              "name": "SF Cottage",
+              "type": "place",
+              "location": { "lat": 37.7401, "lng": -122.4661 }
+            }
+          },
+          "arrival": {
+            "time": "2026-07-28T18:05:00-07:00",
+            "place": {
+              "id": "west-portal",
+              "name": "West Portal Station",
+              "type": "station",
+              "location": { "lat": 37.7409, "lng": -122.4659 },
+              "platform": "Street level",
+              "code": "17217"
+            }
+          },
+          "travelSummary": { "duration": 300, "length": 360 },
+          "transport": { "mode": "pedestrian" },
+          "actions": [
+            {
+              "action": "depart",
+              "duration": 60,
+              "offset": 0,
+              "length": 75,
+              "instruction": "Leave SF Cottage toward Ulloa Street."
+            },
+            {
+              "action": "turn",
+              "duration": 180,
+              "offset": 2,
+              "length": 220,
+              "direction": "right",
+              "instruction": "Turn right onto West Portal Avenue."
+            },
+            {
+              "action": "arrive",
+              "duration": 60,
+              "offset": 5,
+              "length": 65,
+              "instruction": "Arrive at West Portal Station."
+            }
+          ]
+        },
+        {
+          "id": "route-k-ride",
+          "type": "transit",
+          "departure": {
+            "time": "2026-07-28T18:07:00-07:00",
+            "place": {
+              "id": "west-portal",
+              "name": "West Portal Station",
+              "type": "station",
+              "location": { "lat": 37.7409, "lng": -122.4659 },
+              "platform": "2",
+              "code": "17217"
+            },
+            "delay": 60,
+            "status": "scheduled"
+          },
+          "arrival": {
+            "time": "2026-07-28T18:24:00-07:00",
+            "place": {
+              "id": "montgomery",
+              "name": "Montgomery Street Station",
+              "type": "station",
+              "location": { "lat": 37.7893, "lng": -122.401 },
+              "platform": "Inbound",
+              "code": "MONT"
+            },
+            "status": "scheduled"
+          },
+          "travelSummary": { "duration": 1020, "length": 7800 },
+          "transport": {
+            "mode": "lightRail",
+            "name": "K Ingleside",
+            "shortName": "K",
+            "longName": "K Ingleside",
+            "headsign": "Embarcadero",
+            "category": "Light Rail",
+            "color": "#005B95",
+            "textColor": "#FFFFFF"
+          },
+          "agency": {
+            "id": "SFMTA",
+            "name": "San Francisco Municipal Transportation Agency",
+            "website": "https://www.sfmta.com/"
+          },
+          "preActions": [
+            {
+              "action": "board",
+              "duration": 0,
+              "instruction": "Board the K Ingleside toward Embarcadero."
+            }
+          ],
+          "postActions": [
+            {
+              "action": "deboard",
+              "duration": 0,
+              "instruction": "Leave the train at Montgomery Street."
+            }
+          ],
+          "intermediateStops": [
+            {
+              "departure": {
+                "time": "2026-07-28T18:11:00-07:00",
+                "place": {
+                  "id": "forest-hill",
+                  "name": "Forest Hill Station",
+                  "type": "station",
+                  "location": { "lat": 37.7482, "lng": -122.4583 },
+                  "platform": "2",
+                  "code": "FH"
+                }
+              },
+              "duration": 30
+            },
+            {
+              "departure": {
+                "time": "2026-07-28T18:17:00-07:00",
+                "place": {
+                  "id": "castro",
+                  "name": "Castro Station",
+                  "type": "station",
+                  "location": { "lat": 37.7626, "lng": -122.435 },
+                  "platform": "Inbound",
+                  "code": "CAST"
+                }
+              },
+              "duration": 20
+            }
+          ],
+          "notices": [
+            {
+              "code": "scheduledTimes",
+              "title": "Times shown are scheduled",
+              "severity": "info"
+            }
+          ],
+          "incidents": [
+            {
+              "summary": "K line boarding platform changed",
+              "description": "Board from platform 2 at West Portal.",
+              "type": "technicalProblem",
+              "effect": "modifiedService",
+              "validFrom": "2026-07-28T17:30:00-07:00",
+              "validUntil": "2026-07-28T20:00:00-07:00",
+              "url": "https://www.sfmta.com/alerts/k-platform"
+            }
+          ]
+        },
+        {
+          "id": "route-k-walk-in",
+          "type": "pedestrian",
+          "departure": {
+            "time": "2026-07-28T18:24:00-07:00",
+            "place": {
+              "id": "montgomery",
+              "name": "Montgomery Street Station",
+              "type": "station",
+              "location": { "lat": 37.7893, "lng": -122.401 },
+              "platform": "Concourse",
+              "code": "MONT"
+            }
+          },
+          "arrival": {
+            "time": "2026-07-28T18:30:00-07:00",
+            "place": {
+              "name": "Union Square",
+              "type": "place",
+              "location": { "lat": 37.7879, "lng": -122.4075 }
+            }
+          },
+          "travelSummary": { "duration": 360, "length": 470 },
+          "transport": { "mode": "pedestrian" },
+          "actions": [
+            {
+              "action": "depart",
+              "duration": 90,
+              "instruction": "Exit Montgomery Street Station toward Market Street."
+            },
+            {
+              "action": "continue",
+              "duration": 210,
+              "instruction": "Continue toward Union Square."
+            },
+            {
+              "action": "arrive",
+              "duration": 60,
+              "instruction": "Arrive at Union Square."
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "route-transfer",
+      "sections": [
+        {
+          "id": "transfer-walk-out",
+          "type": "pedestrian",
+          "departure": {
+            "time": "2026-07-28T18:02:00-07:00",
+            "place": {
+              "name": "SF Cottage",
+              "type": "place",
+              "location": { "lat": 37.7401, "lng": -122.4661 }
+            }
+          },
+          "arrival": {
+            "time": "2026-07-28T18:04:00-07:00",
+            "place": {
+              "id": "judah-stop",
+              "name": "Judah Street & 19th Avenue",
+              "type": "station",
+              "location": { "lat": 37.7612, "lng": -122.477 },
+              "platform": "Island",
+              "code": "13909"
+            }
+          },
+          "travelSummary": { "duration": 120, "length": 145 },
+          "transport": { "mode": "pedestrian" },
+          "actions": [
+            {
+              "action": "depart",
+              "duration": 120,
+              "instruction": "Walk to the N Judah stop."
+            }
+          ]
+        },
+        {
+          "id": "transfer-n",
+          "type": "transit",
+          "departure": {
+            "time": "2026-07-28T18:04:00-07:00",
+            "place": {
+              "id": "judah-stop",
+              "name": "Judah Street & 19th Avenue",
+              "type": "station",
+              "location": { "lat": 37.7612, "lng": -122.477 },
+              "platform": "Island",
+              "code": "13909"
+            }
+          },
+          "arrival": {
+            "time": "2026-07-28T18:14:00-07:00",
+            "place": {
+              "id": "church",
+              "name": "Church Street Station",
+              "type": "station",
+              "location": { "lat": 37.7671, "lng": -122.4291 },
+              "platform": "Inbound",
+              "code": "CHUR"
+            }
+          },
+          "travelSummary": { "duration": 600, "length": 5100 },
+          "transport": {
+            "mode": "lightRail",
+            "name": "N Judah",
+            "headsign": "Caltrain",
+            "shortName": "N"
+          },
+          "preActions": [
+            {
+              "action": "board",
+              "duration": 0,
+              "instruction": "Board the N Judah toward Caltrain."
+            }
+          ],
+          "postActions": [
+            {
+              "action": "deboard",
+              "duration": 0,
+              "instruction": "Leave the train at Church Street."
+            }
+          ]
+        },
+        {
+          "id": "transfer-walk",
+          "type": "pedestrian",
+          "departure": {
+            "time": "2026-07-28T18:14:00-07:00",
+            "place": {
+              "id": "church",
+              "name": "Church Street Station",
+              "type": "station",
+              "location": { "lat": 37.7671, "lng": -122.4291 },
+              "platform": "Inbound",
+              "code": "CHUR"
+            }
+          },
+          "arrival": {
+            "time": "2026-07-28T18:16:00-07:00",
+            "place": {
+              "id": "market-church",
+              "name": "Market Street & Church Street",
+              "type": "station",
+              "location": { "lat": 37.7675, "lng": -122.4288 },
+              "platform": "Stop B",
+              "code": "15726"
+            }
+          },
+          "travelSummary": { "duration": 120, "length": 90 },
+          "transport": { "mode": "pedestrian" },
+          "preActions": [
+            {
+              "action": "wait",
+              "duration": 30,
+              "instruction": "Wait for a safe crossing."
+            }
+          ],
+          "actions": [
+            {
+              "action": "continue",
+              "duration": 90,
+              "instruction": "Cross Market Street to Stop B."
+            }
+          ]
+        },
+        {
+          "id": "transfer-38r",
+          "type": "transit",
+          "departure": {
+            "time": "2026-07-28T18:18:00-07:00",
+            "place": {
+              "id": "market-church",
+              "name": "Market Street & Church Street",
+              "type": "station",
+              "location": { "lat": 37.7675, "lng": -122.4288 },
+              "platform": "Stop B",
+              "code": "15726"
+            }
+          },
+          "arrival": {
+            "time": "2026-07-28T18:26:00-07:00",
+            "place": {
+              "id": "geary-powell",
+              "name": "Geary Boulevard & Powell Street",
+              "type": "station",
+              "location": { "lat": 37.7871, "lng": -122.4083 },
+              "platform": "Curb",
+              "code": "13217"
+            }
+          },
+          "travelSummary": { "duration": 480, "length": 3300 },
+          "transport": {
+            "mode": "busRapid",
+            "name": "38R Geary Rapid",
+            "headsign": "Transit Center",
+            "shortName": "38R"
+          },
+          "preActions": [
+            {
+              "action": "board",
+              "duration": 0,
+              "instruction": "Board the 38R toward Transit Center."
+            }
+          ],
+          "postActions": [
+            {
+              "action": "deboard",
+              "duration": 0,
+              "instruction": "Leave the bus at Powell Street."
+            }
+          ]
+        },
+        {
+          "id": "transfer-walk-in",
+          "type": "pedestrian",
+          "departure": {
+            "time": "2026-07-28T18:26:00-07:00",
+            "place": {
+              "id": "geary-powell",
+              "name": "Geary Boulevard & Powell Street",
+              "type": "station",
+              "location": { "lat": 37.7871, "lng": -122.4083 },
+              "platform": "Curb",
+              "code": "13217"
+            }
+          },
+          "arrival": {
+            "time": "2026-07-28T18:29:00-07:00",
+            "place": {
+              "name": "Union Square",
+              "type": "place",
+              "location": { "lat": 37.7879, "lng": -122.4075 }
+            }
+          },
+          "travelSummary": { "duration": 180, "length": 210 },
+          "transport": { "mode": "pedestrian" },
+          "actions": [
+            {
+              "action": "arrive",
+              "duration": 180,
+              "instruction": "Walk to Union Square."
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "route-future-mode",
+      "sections": [
+        {
+          "id": "future-section",
+          "type": "gondolaPortal",
+          "departure": {
+            "time": "2026-07-28T18:03:00-07:00",
+            "place": {
+              "name": "SF Cottage",
+              "type": "place",
+              "location": { "lat": 37.7401, "lng": -122.4661 }
+            }
+          },
+          "arrival": {
+            "time": "2026-07-28T18:13:00-07:00",
+            "place": {
+              "name": "Union Square",
+              "type": "place",
+              "location": { "lat": 37.7879, "lng": -122.4075 }
+            }
+          },
+          "travelSummary": { "duration": 600, "length": 8000 },
+          "actions": [
+            {
+              "action": "teleport",
+              "duration": 600,
+              "instruction": "Step into the transfer portal."
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}
