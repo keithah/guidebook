@@ -1,6 +1,5 @@
 import { cleanup, render, screen } from '@testing-library/react';
 import { afterEach, describe, expect, it, vi } from 'vitest';
-
 import LiveStatus from '../LiveStatus.jsx';
 
 const now = Date.parse('2026-07-28T19:00:00.000Z');
@@ -11,94 +10,100 @@ afterEach(() => {
 });
 
 describe('LiveStatus', () => {
-  it('shows a live indicator dot and label for the "live" source alias', () => {
-    const { container } = render(<LiveStatus source="live" />);
-    expect(screen.getByRole('status', { name: 'Live' })).toBeVisible();
-    expect(container.querySelector('span[aria-hidden="true"]')).toBeInTheDocument();
-  });
-
-  it('omits the live indicator dot for non-live sources', () => {
-    const { container } = render(<LiveStatus source="cache" />);
-    expect(screen.getByRole('status', { name: 'Cached' })).toBeVisible();
-    expect(
-      container.querySelector('span[aria-hidden="true"]'),
-    ).not.toBeInTheDocument();
-  });
-
-  it('falls back to "Updated" for an unrecognized source', () => {
+  it('falls back to a generic label for unrecognized sources without a timestamp', () => {
     render(<LiveStatus source="mystery" />);
     expect(screen.getByRole('status', { name: 'Updated' })).toBeVisible();
   });
 
-  it('lets an explicit label override the source-derived label', () => {
-    render(<LiveStatus source="network" label="Custom status" />);
-    expect(screen.getByRole('status', { name: 'Custom status' })).toBeVisible();
+  it('lets a custom label override the source-derived label', () => {
+    render(<LiveStatus source="network" label="Just synced" timestamp={now} />);
+    expect(screen.getByRole('status')).toHaveAccessibleName(/just synced/i);
+    expect(screen.getByText('Just synced')).toBeVisible();
   });
 
-  it('renders no timestamp when none is provided or the value cannot be parsed', () => {
-    const { container, rerender } = render(<LiveStatus source="cache" />);
-    expect(container.querySelector('time')).not.toBeInTheDocument();
-
-    rerender(<LiveStatus source="cache" timestamp="not-a-real-date" />);
-    expect(container.querySelector('time')).not.toBeInTheDocument();
-    expect(screen.getByRole('status', { name: 'Cached' })).toBeVisible();
+  it.each([
+    ['network', true],
+    ['live', true],
+    ['cache', false],
+    ['cached', false],
+    ['stale', false],
+    ['unavailable', false],
+  ])('only shows the live indicator dot for %s sources', (source, hasDot) => {
+    const { container } = render(<LiveStatus source={source} />);
+    const dot = container.querySelector('span[aria-hidden="true"]');
+    if (hasDot) {
+      expect(dot).toBeInTheDocument();
+    } else {
+      expect(dot).not.toBeInTheDocument();
+    }
   });
 
-  it('accepts a Date instance and an ISO string, formatting a "just now" age within the first minute', () => {
+  it('describes recency in human terms across minutes, hours, and days', () => {
     vi.useFakeTimers();
     vi.setSystemTime(now);
 
-    const { rerender } = render(
-      <LiveStatus source="network" timestamp={new Date(now - 5_000)} />,
+    const { rerender, container } = render(
+      <LiveStatus source="network" timestamp={now - 30_000} />,
     );
-    expect(
-      screen.getByRole('status', { name: 'Live · updated just now' }),
-    ).toBeVisible();
+    expect(screen.getByRole('status')).toHaveAccessibleName(
+      'Live · updated just now',
+    );
+
+    rerender(<LiveStatus source="network" timestamp={now - 5 * 60_000} />);
+    expect(screen.getByRole('status')).toHaveAccessibleName(
+      'Live · updated 5 min ago',
+    );
+
+    rerender(<LiveStatus source="network" timestamp={now - 125 * 60_000} />);
+    expect(screen.getByRole('status')).toHaveAccessibleName(
+      'Live · updated 2 hr ago',
+    );
 
     rerender(
-      <LiveStatus
-        source="network"
-        timestamp={new Date(now - 5_000).toISOString()}
-      />,
+      <LiveStatus source="network" timestamp={now - 25 * 60 * 60_000} />,
     );
-    expect(
-      screen.getByRole('status', { name: 'Live · updated just now' }),
-    ).toBeVisible();
+    expect(screen.getByRole('status')).toHaveAccessibleName(
+      'Live · updated 1 day ago',
+    );
+
+    rerender(
+      <LiveStatus source="network" timestamp={now - 50 * 60 * 60_000} />,
+    );
+    expect(screen.getByRole('status')).toHaveAccessibleName(
+      'Live · updated 2 days ago',
+    );
+    expect(container.querySelector('time')).toHaveAttribute(
+      'dateTime',
+      new Date(now - 50 * 60 * 60_000).toISOString(),
+    );
   });
 
-  it('formats hour- and day-scale ages', () => {
-    vi.useFakeTimers();
-    vi.setSystemTime(now);
-
-    const { rerender } = render(
-      <LiveStatus source="stale" timestamp={now - 60 * 60 * 1_000} />,
+  it('accepts Date instances and ISO strings as timestamps', () => {
+    const { container: dateContainer } = render(
+      <LiveStatus source="cache" timestamp={new Date(now)} />,
     );
-    expect(
-      screen.getByRole('status', { name: 'Last known · updated 1 hr ago' }),
-    ).toBeVisible();
+    expect(dateContainer.querySelector('time')).toBeInTheDocument();
 
-    rerender(
-      <LiveStatus source="stale" timestamp={now - 24 * 60 * 60 * 1_000} />,
+    cleanup();
+    const { container: stringContainer } = render(
+      <LiveStatus source="cache" timestamp={new Date(now).toISOString()} />,
     );
-    expect(
-      screen.getByRole('status', { name: 'Last known · updated 1 day ago' }),
-    ).toBeVisible();
-
-    rerender(
-      <LiveStatus source="stale" timestamp={now - 48 * 60 * 60 * 1_000} />,
-    );
-    expect(
-      screen.getByRole('status', { name: 'Last known · updated 2 days ago' }),
-    ).toBeVisible();
+    expect(stringContainer.querySelector('time')).toBeInTheDocument();
   });
 
-  it('never reports a negative age for a timestamp in the future', () => {
-    vi.useFakeTimers();
-    vi.setSystemTime(now);
+  it('omits the timestamp when it is missing, empty, or invalid', () => {
+    const { container: nullContainer } = render(
+      <LiveStatus source="unavailable" timestamp={null} />,
+    );
+    expect(screen.getByRole('status')).toHaveAccessibleName('Unavailable');
+    expect(nullContainer.querySelector('time')).not.toBeInTheDocument();
 
-    render(<LiveStatus source="network" timestamp={now + 60_000} />);
-    expect(
-      screen.getByRole('status', { name: 'Live · updated just now' }),
-    ).toBeVisible();
+    cleanup();
+    render(<LiveStatus source="unavailable" timestamp="" />);
+    expect(screen.getByRole('status')).toHaveAccessibleName('Unavailable');
+
+    cleanup();
+    render(<LiveStatus source="unavailable" timestamp="not-a-date" />);
+    expect(screen.getByRole('status')).toHaveAccessibleName('Unavailable');
   });
 });

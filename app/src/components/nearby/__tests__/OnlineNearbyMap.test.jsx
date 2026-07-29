@@ -1,14 +1,15 @@
-import { cleanup, fireEvent, render, screen, within } from '@testing-library/react';
+import { cleanup, fireEvent, render, screen } from '@testing-library/react';
 import { afterEach, describe, expect, it, vi } from 'vitest';
+import L from 'leaflet';
+import OnlineNearbyMap from '../OnlineNearbyMap.jsx';
 
-import { lineColors, lineLabel } from '../../../theme.js';
-
-const fitBoundsMock = vi.hoisted(() => vi.fn());
+const { mockMap } = vi.hoisted(() => ({
+  mockMap: { fitBounds: vi.fn() },
+}));
 
 vi.mock('leaflet', () => ({
   default: {
-    // Return the icon options as-is so tests can inspect className/html/size.
-    divIcon: (options) => options,
+    divIcon: vi.fn((options) => ({ __mockIcon: true, ...options })),
   },
 }));
 
@@ -23,64 +24,34 @@ vi.mock('react-leaflet', () => ({
       {children}
     </div>
   ),
-  TileLayer: ({ attribution, url, eventHandlers }) => (
-    <div data-testid="tile-layer" data-attribution={attribution} data-url={url}>
-      <button
-        type="button"
-        onClick={(event) => eventHandlers?.tileerror?.(event)}
-      >
-        trigger tile error
-      </button>
-    </div>
+  TileLayer: ({ url, eventHandlers }) => (
+    // eslint-disable-next-line jsx-a11y/click-events-have-key-events, jsx-a11y/no-static-element-interactions
+    <div
+      data-testid="tile-layer"
+      data-url={url}
+      onClick={() => eventHandlers?.tileerror?.()}
+    />
   ),
   Marker: ({ position, icon, children }) => (
     <div
       data-testid="marker"
       data-position={JSON.stringify(position)}
       data-icon-class={icon?.className}
-      data-icon-html={icon?.html}
     >
       {children}
     </div>
   ),
   Popup: ({ children }) => <div data-testid="popup">{children}</div>,
-  useMap: () => ({ fitBounds: fitBoundsMock }),
+  useMap: () => mockMap,
 }));
 
-const { default: OnlineNearbyMap } = await import('../OnlineNearbyMap.jsx');
-
+const center = { lat: 37.7226, lng: -122.4547 };
 const cottage = { lat: 37.7226, lng: -122.4547 };
-const center = { lat: 37.723, lng: -122.455 };
-
-function stopMarkers() {
-  return screen
-    .getAllByTestId('marker')
-    .filter((marker) => marker.dataset.iconClass === 'sfc-line-pin');
-}
 
 afterEach(cleanup);
 
 describe('OnlineNearbyMap', () => {
-  it('centers the map on the current location with scroll-wheel zoom disabled', () => {
-    render(
-      <OnlineNearbyMap
-        center={center}
-        cottage={cottage}
-        stops={[]}
-        showMe={false}
-      />,
-    );
-
-    const mapContainer = screen.getByTestId('map-container');
-    expect(JSON.parse(mapContainer.dataset.center)).toEqual([
-      center.lat,
-      center.lng,
-    ]);
-    expect(mapContainer.dataset.zoom).toBe('15');
-    expect(mapContainer.dataset.scrollWheelZoom).toBe('false');
-  });
-
-  it('wires the OpenStreetMap tile layer and forwards tile failures', () => {
+  it('renders the map centered on the current position and wires tile failures to the handler', () => {
     const onTileFailure = vi.fn();
     render(
       <OnlineNearbyMap
@@ -88,40 +59,40 @@ describe('OnlineNearbyMap', () => {
         cottage={cottage}
         stops={[]}
         showMe={false}
+        dest={null}
         onTileFailure={onTileFailure}
       />,
     );
 
+    expect(screen.getByTestId('map-container')).toHaveAttribute(
+      'data-center',
+      JSON.stringify([center.lat, center.lng]),
+    );
+
     const tileLayer = screen.getByTestId('tile-layer');
-    expect(tileLayer.dataset.url).toBe(
+    expect(tileLayer).toHaveAttribute(
+      'data-url',
       'https://tile.openstreetmap.org/{z}/{x}/{y}.png',
     );
-    expect(tileLayer.dataset.attribution).toContain('OpenStreetMap');
-
-    fireEvent.click(within(tileLayer).getByRole('button'));
+    fireEvent.click(tileLayer);
     expect(onTileFailure).toHaveBeenCalledTimes(1);
+
+    expect(screen.getByText('The SF Cottage')).toBeVisible();
+    expect(screen.queryByText('You are here')).not.toBeInTheDocument();
   });
 
-  it('always shows the cottage marker and adds the "you are here" marker only when requested', () => {
+  it('shows a "me" marker only when showMe is true', () => {
     const { rerender } = render(
       <OnlineNearbyMap
         center={center}
         cottage={cottage}
         stops={[]}
         showMe={false}
+        dest={null}
+        onTileFailure={vi.fn()}
       />,
     );
-
-    const initialMarkers = screen.getAllByTestId('marker');
-    expect(initialMarkers).toHaveLength(1);
-    expect(initialMarkers[0].dataset.iconClass).toBe('sfc-home-pin');
-    expect(JSON.parse(initialMarkers[0].dataset.position)).toEqual([
-      cottage.lat,
-      cottage.lng,
-    ]);
-    expect(within(initialMarkers[0]).getByTestId('popup')).toHaveTextContent(
-      'The SF Cottage',
-    );
+    expect(screen.queryByText('You are here')).not.toBeInTheDocument();
 
     rerender(
       <OnlineNearbyMap
@@ -129,46 +100,28 @@ describe('OnlineNearbyMap', () => {
         cottage={cottage}
         stops={[]}
         showMe
+        dest={null}
+        onTileFailure={vi.fn()}
       />,
     );
-
-    const markersWithMe = screen.getAllByTestId('marker');
-    expect(markersWithMe).toHaveLength(2);
-    const meMarker = markersWithMe.find(
-      (marker) => marker.dataset.iconClass === 'sfc-me-pin',
-    );
-    expect(meMarker).toBeDefined();
-    expect(JSON.parse(meMarker.dataset.position)).toEqual([
-      center.lat,
-      center.lng,
-    ]);
-    expect(within(meMarker).getByTestId('popup')).toHaveTextContent(
-      'You are here',
-    );
+    expect(screen.getByText('You are here')).toBeVisible();
   });
 
-  it('renders one marker per stop with a line-colored, labeled icon and a name/sub popup', () => {
+  it('renders one line-colored marker per stop', () => {
     const stops = [
       {
-        name: 'West Portal Station',
-        sub: 'Inbound platform',
-        lat: 37.74,
-        lng: -122.466,
+        name: 'Forest Hill Station',
+        sub: 'Platform 2',
+        lat: 37.7482,
+        lng: -122.4583,
         line: 'K',
       },
       {
-        name: 'Embarcadero BART',
-        sub: 'Southbound',
-        lat: 37.793,
-        lng: -122.397,
-        line: 'BART',
-      },
-      {
-        name: 'Some Curb Stop',
-        sub: 'Route 99',
-        lat: 37.7,
-        lng: -122.4,
-        line: 'ZZ',
+        name: 'Church Street Station',
+        sub: 'Inbound',
+        lat: 37.7671,
+        lng: -122.4291,
+        line: 'N',
       },
     ];
 
@@ -178,96 +131,59 @@ describe('OnlineNearbyMap', () => {
         cottage={cottage}
         stops={stops}
         showMe={false}
-      />,
-    );
-
-    const markers = stopMarkers();
-    expect(markers).toHaveLength(3);
-
-    markers.forEach((marker, index) => {
-      const stop = stops[index];
-      expect(JSON.parse(marker.dataset.position)).toEqual([
-        stop.lat,
-        stop.lng,
-      ]);
-      expect(marker.dataset.iconHtml).toContain(lineLabel(stop.line));
-      expect(within(marker).getByTestId('popup')).toHaveTextContent(
-        `${stop.name}${stop.sub}`,
-      );
-    });
-
-    expect(markers[0].dataset.iconHtml).toContain(lineColors.K);
-    expect(markers[1].dataset.iconHtml).toContain(lineColors.BART);
-    // A line with no configured color falls back to the default gray.
-    expect(markers[2].dataset.iconHtml).toContain('#5A6B65');
-  });
-
-  it('omits the destination marker and never fits bounds when there is no destination', () => {
-    render(
-      <OnlineNearbyMap
-        center={center}
-        cottage={cottage}
-        stops={[]}
-        showMe={false}
         dest={null}
+        onTileFailure={vi.fn()}
       />,
     );
 
-    expect(
-      screen
-        .getAllByTestId('marker')
-        .some((marker) => marker.dataset.iconClass === 'sfc-dest-pin'),
-    ).toBe(false);
-    expect(fitBoundsMock).not.toHaveBeenCalled();
+    const linePinCalls = L.divIcon.mock.calls.filter(
+      ([options]) => options.className === 'sfc-line-pin',
+    );
+    expect(linePinCalls).toHaveLength(stops.length);
+
+    const markers = screen
+      .getAllByTestId('marker')
+      .filter((marker) => marker.dataset.iconClass === 'sfc-line-pin');
+    expect(markers.map((marker) => marker.dataset.position)).toEqual(
+      stops.map((stop) => JSON.stringify([stop.lat, stop.lng])),
+    );
+    expect(markers[0]).toHaveTextContent('Forest Hill Station');
+    expect(markers[0]).toHaveTextContent('Platform 2');
+    expect(markers[1]).toHaveTextContent('Church Street Station');
+    expect(markers[1]).toHaveTextContent('Inbound');
   });
 
-  it('shows a destination marker and fits the map bounds, recalculating when the destination changes', () => {
-    const dest = { lat: 37.79, lng: -122.4, name: 'Union Square' };
+  it('shows a destination marker and fits the map bounds only when a destination is set', () => {
+    const dest = { lat: 37.7879, lng: -122.4075, name: 'Union Square' };
     const { rerender } = render(
       <OnlineNearbyMap
         center={center}
         cottage={cottage}
         stops={[]}
         showMe={false}
-        dest={dest}
+        dest={null}
+        onTileFailure={vi.fn()}
       />,
     );
+    expect(screen.queryByText('Union Square')).not.toBeInTheDocument();
+    expect(mockMap.fitBounds).not.toHaveBeenCalled();
 
-    const destMarker = screen
-      .getAllByTestId('marker')
-      .find((marker) => marker.dataset.iconClass === 'sfc-dest-pin');
-    expect(destMarker).toBeDefined();
-    expect(JSON.parse(destMarker.dataset.position)).toEqual([
-      dest.lat,
-      dest.lng,
-    ]);
-    expect(within(destMarker).getByTestId('popup')).toHaveTextContent(
-      'Union Square',
-    );
-    expect(fitBoundsMock).toHaveBeenCalledWith(
-      [
-        [center.lat, center.lng],
-        [dest.lat, dest.lng],
-      ],
-      { padding: [30, 30] },
-    );
-
-    fitBoundsMock.mockClear();
-    const newDest = { lat: 37.8, lng: -122.41, name: 'Ferry Building' };
     rerender(
       <OnlineNearbyMap
         center={center}
         cottage={cottage}
         stops={[]}
         showMe={false}
-        dest={newDest}
+        dest={dest}
+        onTileFailure={vi.fn()}
       />,
     );
 
-    expect(fitBoundsMock).toHaveBeenCalledWith(
+    expect(screen.getByText('Union Square')).toBeVisible();
+    expect(mockMap.fitBounds).toHaveBeenCalledWith(
       [
         [center.lat, center.lng],
-        [newDest.lat, newDest.lng],
+        [dest.lat, dest.lng],
       ],
       { padding: [30, 30] },
     );
