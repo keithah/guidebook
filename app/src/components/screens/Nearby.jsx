@@ -2,7 +2,7 @@ import { useApp } from '../../context/AppContext.jsx';
 import { colors, fonts, screenPad, card, backLink } from '../../theme.js';
 import MuniLogo from '../MuniLogo.jsx';
 import LineBadge from '../LineBadge.jsx';
-import NearbyMap from '../NearbyMap.jsx';
+import NeighborhoodMap from '../nearby/NeighborhoodMap.jsx';
 import DestinationSearch from '../nearby/DestinationSearch.jsx';
 import LiveStatus from '../nearby/LiveStatus.jsx';
 import TransitAlerts from '../nearby/TransitAlerts.jsx';
@@ -204,7 +204,7 @@ export default function Nearby() {
               borderRadius: 18,
             }}
           >
-            <NearbyMap
+            <NeighborhoodMap
               center={coords}
               cottage={cottage}
               stops={property.transit.nearbyStops}

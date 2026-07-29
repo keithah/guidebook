@@ -8,7 +8,7 @@ import { fetchHereTransitRoutes } from '../../lib/hereTransit.js';
 import { AppProvider } from '../../context/AppContext.jsx';
 import Nearby from './Nearby.jsx';
 
-vi.mock('../NearbyMap.jsx', () => ({
+vi.mock('../nearby/NeighborhoodMap.jsx', () => ({
   default: () => <div aria-label="Neighborhood map" />,
 }));
 

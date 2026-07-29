@@ -2,6 +2,27 @@ import { defineConfig } from 'vite';
 import react from '@vitejs/plugin-react';
 import { VitePWA } from 'vite-plugin-pwa';
 
+export const runtimeCaching = [
+  {
+    urlPattern: /^https:\/\/api\.weather\.gov\//,
+    handler: 'NetworkFirst',
+    options: {
+      cacheName: 'nws-weather',
+      networkTimeoutSeconds: 5,
+      expiration: { maxEntries: 20, maxAgeSeconds: 60 * 60 },
+    },
+  },
+  {
+    urlPattern: /^https:\/\/fonts\.(googleapis|gstatic)\.com\//,
+    handler: 'CacheFirst',
+    options: {
+      cacheName: 'google-fonts',
+      expiration: { maxEntries: 10, maxAgeSeconds: 60 * 60 * 24 * 365 },
+      cacheableResponse: { statuses: [0, 200] },
+    },
+  },
+];
+
 // https://vite.dev/config/
 export default defineConfig({
   // Served from https://keithah.github.io/guidebook/ (a GitHub Pages
@@ -30,49 +51,11 @@ export default defineConfig({
         ],
       },
       workbox: {
-        // App shell + property data cache-first (spec: "all content ... cached
-        // for offline use"). Live data (weather, transit, map tiles) is
-        // network-first with a fallback so it degrades gracefully instead of
-        // going blank offline.
+        // The app shell and packaged neighborhood map are precached. Only
+        // weather and fonts use runtime caching; live map/transit requests do
+        // not enter the service worker cache.
         globPatterns: ['**/*.{js,css,html,svg,png,jpg,jpeg,webp}'],
-        runtimeCaching: [
-          {
-            urlPattern: /^https:\/\/[abc]\.tile\.openstreetmap\.org\//,
-            handler: 'CacheFirst',
-            options: {
-              cacheName: 'osm-tiles',
-              expiration: { maxEntries: 200, maxAgeSeconds: 60 * 60 * 24 * 30 },
-              cacheableResponse: { statuses: [0, 200] },
-            },
-          },
-          {
-            urlPattern: /^https:\/\/api\.weather\.gov\//,
-            handler: 'NetworkFirst',
-            options: {
-              cacheName: 'nws-weather',
-              networkTimeoutSeconds: 5,
-              expiration: { maxEntries: 20, maxAgeSeconds: 60 * 60 },
-            },
-          },
-          {
-            urlPattern: /^https:\/\/api\.511\.org\//,
-            handler: 'NetworkFirst',
-            options: {
-              cacheName: '511-transit',
-              networkTimeoutSeconds: 5,
-              expiration: { maxEntries: 20, maxAgeSeconds: 60 * 5 },
-            },
-          },
-          {
-            urlPattern: /^https:\/\/fonts\.(googleapis|gstatic)\.com\//,
-            handler: 'CacheFirst',
-            options: {
-              cacheName: 'google-fonts',
-              expiration: { maxEntries: 10, maxAgeSeconds: 60 * 60 * 24 * 365 },
-              cacheableResponse: { statuses: [0, 200] },
-            },
-          },
-        ],
+        runtimeCaching,
       },
     }),
   ],
