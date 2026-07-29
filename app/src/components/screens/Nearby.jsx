@@ -63,7 +63,9 @@ export default function Nearby() {
       : null,
   }));
   const orderedStops = selectedPosition
-    ? [...stopRows].sort((a, b) => Number(b.toward) - Number(a.toward))
+    ? [...stopRows].sort(
+        (a, b) => Number(Boolean(b.toward)) - Number(Boolean(a.toward)),
+      )
     : stopRows;
   const cottageDestination = {
     id: `property:${property.id}`,

@@ -131,6 +131,36 @@ describe('Nearby', () => {
     );
   });
 
+  it('promotes stops that head toward the selected destination', async () => {
+    const balboaPark = {
+      ...unionSquare,
+      id: 'here:balboa-park',
+      title: 'Balboa Park Station',
+      address: '401 Geneva Ave, San Francisco, CA',
+      position: { lat: 37.7216, lng: -122.443 },
+    };
+    searchHereDestinations.mockResolvedValue({
+      ok: true,
+      candidates: [balboaPark],
+      source: 'network',
+    });
+    renderNearby();
+
+    fireEvent.change(screen.getByRole('searchbox', { name: /destination/i }), {
+      target: { value: 'Balboa Park' },
+    });
+    fireEvent.click(screen.getByRole('button', { name: 'Go' }));
+    fireEvent.click(
+      await screen.findByRole('button', { name: /choose balboa park station/i }),
+    );
+    await screen.findAllByRole('button', { name: /view full itinerary/i });
+
+    const departures = screen.getByRole('region', {
+      name: 'Nearby departures',
+    });
+    expect(departures.children[1]).toHaveTextContent('outbound to Balboa Park');
+  });
+
   it('keeps local and 511 guidance usable when HERE is unavailable', async () => {
     searchHereDestinations.mockResolvedValue({ ok: false, reason: 'network' });
     fetchHereTransitRoutes.mockResolvedValue({ ok: false, reason: 'network' });

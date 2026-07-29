@@ -88,10 +88,11 @@ export function useHereTripPlanner({ origin }) {
   const selectDestination = useCallback(
     async (destination) => {
       searchAbortRef.current?.abort();
+      setSearchStatus({ status: candidates.length > 0 ? 'success' : 'idle' });
       setSelectedDestination(destination);
       return requestRoutes(destination);
     },
-    [requestRoutes],
+    [candidates.length, requestRoutes],
   );
 
   const clearDestination = useCallback(() => {

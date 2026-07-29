@@ -93,6 +93,45 @@ describe('useHereTripPlanner', () => {
     expect(fetchHereTransitRoutes).not.toHaveBeenCalled();
   });
 
+  it('settles search feedback when selecting a retained candidate during a pending search', async () => {
+    const pending = deferred();
+    searchHereDestinations
+      .mockResolvedValueOnce({ ok: true, candidates: [unionSquare] })
+      .mockReturnValueOnce(pending.promise);
+    fetchHereTransitRoutes.mockResolvedValue({
+      ok: false,
+      reason: 'network',
+    });
+    const { result } = renderHook(() => useHereTripPlanner({ origin }));
+
+    await act(async () => {
+      await result.current.search('Union Square');
+    });
+    let pendingSearch;
+    act(() => {
+      pendingSearch = result.current.search('A newer query');
+    });
+    expect(result.current.searchStatus).toEqual({ status: 'loading' });
+    const pendingSignal = searchHereDestinations.mock.calls[1][2].signal;
+
+    await act(async () => {
+      await result.current.selectDestination(unionSquare);
+    });
+
+    expect(pendingSignal.aborted).toBe(true);
+    expect(result.current.searchStatus).toEqual({ status: 'success' });
+    expect(result.current.selectedDestination).toEqual(unionSquare);
+
+    pending.resolve({
+      ok: true,
+      candidates: [{ ...unionSquare, id: 'here:late-result' }],
+    });
+    await act(async () => {
+      await pendingSearch;
+    });
+    expect(result.current.searchStatus).toEqual({ status: 'success' });
+  });
+
   it('routes only after selection and refetches when the origin changes', async () => {
     const firstRoute = {
       ok: true,
