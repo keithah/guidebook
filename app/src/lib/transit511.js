@@ -1,4 +1,8 @@
-import { dedupeRequest } from './requestCoordinator.js';
+import {
+  providerFailureReason,
+  providerHttpFailure,
+  sharedProviderRequest,
+} from './providerFetch.js';
 import { providerResponseStore } from './responseStore.js';
 
 const STOP_MONITORING_URL = 'https://api.511.org/transit/StopMonitoring';
@@ -165,28 +169,6 @@ export function normalizeServiceAlerts(payload, now = Date.now(), agency) {
 }
 
 /**
- * Classifies an error as a timeout or network failure.
- * @param {Error} error - The error to classify.
- * @return {'timeout'|'network'} `timeout` for an abort error, `network` otherwise.
- */
-function failureReason(error) {
-  return error?.name === 'AbortError' ? 'timeout' : 'network';
-}
-
-/**
- * Classify an HTTP response failure.
- * @param {Response} response - The HTTP response to classify.
- * @return {string|null} The failure reason, or `null` for a successful response.
- */
-function responseFailure(response) {
-  if (response.status === 401 || response.status === 403) {
-    return 'unauthorized';
-  }
-  if (response.status === 429) return 'rate-limited';
-  return response.ok ? null : 'network';
-}
-
-/**
  * Parses a response body as JSON after removing a leading UTF-8 byte-order mark.
  * @param {Response} response - The response whose body should be parsed.
  * @return {any} The parsed JSON value.
@@ -225,6 +207,8 @@ function buildUrl(base, apiKey, parameters) {
  * @param {number} options.freshMs - Fresh-cache duration in milliseconds.
  * @param {number} options.staleMs - Stale-cache duration in milliseconds.
  * @param {Function} options.now - Function that returns the current time in milliseconds.
+ * @param {AbortSignal} options.signal - Signal used to cancel the provider request.
+ * @param {Function} options.didTimeout - Indicates whether the request timeout has elapsed.
  * @returns {Promise<Object>} A successful network result containing normalized data and cache timestamps, or a failure result with a reason.
  */
 async function request511({
@@ -237,90 +221,61 @@ async function request511({
   freshMs,
   staleMs,
   now,
+  signal,
+  didTimeout,
 }) {
-  const controller = new AbortController();
-  let timedOut = false;
-  let timeout;
-  const timeoutResult = new Promise((resolve) => {
-    timeout = setTimeout(() => {
-      timedOut = true;
-      controller.abort();
-      resolve({ ok: false, reason: 'timeout' });
-    }, REQUEST_TIMEOUT_MS);
-  });
-  const operation = (async () => {
-    let response;
-    try {
-      response = await fetchImpl(url, { signal: controller.signal });
-    } catch (error) {
-      return { ok: false, reason: failureReason(error) };
-    }
-
-    if (timedOut) return { ok: false, reason: 'timeout' };
-    const httpFailure = responseFailure(response);
-    if (httpFailure) return { ok: false, reason: httpFailure };
-
-    let payload;
-    try {
-      payload = await readJson(response);
-    } catch (error) {
-      return {
-        ok: false,
-        reason: error?.name === 'AbortError' ? 'timeout' : 'invalid-response',
-      };
-    }
-    if (timedOut) return { ok: false, reason: 'timeout' };
-    if (!validate(payload)) return { ok: false, reason: 'invalid-response' };
-
-    const fetchedAt = now();
-    const data = normalize(payload, fetchedAt);
-    const expiresAt = fetchedAt + freshMs;
-    try {
-      await providerResponseStore.put({
-        key,
-        data: { [dataField]: data },
-        fetchedAt,
-        expiresAt,
-        staleUntil: fetchedAt + staleMs,
-      });
-    } catch {
-      // Persistent caching is best-effort; the network result remains usable.
-    }
-
+  let response;
+  try {
+    response = await fetchImpl(url, { signal });
+  } catch (error) {
     return {
-      ok: true,
-      [dataField]: data,
-      source: 'network',
-      fetchedAt,
-      expiresAt,
+      ok: false,
+      reason: didTimeout() ? 'timeout' : providerFailureReason(error),
     };
-  })();
-
-  return Promise.race([operation, timeoutResult]).finally(() => {
-    clearTimeout(timeout);
-  });
-}
-
-/**
- * Resolves a request with an aborted result when the caller's signal is aborted.
- * @param {Promise} request - The pending request.
- * @param {AbortSignal} signal - The caller's cancellation signal.
- * @returns {Promise} The request result or an aborted result.
- */
-function settleForCaller(request, signal) {
-  if (!signal) return request;
-  if (signal.aborted) {
-    return Promise.resolve({ ok: false, reason: 'aborted' });
   }
 
-  let onAbort;
-  const aborted = new Promise((resolve) => {
-    onAbort = () => resolve({ ok: false, reason: 'aborted' });
-    signal.addEventListener('abort', onAbort, { once: true });
-  });
-  return Promise.race([request, aborted]).finally(() => {
-    signal.removeEventListener('abort', onAbort);
-  });
+  if (didTimeout()) return { ok: false, reason: 'timeout' };
+  const httpFailure = providerHttpFailure(response);
+  if (httpFailure) return { ok: false, reason: httpFailure };
+
+  let payload;
+  try {
+    payload = await readJson(response);
+  } catch (error) {
+    return {
+      ok: false,
+      reason: didTimeout()
+        ? 'timeout'
+        : error?.name === 'AbortError'
+          ? 'aborted'
+          : 'invalid-response',
+    };
+  }
+  if (didTimeout()) return { ok: false, reason: 'timeout' };
+  if (!validate(payload)) return { ok: false, reason: 'invalid-response' };
+
+  const fetchedAt = now();
+  const data = normalize(payload, fetchedAt);
+  const expiresAt = fetchedAt + freshMs;
+  try {
+    await providerResponseStore.put({
+      key,
+      data: { [dataField]: data },
+      fetchedAt,
+      expiresAt,
+      staleUntil: fetchedAt + staleMs,
+    });
+  } catch {
+    // Persistent caching is best-effort; the network result remains usable.
+  }
+
+  return {
+    ok: true,
+    [dataField]: data,
+    source: 'network',
+    fetchedAt,
+    expiresAt,
+  };
 }
 
 /**
@@ -371,20 +326,25 @@ async function cached511Request({
     }
   }
 
-  const request = dedupeRequest(key, () =>
-    request511({
-      url,
-      fetchImpl,
-      normalize,
-      validate,
-      dataField,
-      key,
-      freshMs,
-      staleMs,
-      now,
-    }),
-  ).catch((error) => ({ ok: false, reason: failureReason(error) }));
-  const result = await settleForCaller(request, signal);
+  const result = await sharedProviderRequest({
+    key,
+    signal,
+    timeoutMs: REQUEST_TIMEOUT_MS,
+    loader: ({ signal: providerSignal, didTimeout }) =>
+      request511({
+        url,
+        fetchImpl,
+        normalize,
+        validate,
+        dataField,
+        key,
+        freshMs,
+        staleMs,
+        now,
+        signal: providerSignal,
+        didTimeout,
+      }),
+  });
 
   if (
     !result.ok &&

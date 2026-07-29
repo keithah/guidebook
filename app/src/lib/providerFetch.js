@@ -93,6 +93,10 @@ function withProviderDeadline(loader, timeoutMs) {
  * @return {Promise<Object>} The provider result, or a failure result with reason `aborted`, `timeout`, `unauthorized`, `rate-limited`, or `network`.
  */
 export function sharedProviderRequest({ key, signal, timeoutMs, loader }) {
+  if (signal?.aborted) {
+    return Promise.resolve({ ok: false, reason: 'aborted' });
+  }
+
   const request = dedupeRequest(key, () =>
     withProviderDeadline(loader, timeoutMs),
   ).catch((error) => ({ ok: false, reason: providerFailureReason(error) }));

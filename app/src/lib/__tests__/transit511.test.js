@@ -169,7 +169,7 @@ describe('511 requests', () => {
   });
 
   it.each([
-    ['AbortError', 'timeout'],
+    ['AbortError', 'aborted'],
     ['TypeError', 'network'],
   ])('maps a %s fetch failure to %s', async (name, reason) => {
     const error = new Error('synthetic failure');
