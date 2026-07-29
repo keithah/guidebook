@@ -1,0 +1,115 @@
+{
+  "Header": {
+    "GtfsRealtimeVersion": "2.0",
+    "Incrementality": "FULL_DATASET",
+    "Timestamp": "1785265200"
+  },
+  "Entities": [
+    {
+      "Id": "sf-k-delay",
+      "Alert": {
+        "ActivePeriods": [
+          {
+            "Start": "1785261600",
+            "End": "1785272400"
+          }
+        ],
+        "InformedEntities": [
+          {
+            "AgencyId": "SF",
+            "RouteId": "K"
+          }
+        ],
+        "Cause": "TECHNICAL_PROBLEM",
+        "Effect": "SIGNIFICANT_DELAYS",
+        "HeaderText": {
+          "Translations": [
+            {
+              "Text": "Demora en K Ingleside",
+              "Language": "es"
+            },
+            {
+              "Text": "K Ingleside delay",
+              "Language": "en"
+            }
+          ]
+        },
+        "DescriptionText": {
+          "Translations": [
+            {
+              "Text": "Allow extra travel time on the K line.",
+              "Language": "en-US"
+            }
+          ]
+        },
+        "Url": {
+          "Translations": [
+            {
+              "Text": "https://example.invalid/transit/k-delay",
+              "Language": "en"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "Id": "sf-43-reroute",
+      "Alert": {
+        "ActivePeriods": [
+          {
+            "Start": "1785258000",
+            "End": "1785290400"
+          }
+        ],
+        "InformedEntities": [
+          {
+            "AgencyId": "SF",
+            "RouteId": "43"
+          }
+        ],
+        "Cause": "CONSTRUCTION",
+        "Effect": "DETOUR",
+        "HeaderText": {
+          "Translations": [
+            {
+              "Text": "43 Masonic reroute",
+              "Language": "en"
+            }
+          ]
+        },
+        "DescriptionText": {
+          "Translations": [
+            {
+              "Text": "The 43 is using a temporary stop.",
+              "Language": "en"
+            }
+          ]
+        },
+        "Url": {
+          "Translations": [
+            {
+              "Text": "https://example.invalid/transit/43-reroute",
+              "Language": "en"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "Id": "synthetic-malformed",
+      "Alert": {
+        "ActivePeriods": [],
+        "InformedEntities": [],
+        "HeaderText": {
+          "Translations": []
+        },
+        "DescriptionText": {
+          "Translations": []
+        },
+        "Url": {
+          "Translations": []
+        }
+      }
+    }
+  ]
+}

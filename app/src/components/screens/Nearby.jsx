@@ -31,7 +31,7 @@ export default function Nearby() {
 
   const cottage = { lat: property.address.lat, lng: property.address.lng };
   const showMe = !!(coords && (coords.lat !== cottage.lat || coords.lng !== cottage.lng));
-  const liveTimes = useLiveDepartures(property.transit.nearbyStops);
+  const { times: liveTimes } = useLiveDepartures(property.transit.nearbyStops);
 
   // ---- In-app destination search (Photon geocoder, no key) ----------------
   const [searching, setSearching] = useState(false);

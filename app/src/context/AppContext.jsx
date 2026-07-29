@@ -193,9 +193,9 @@ export function AppProvider({ children }) {
   }, [phase === 'before', stay?.checkin]);
 
   // ---- Live K departures (511) for Home / TopBar ---------------------------
-  const optionsLive = useLiveDepartures(property.transit.options);
+  const { times: optionTimes } = useLiveDepartures(property.transit.options);
   const kIndex = property.transit.options.findIndex((o) => o.line === 'K');
-  const kTimes = optionsLive[kIndex] ?? property.transit.options[kIndex]?.times;
+  const kTimes = optionTimes[kIndex] ?? property.transit.options[kIndex]?.times;
 
   // ---- Temperature unit + forecast panel -----------------------------------
   const [unit, setUnit] = useLocalStorageState('sfcottage:temp-unit', 'F');
