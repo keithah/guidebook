@@ -5,6 +5,7 @@ import transitFixture from '../../test/fixtures/here-transit.json';
 import { normalizeHereRoutes } from '../../lib/hereTransit.js';
 import { searchHereDestinations } from '../../lib/hereSearch.js';
 import { fetchHereTransitRoutes } from '../../lib/hereTransit.js';
+import { useTransitAlerts } from '../../hooks/useTransitAlerts.js';
 import { AppProvider } from '../../context/AppContext.jsx';
 import Nearby from './Nearby.jsx';
 
@@ -33,20 +34,7 @@ vi.mock('../../hooks/useLiveDepartures.js', () => ({
 }));
 
 vi.mock('../../hooks/useTransitAlerts.js', () => ({
-  useTransitAlerts: () => ({
-    alerts: [
-      {
-        id: 'general-alert',
-        agency: 'SF',
-        affectedLines: [],
-        header: 'Systemwide service notice',
-        description: 'Leave a little extra time.',
-      },
-    ],
-    status: 'live',
-    updatedAt: Date.parse('2026-07-28T18:58:00.000Z'),
-    error: null,
-  }),
+  useTransitAlerts: vi.fn(),
 }));
 
 vi.mock('../../lib/weather.js', () => ({
@@ -98,6 +86,27 @@ describe('Nearby', () => {
       trips,
       source: 'network',
       fetchedAt: Date.parse('2026-07-28T19:00:00.000Z'),
+    });
+    useTransitAlerts.mockReturnValue({
+      alerts: [
+        {
+          id: 'k-alert',
+          agency: 'SF',
+          affectedLines: ['K'],
+          header: 'K service delay',
+          description: 'Allow extra travel time.',
+        },
+        {
+          id: 'general-alert',
+          agency: 'SF',
+          affectedLines: [],
+          header: 'Systemwide service notice',
+          description: 'Leave a little extra time.',
+        },
+      ],
+      status: 'live',
+      updatedAt: Date.parse('2026-07-28T18:58:00.000Z'),
+      error: null,
     });
   });
 
@@ -176,9 +185,70 @@ describe('Nearby', () => {
     expect(screen.getByText('Walking')).toBeVisible();
     expect(screen.getByRole('button', { name: 'Downtown / Union Square' })).toBeVisible();
     expect(screen.getAllByText('Ocean Ave & Lee St')).toHaveLength(2);
-    expect(screen.getByRole('status', { name: /live/i })).toBeVisible();
+    expect(screen.getAllByRole('status', { name: /live/i }).length).toBeGreaterThan(0);
     expect(screen.getByText('Data provided by 511.org')).toBeVisible();
     expect(screen.getByText('Uber')).toBeVisible();
     expect(screen.getByText('First time on Muni or BART?')).toBeVisible();
+  });
+
+  it('keeps route alerts visible with collapsed trips and labels curated departure fallbacks', async () => {
+    renderNearby();
+    const input = screen.getByRole('searchbox', { name: /destination/i });
+    fireEvent.change(input, { target: { value: 'Union Square' } });
+    fireEvent.click(screen.getByRole('button', { name: 'Go' }));
+    fireEvent.click(
+      await screen.findByRole('button', { name: /choose union square/i }),
+    );
+
+    await screen.findAllByRole('button', { name: /view full itinerary/i });
+    expect(screen.getByText('K service delay')).toBeVisible();
+    expect(screen.getByText('Systemwide service notice')).toBeVisible();
+    expect(screen.getAllByRole('status', { name: /live/i }).length).toBeGreaterThan(0);
+    expect(screen.getAllByText(/curated schedule/i).length).toBeGreaterThan(0);
+
+    fireEvent.click(
+      screen.getAllByRole('button', { name: /view full itinerary/i })[0],
+    );
+    expect(screen.getAllByText('K service delay')).toHaveLength(1);
+
+    fetchHereTransitRoutes.mockResolvedValueOnce({
+      ok: false,
+      reason: 'network',
+    });
+    fireEvent.click(
+      screen.getByRole('button', { name: /choose union square/i }),
+    );
+    expect(
+      await screen.findByText(/transit directions need a connection/i),
+    ).toBeVisible();
+    expect(screen.getByText('K service delay')).toBeVisible();
+  });
+
+  it('shows last-known route alerts even when HERE routing fails', async () => {
+    fetchHereTransitRoutes.mockResolvedValue({ ok: false, reason: 'network' });
+    useTransitAlerts.mockReturnValue({
+      alerts: [
+        {
+          id: 'k-alert',
+          agency: 'SF',
+          affectedLines: ['K'],
+          header: 'K service delay',
+          description: 'Allow extra travel time.',
+        },
+      ],
+      status: 'stale',
+      updatedAt: Date.parse('2026-07-28T18:30:00.000Z'),
+      error: 'network',
+    });
+    renderNearby();
+
+    fireEvent.click(
+      screen.getByRole('button', { name: /take me back to the cottage/i }),
+    );
+
+    expect(await screen.findByText(/transit directions need a connection/i)).toBeVisible();
+    expect(screen.getByText('K service delay')).toBeVisible();
+    expect(screen.getByRole('status', { name: /last known/i })).toBeVisible();
+    expect(screen.getByText(/live alert update is unavailable/i)).toBeVisible();
   });
 });

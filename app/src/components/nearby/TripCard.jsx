@@ -179,7 +179,7 @@ export default function TripCard({
         aria-expanded={expanded}
         aria-controls={itineraryId}
         aria-label={toggleLabel}
-        onClick={onToggle}
+        onClick={() => onToggle(lineIds)}
         style={{
           width: '100%',
           marginTop: 12,

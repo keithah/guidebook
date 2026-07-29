@@ -248,6 +248,7 @@ describe('fetchHereTransitRoutes', () => {
   });
 
   afterEach(() => {
+    vi.useRealTimers();
     vi.restoreAllMocks();
   });
 
@@ -537,5 +538,47 @@ describe('fetchHereTransitRoutes', () => {
       }),
     ).resolves.toEqual({ ok: false, reason: 'aborted' });
     expect(fetchImpl).not.toHaveBeenCalled();
+  });
+
+  it('aborts a hung shared route fetch at its deadline and allows a fresh retry', async () => {
+    vi.useFakeTimers();
+    vi.spyOn(providerResponseStore, 'get').mockResolvedValue(undefined);
+    let firstSignal;
+    const fetchImpl = vi
+      .fn()
+      .mockImplementationOnce((_url, { signal } = {}) => {
+        firstSignal = signal;
+        return new Promise(() => {});
+      })
+      .mockResolvedValueOnce(hereResponse());
+
+    const first = fetchHereTransitRoutes(origin, destination, {
+      departureTime,
+      apiKey,
+      fetchImpl,
+      timeoutMs: 1_000,
+      now: () => fetchedAt,
+    });
+    await vi.waitFor(() => expect(fetchImpl).toHaveBeenCalledTimes(1));
+
+    await vi.advanceTimersByTimeAsync(1_000);
+
+    await expect(first).resolves.toEqual({ ok: false, reason: 'timeout' });
+    expect(firstSignal).toBeInstanceOf(AbortSignal);
+    expect(firstSignal.aborted).toBe(true);
+
+    const retry = fetchHereTransitRoutes(origin, destination, {
+      departureTime,
+      apiKey,
+      fetchImpl,
+      timeoutMs: 1_000,
+      now: () => fetchedAt,
+    });
+    await vi.waitFor(() => expect(fetchImpl).toHaveBeenCalledTimes(2));
+    await expect(retry).resolves.toMatchObject({
+      ok: true,
+      source: 'network',
+    });
+    expect(fetchImpl).toHaveBeenCalledTimes(2);
   });
 });

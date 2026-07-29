@@ -1,3 +1,4 @@
+import { useEffect, useState } from 'react';
 import { useApp } from '../../context/AppContext.jsx';
 import { colors, fonts, screenPad, card, backLink } from '../../theme.js';
 import MuniLogo from '../MuniLogo.jsx';
@@ -48,7 +49,13 @@ export default function Nearby() {
   const { times: liveTimes, meta: departureMeta } = useLiveDepartures(
     property.transit.nearbyStops,
   );
-  const { alerts } = useTransitAlerts('SF');
+  const {
+    alerts,
+    status: alertStatus,
+    updatedAt: alertsUpdatedAt,
+    error: alertError,
+  } = useTransitAlerts('SF');
+  const [expandedAlertLineIds, setExpandedAlertLineIds] = useState([]);
   const selectedPosition = planner.selectedDestination?.position ?? null;
   const nearBase =
     showMe && distanceMiles(coords, cottage) < 60
@@ -84,6 +91,10 @@ export default function Nearby() {
   ]
     .filter(Boolean)
     .join(':');
+
+  useEffect(() => {
+    setExpandedAlertLineIds([]);
+  }, [tripKey]);
 
   const chooseCottage = () => {
     planner.setQuery(property.address.street);
@@ -255,6 +266,7 @@ export default function Nearby() {
               externalUrlForTrip={() =>
                 mapsUrl(origin, planner.selectedDestination.position)
               }
+              onExpandedLineIdsChange={setExpandedAlertLineIds}
             />
             {planner.routeResult && !planner.routeResult.ok && (
               <button
@@ -411,7 +423,13 @@ export default function Nearby() {
             )}
           </div>
 
-          <TransitAlerts alerts={alerts} />
+          <TransitAlerts
+            alerts={alerts}
+            status={alertStatus}
+            updatedAt={alertsUpdatedAt}
+            error={alertError}
+            excludeLineIds={expandedAlertLineIds}
+          />
 
           <section aria-label="Nearby departures">
             <div
@@ -429,7 +447,8 @@ export default function Nearby() {
             </div>
             {orderedStops.map(({ stop, index, toward }) => {
               const meta = departureMeta[index];
-              const showStatus = ['live', 'cached', 'stale'].includes(
+              const hasLivePrediction = liveTimes[index] != null;
+              const showStatus = ['live', 'cached', 'stale', 'unavailable'].includes(
                 meta?.status,
               );
               return (
@@ -489,9 +508,22 @@ export default function Nearby() {
                       fontFamily: fonts.serif,
                       fontSize: 20,
                       whiteSpace: 'nowrap',
+                      textAlign: 'right',
                     }}
                   >
-                    {liveTimes[index] ?? stop.times}
+                    <div>{liveTimes[index] ?? stop.times}</div>
+                    {!hasLivePrediction && (
+                      <div
+                        style={{
+                          marginTop: 2,
+                          color: colors.mutedText,
+                          fontFamily: fonts.sans,
+                          fontSize: 10,
+                        }}
+                      >
+                        Curated schedule
+                      </div>
+                    )}
                   </div>
                 </div>
               );

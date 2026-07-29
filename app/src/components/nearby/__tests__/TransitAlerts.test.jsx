@@ -58,11 +58,48 @@ describe('TransitAlerts', () => {
   });
 
   it('uses standalone mode for alerts that affect the whole system', () => {
-    render(<TransitAlerts alerts={[...alerts, generalAlert]} />);
+    render(
+      <TransitAlerts
+        alerts={[...alerts, generalAlert]}
+        status="live"
+        updatedAt={Date.parse('2026-07-28T18:58:00.000Z')}
+      />,
+    );
 
     expect(screen.getByText('Systemwide fare machines update')).toBeVisible();
+    expect(screen.getByText('K Ingleside delay')).toBeVisible();
+    expect(screen.getByText('43 Masonic reroute')).toBeVisible();
+    expect(screen.getByRole('status', { name: /live/i })).toBeVisible();
+  });
+
+  it('labels last-known alerts and explains a failed live refresh', () => {
+    render(
+      <TransitAlerts
+        alerts={alerts}
+        status="stale"
+        updatedAt={Date.parse('2026-07-28T18:58:00.000Z')}
+        error="network"
+      />,
+    );
+
+    expect(screen.getByRole('status', { name: /last known/i })).toBeVisible();
+    expect(screen.getByText(/live alert update is unavailable/i)).toBeVisible();
+    expect(screen.getByText('K Ingleside delay')).toBeVisible();
+  });
+
+  it('keeps unmatched alerts standalone while an expanded line owns its alert', () => {
+    render(
+      <TransitAlerts
+        alerts={[...alerts, generalAlert]}
+        status="cached"
+        updatedAt={Date.parse('2026-07-28T18:58:00.000Z')}
+        excludeLineIds={['K']}
+      />,
+    );
+
     expect(screen.queryByText('K Ingleside delay')).not.toBeInTheDocument();
-    expect(screen.queryByText('43 Masonic reroute')).not.toBeInTheDocument();
+    expect(screen.getByText('43 Masonic reroute')).toBeVisible();
+    expect(screen.getByText('Systemwide fare machines update')).toBeVisible();
   });
 
   it('matches no alerts when trip mode receives no line IDs', () => {

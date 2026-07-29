@@ -71,6 +71,7 @@ describe('searchHereDestinations', () => {
   });
 
   afterEach(() => {
+    vi.useRealTimers();
     vi.restoreAllMocks();
   });
 
@@ -184,6 +185,21 @@ describe('searchHereDestinations', () => {
     await expect(
       searchHereDestinations('   ', center, { apiKey, fetchImpl }),
     ).resolves.toEqual({ ok: false, reason: 'empty-query' });
+    expect(fetchImpl).not.toHaveBeenCalled();
+  });
+
+  it('does not start work for an already-aborted caller', async () => {
+    const controller = new AbortController();
+    controller.abort();
+    const fetchImpl = vi.fn();
+
+    await expect(
+      searchHereDestinations('coffee', center, {
+        apiKey,
+        fetchImpl,
+        signal: controller.signal,
+      }),
+    ).resolves.toEqual({ ok: false, reason: 'aborted' });
     expect(fetchImpl).not.toHaveBeenCalled();
   });
 
@@ -408,5 +424,45 @@ describe('searchHereDestinations', () => {
     resolveResponse(hereResponse());
     expect((await second).source).toBe('network');
     expect(fetchImpl).toHaveBeenCalledTimes(1);
+  });
+
+  it('aborts a hung shared fetch at its deadline and releases the key for retry', async () => {
+    vi.useFakeTimers();
+    vi.spyOn(providerResponseStore, 'get').mockResolvedValue(undefined);
+    let firstSignal;
+    const fetchImpl = vi
+      .fn()
+      .mockImplementationOnce((_url, { signal } = {}) => {
+        firstSignal = signal;
+        return new Promise(() => {});
+      })
+      .mockResolvedValueOnce(hereResponse());
+
+    const first = searchHereDestinations('coffee', center, {
+      apiKey,
+      fetchImpl,
+      timeoutMs: 1_000,
+      now: () => fetchedAt,
+    });
+    await vi.waitFor(() => expect(fetchImpl).toHaveBeenCalledTimes(1));
+
+    await vi.advanceTimersByTimeAsync(1_000);
+
+    await expect(first).resolves.toEqual({ ok: false, reason: 'timeout' });
+    expect(firstSignal).toBeInstanceOf(AbortSignal);
+    expect(firstSignal.aborted).toBe(true);
+
+    const retry = searchHereDestinations('coffee', center, {
+      apiKey,
+      fetchImpl,
+      timeoutMs: 1_000,
+      now: () => fetchedAt,
+    });
+    await vi.waitFor(() => expect(fetchImpl).toHaveBeenCalledTimes(2));
+    await expect(retry).resolves.toMatchObject({
+      ok: true,
+      source: 'network',
+    });
+    expect(fetchImpl).toHaveBeenCalledTimes(2);
   });
 });

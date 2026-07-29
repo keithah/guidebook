@@ -5,6 +5,7 @@ import { providerResponseStore } from './responseStore.js';
 const HERE_DISCOVER_URL = 'https://discover.search.hereapi.com/v1/discover';
 const SEARCH_RADIUS_METERS = 80_000;
 const CANDIDATE_LIMIT = 5;
+const REQUEST_TIMEOUT_MS = 10_000;
 
 export function buildHereSearchUrl(query, center, apiKey) {
   const url = new URL(HERE_DISCOVER_URL);
@@ -68,57 +69,88 @@ async function fetchHereDestinations({
   fetchImpl,
   now,
   key,
+  timeoutMs,
 }) {
-  let response;
-  try {
-    response = await fetchImpl(buildHereSearchUrl(query, center, apiKey));
-  } catch (error) {
-    return { ok: false, reason: failureReason(error) };
-  }
-
-  if (response.status === 401 || response.status === 403) {
-    return { ok: false, reason: 'unauthorized' };
-  }
-  if (response.status === 429) {
-    return { ok: false, reason: 'rate-limited' };
-  }
-  if (!response.ok) return { ok: false, reason: 'network' };
-
-  let payload;
-  try {
-    payload = await response.json();
-  } catch (error) {
-    return {
-      ok: false,
-      reason: error?.name === 'AbortError' ? 'aborted' : 'invalid-response',
-    };
-  }
-
-  const fetchedAt = now();
-  const candidates = normalizeHereCandidates(payload).slice(0, CANDIDATE_LIMIT);
-  const expiresAt = cacheUntilFromHeaders(response.headers, fetchedAt);
-
-  if (expiresAt !== null && expiresAt > fetchedAt) {
+  const controller = new AbortController();
+  let timedOut = false;
+  let timeout;
+  const timeoutResult = new Promise((resolve) => {
+    timeout = setTimeout(() => {
+      timedOut = true;
+      controller.abort();
+      resolve({ ok: false, reason: 'timeout' });
+    }, timeoutMs);
+  });
+  const operation = (async () => {
+    let response;
     try {
-      await providerResponseStore.put({
-        key,
-        data: { candidates },
-        fetchedAt,
-        expiresAt,
-        staleUntil: expiresAt,
+      response = await fetchImpl(buildHereSearchUrl(query, center, apiKey), {
+        signal: controller.signal,
       });
-    } catch {
-      // Persistent caching is best-effort; the network result remains usable.
+    } catch (error) {
+      return {
+        ok: false,
+        reason: timedOut ? 'timeout' : failureReason(error),
+      };
     }
-  }
 
-  return {
-    ok: true,
-    candidates,
-    source: 'network',
-    fetchedAt,
-    expiresAt,
-  };
+    if (timedOut) return { ok: false, reason: 'timeout' };
+    if (response.status === 401 || response.status === 403) {
+      return { ok: false, reason: 'unauthorized' };
+    }
+    if (response.status === 429) {
+      return { ok: false, reason: 'rate-limited' };
+    }
+    if (!response.ok) return { ok: false, reason: 'network' };
+
+    let payload;
+    try {
+      payload = await response.json();
+    } catch (error) {
+      return {
+        ok: false,
+        reason: timedOut
+          ? 'timeout'
+          : error?.name === 'AbortError'
+            ? 'aborted'
+            : 'invalid-response',
+      };
+    }
+    if (timedOut) return { ok: false, reason: 'timeout' };
+
+    const fetchedAt = now();
+    const candidates = normalizeHereCandidates(payload).slice(
+      0,
+      CANDIDATE_LIMIT,
+    );
+    const expiresAt = cacheUntilFromHeaders(response.headers, fetchedAt);
+
+    if (expiresAt !== null && expiresAt > fetchedAt) {
+      try {
+        await providerResponseStore.put({
+          key,
+          data: { candidates },
+          fetchedAt,
+          expiresAt,
+          staleUntil: expiresAt,
+        });
+      } catch {
+        // Persistent caching is best-effort; the network result remains usable.
+      }
+    }
+
+    return {
+      ok: true,
+      candidates,
+      source: 'network',
+      fetchedAt,
+      expiresAt,
+    };
+  })();
+
+  return Promise.race([operation, timeoutResult]).finally(() => {
+    clearTimeout(timeout);
+  });
 }
 
 function settleForCaller(request, signal) {
@@ -146,11 +178,13 @@ export async function searchHereDestinations(
     fetchImpl = fetch,
     apiKey = import.meta.env.VITE_HERE_API_KEY,
     now = Date.now,
+    timeoutMs = REQUEST_TIMEOUT_MS,
   } = {},
 ) {
   const normalizedQuery = String(query ?? '').trim();
   if (!normalizedQuery) return { ok: false, reason: 'empty-query' };
   if (!apiKey?.trim()) return { ok: false, reason: 'missing-api-key' };
+  if (signal?.aborted) return { ok: false, reason: 'aborted' };
 
   let key;
   try {
@@ -196,6 +230,7 @@ export async function searchHereDestinations(
       fetchImpl,
       now,
       key,
+      timeoutMs,
     }),
   ).catch((error) => ({ ok: false, reason: failureReason(error) }));
 

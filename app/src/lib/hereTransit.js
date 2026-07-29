@@ -5,6 +5,7 @@ import { providerResponseStore } from './responseStore.js';
 const HERE_TRANSIT_URL = 'https://transit.router.hereapi.com/v8/routes';
 const RETURN_ATTRIBUTES =
   'intermediate,actions,travelSummary,incidents,sourceFeedMapping';
+const REQUEST_TIMEOUT_MS = 10_000;
 const KNOWN_SECTION_TYPES = new Set(['pedestrian', 'transit']);
 const KNOWN_ACTION_TYPES = new Set([
   'arrive',
@@ -354,60 +355,87 @@ async function fetchRoutes({
   fetchImpl,
   now,
   key,
+  timeoutMs,
 }) {
-  let response;
-  try {
-    response = await fetchImpl(
-      buildHereTransitUrl(origin, destination, plannedAt, apiKey),
-    );
-  } catch (error) {
-    return { ok: false, reason: failureReason(error) };
-  }
-
-  if (response.status === 401 || response.status === 403) {
-    return { ok: false, reason: 'unauthorized' };
-  }
-  if (response.status === 429) {
-    return { ok: false, reason: 'rate-limited' };
-  }
-  if (!response.ok) return { ok: false, reason: 'network' };
-
-  let payload;
-  try {
-    payload = await response.json();
-  } catch (error) {
-    return {
-      ok: false,
-      reason: error?.name === 'AbortError' ? 'aborted' : 'invalid-response',
-    };
-  }
-
-  const trips = normalizeHereRoutes(payload, plannedAt);
-  if (trips.length === 0) return { ok: false, reason: 'no-route' };
-
-  const responseTime = now();
-  const expiresAt = cacheUntilFromHeaders(response.headers, responseTime);
-  if (expiresAt !== null && expiresAt > responseTime) {
+  const controller = new AbortController();
+  let timedOut = false;
+  let timeout;
+  const timeoutResult = new Promise((resolve) => {
+    timeout = setTimeout(() => {
+      timedOut = true;
+      controller.abort();
+      resolve({ ok: false, reason: 'timeout' });
+    }, timeoutMs);
+  });
+  const operation = (async () => {
+    let response;
     try {
-      await providerResponseStore.put({
-        key,
-        data: { trips },
-        fetchedAt: responseTime,
-        expiresAt,
-        staleUntil: expiresAt,
-      });
-    } catch {
-      // Persistent caching is best-effort; the network result remains usable.
+      response = await fetchImpl(
+        buildHereTransitUrl(origin, destination, plannedAt, apiKey),
+        { signal: controller.signal },
+      );
+    } catch (error) {
+      return {
+        ok: false,
+        reason: timedOut ? 'timeout' : failureReason(error),
+      };
     }
-  }
 
-  return {
-    ok: true,
-    trips,
-    source: 'network',
-    fetchedAt: responseTime,
-    expiresAt,
-  };
+    if (timedOut) return { ok: false, reason: 'timeout' };
+    if (response.status === 401 || response.status === 403) {
+      return { ok: false, reason: 'unauthorized' };
+    }
+    if (response.status === 429) {
+      return { ok: false, reason: 'rate-limited' };
+    }
+    if (!response.ok) return { ok: false, reason: 'network' };
+
+    let payload;
+    try {
+      payload = await response.json();
+    } catch (error) {
+      return {
+        ok: false,
+        reason: timedOut
+          ? 'timeout'
+          : error?.name === 'AbortError'
+            ? 'aborted'
+            : 'invalid-response',
+      };
+    }
+    if (timedOut) return { ok: false, reason: 'timeout' };
+
+    const trips = normalizeHereRoutes(payload, plannedAt);
+    if (trips.length === 0) return { ok: false, reason: 'no-route' };
+
+    const responseTime = now();
+    const expiresAt = cacheUntilFromHeaders(response.headers, responseTime);
+    if (expiresAt !== null && expiresAt > responseTime) {
+      try {
+        await providerResponseStore.put({
+          key,
+          data: { trips },
+          fetchedAt: responseTime,
+          expiresAt,
+          staleUntil: expiresAt,
+        });
+      } catch {
+        // Persistent caching is best-effort; the network result remains usable.
+      }
+    }
+
+    return {
+      ok: true,
+      trips,
+      source: 'network',
+      fetchedAt: responseTime,
+      expiresAt,
+    };
+  })();
+
+  return Promise.race([operation, timeoutResult]).finally(() => {
+    clearTimeout(timeout);
+  });
 }
 
 function settleForCaller(request, signal) {
@@ -436,6 +464,7 @@ export async function fetchHereTransitRoutes(
     fetchImpl = fetch,
     apiKey = import.meta.env.VITE_HERE_API_KEY,
     now = Date.now,
+    timeoutMs = REQUEST_TIMEOUT_MS,
   } = {},
 ) {
   if (!apiKey?.trim()) return { ok: false, reason: 'missing-api-key' };
@@ -485,6 +514,7 @@ export async function fetchHereTransitRoutes(
       fetchImpl,
       now,
       key,
+      timeoutMs,
     }),
   ).catch((error) => ({ ok: false, reason: failureReason(error) }));
 

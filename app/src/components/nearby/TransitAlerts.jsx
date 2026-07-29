@@ -1,19 +1,28 @@
 import { useId, useState } from 'react';
 import { colors } from '../../theme.js';
+import LiveStatus from './LiveStatus.jsx';
 
 function normalizeLineId(value) {
   return String(value ?? '').trim().toUpperCase();
 }
 
-function isRelevant(alert, lineIds) {
+function affectsLine(alert, lineIds) {
   const affectedLines = Array.isArray(alert?.affectedLines)
     ? alert.affectedLines
     : [];
-  if (lineIds === undefined) return affectedLines.length === 0;
   if (!Array.isArray(lineIds) || lineIds.length === 0) return false;
 
   const requested = new Set(lineIds.map(normalizeLineId));
   return affectedLines.some((line) => requested.has(normalizeLineId(line)));
+}
+
+function alertErrorMessage(status, error) {
+  if (status === 'stale') {
+    return 'Live alert update is unavailable. Showing last known alerts.';
+  }
+  if (status !== 'unavailable') return null;
+  if (error === 'missing-api-key') return 'Live service alerts are not configured.';
+  return 'Live service alerts are unavailable right now.';
 }
 
 function AlertRow({ alert }) {
@@ -124,12 +133,23 @@ function AlertRow({ alert }) {
   );
 }
 
-export default function TransitAlerts({ alerts = [], lineIds }) {
+export default function TransitAlerts({
+  alerts = [],
+  lineIds,
+  status,
+  updatedAt,
+  error,
+  excludeLineIds = [],
+}) {
   const standalone = lineIds === undefined;
   const relevantAlerts = alerts.filter((alert) =>
-    isRelevant(alert, lineIds),
+    standalone
+      ? !affectsLine(alert, excludeLineIds)
+      : affectsLine(alert, lineIds),
   );
-  if (relevantAlerts.length === 0) return null;
+  const showStatus = standalone && Boolean(status);
+  const statusMessage = alertErrorMessage(status, error);
+  if (relevantAlerts.length === 0 && !showStatus) return null;
 
   return (
     <section
@@ -151,13 +171,39 @@ export default function TransitAlerts({ alerts = [], lineIds }) {
           textTransform: 'uppercase',
         }}
       >
-        {standalone ? 'General service alert' : 'Service alert'}
+        {standalone ? 'Current SF service alerts' : 'Service alert'}
       </div>
-      <ul style={{ listStyle: 'none', margin: 0, padding: 0 }}>
-        {relevantAlerts.map((alert) => (
-          <AlertRow key={alert.id} alert={alert} />
-        ))}
-      </ul>
+      {showStatus && (
+        <div
+          style={{
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'space-between',
+            gap: 8,
+            padding: '8px 0 5px',
+          }}
+        >
+          {status === 'loading' ? (
+            <span style={{ color: colors.mutedText, fontSize: 12 }}>
+              Checking current service alerts…
+            </span>
+          ) : (
+            <LiveStatus source={status} timestamp={updatedAt} />
+          )}
+        </div>
+      )}
+      {statusMessage && (
+        <div style={{ color: colors.mutedText, fontSize: 12, lineHeight: 1.45 }}>
+          {statusMessage}
+        </div>
+      )}
+      {relevantAlerts.length > 0 && (
+        <ul style={{ listStyle: 'none', margin: 0, padding: 0 }}>
+          {relevantAlerts.map((alert) => (
+            <AlertRow key={alert.id} alert={alert} />
+          ))}
+        </ul>
+      )}
     </section>
   );
 }

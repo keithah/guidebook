@@ -14,6 +14,7 @@ export default function TripOptions({
   result,
   alerts = [],
   externalUrlForTrip,
+  onExpandedLineIdsChange,
 }) {
   const [expandedTripId, setExpandedTripId] = useState(null);
 
@@ -69,11 +70,10 @@ export default function TripOptions({
               trip={trip}
               index={index}
               expanded={expanded}
-              onToggle={() =>
-                setExpandedTripId((current) =>
-                  current === tripKey ? null : tripKey,
-                )
-              }
+              onToggle={(lineIds) => {
+                setExpandedTripId(expanded ? null : tripKey);
+                onExpandedLineIdsChange?.(expanded ? [] : lineIds);
+              }}
               alerts={alerts}
               externalUrl={externalUrlForTrip?.(trip)}
               instanceId={tripKey}
