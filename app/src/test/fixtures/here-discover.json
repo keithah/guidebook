@@ -1,0 +1,52 @@
+{
+  "items": [
+    {
+      "id": "here:af:streetsection:union-square",
+      "title": "Union Square",
+      "address": {
+        "label": "Union Square, San Francisco, CA 94108, United States"
+      },
+      "position": {
+        "lat": 37.7879,
+        "lng": -122.4075
+      },
+      "resultType": "place",
+      "categories": [],
+      "distance": 7900
+    },
+    {
+      "id": "here:af:streetsection:market-street",
+      "title": "1 Market Street",
+      "address": {
+        "label": "1 Market Street, San Francisco, CA 94105, United States"
+      },
+      "position": {
+        "lat": 37.7936,
+        "lng": -122.3958
+      },
+      "resultType": "address",
+      "categories": [
+        {
+          "id": "100-1000-0000",
+          "name": "Restaurant",
+          "primary": true
+        }
+      ],
+      "distance": 1250
+    },
+    {
+      "id": "here:af:streetsection:malformed",
+      "title": "Malformed result",
+      "address": {
+        "label": "San Francisco, CA, United States"
+      },
+      "position": {
+        "lat": "37.78",
+        "lng": null
+      },
+      "resultType": "place",
+      "categories": [],
+      "distance": 10
+    }
+  ]
+}

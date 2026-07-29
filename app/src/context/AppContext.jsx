@@ -16,6 +16,10 @@ export function useApp() {
 
 const TABS = ['home', 'arrive', 'cottage', 'around', 'explore', 'help'];
 
+/**
+ * Provide application-wide state and actions through `AppContext`.
+ * @returns {JSX.Element} The context provider containing the application children.
+ */
 export function AppProvider({ children }) {
   const scrollRef = useRef(null);
 
@@ -140,7 +144,6 @@ export function AppProvider({ children }) {
   const [locating, setLocating] = useState(false);
   const [locateError, setLocateError] = useState(null);
   const [backOpen, setBackOpen] = useState(false);
-  const [dest, setDest] = useState('');
 
   const allowLocation = useCallback(async () => {
     setLocating(true);
@@ -193,9 +196,9 @@ export function AppProvider({ children }) {
   }, [phase === 'before', stay?.checkin]);
 
   // ---- Live K departures (511) for Home / TopBar ---------------------------
-  const optionsLive = useLiveDepartures(property.transit.options);
+  const { times: optionTimes } = useLiveDepartures(property.transit.options);
   const kIndex = property.transit.options.findIndex((o) => o.line === 'K');
-  const kTimes = optionsLive[kIndex] ?? property.transit.options[kIndex]?.times;
+  const kTimes = optionTimes[kIndex] ?? property.transit.options[kIndex]?.times;
 
   // ---- Temperature unit + forecast panel -----------------------------------
   const [unit, setUnit] = useLocalStorageState('sfcottage:temp-unit', 'F');
@@ -245,8 +248,6 @@ export function AppProvider({ children }) {
       useCottageAsLocation,
       backOpen,
       setBackOpen,
-      dest,
-      setDest,
       weather,
       arrivalWeather,
       forecastDays,
@@ -288,7 +289,6 @@ export function AppProvider({ children }) {
       allowLocation,
       useCottageAsLocation,
       backOpen,
-      dest,
       weather,
       arrivalWeather,
       forecastDays,

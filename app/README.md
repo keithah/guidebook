@@ -1,78 +1,135 @@
 # The SF Cottage — Guidebook
 
-A guest guidebook PWA for The SF Cottage, implementing the "Fog" design
-direction from `../project/Fog Guidebook.dc.html` (see `../README.md` and
-`../chats/chat1.md` for the design history). Built with React + Vite.
+A phone-width React/Vite PWA for guests at The SF Cottage. The app combines
+curated property content with live Bay Area place search, door-to-door transit
+itineraries, nearby departures, service alerts, and an offline neighborhood
+orientation map.
 
-## Running it
+## Local setup
 
-```
+Use Node.js 22 or newer, then install dependencies and copy the environment
+template:
+
+```sh
 npm install
-npm run dev
+cp .env.example .env
 ```
 
-Open the printed localhost URL. The app is phone-width (max 430px) by
-design — resize your browser or use device emulation.
+Set both values in the ignored `.env` file; never commit or paste either key
+into source code:
 
+```dotenv
+VITE_HERE_API_KEY=
+VITE_API_511_KEY=
 ```
-npm run build   # production build to dist/
-npm run preview # serve the production build locally
+
+- `VITE_HERE_API_KEY` is a browser key for HERE Discover and HERE Public
+  Transit Routing. In HERE Access Manager, restrict it to the origins used by
+  this app: `https://keithah.github.io`, `http://localhost:5173`, and
+  `http://127.0.0.1:4173`. Add another exact local origin only when intentionally
+  running Vite on a different host or port.
+- `VITE_API_511_KEY` is a 511 Open Data token from
+  <https://511.org/open-data/token>.
+
+Start the development server with `npm run dev` and open
+`http://localhost:5173/guidebook/`. The app is designed for a maximum width of
+430 px, so use a phone viewport or resize the browser when checking layout.
+
+## Provider responsibilities
+
+- HERE Discover returns up to five destination candidates. A guest must choose
+  the intended candidate; the app never silently selects the first result.
+- HERE Public Transit Routing returns up to three complete door-to-door
+  itineraries, including walking, transit, transfers, intermediate stops, and
+  the final arrival.
+- 511 supplies authoritative nearby departure boards and San Francisco service
+  alerts. Curated times and instructions in
+  `src/data/properties/sfcottage.json` remain available when live data fails.
+
+The UI labels a network response `Live`, an unexpired stored response `Cached`,
+and a stored 511 response shown after a failed refresh `Last known`. Departure
+data is fresh for five minutes and may be shown as last known for at most 30
+minutes from retrieval. Alert data is fresh for ten minutes and may be shown as
+last known for at most 60 minutes from retrieval.
+
+HERE responses are persisted only when HERE's HTTP caching headers explicitly
+allow it. Current HERE `no-store` responses remain in application memory only
+for the active session and do not enter IndexedDB or Cache Storage.
+
+## Storage and offline boundaries
+
+The generated Workbox service worker precaches the application shell, checked-in
+images, property data bundled with the app, and
+`public/images/ingleside-neighborhood.svg`. Its only runtime caches are NWS
+weather and Google Fonts. Standard OpenStreetMap tiles, HERE responses, and 511
+responses are never stored in service-worker Cache Storage.
+
+IndexedDB database `sfcottage-guidebook` has two separate stores:
+
+- `providerResponses` stores normalized 511 data and only those normalized HERE
+  responses whose caching headers permit persistence.
+- `savedState` stores user-saved destination candidates.
+
+Both stores use credential-free logical keys. Raw provider payloads, request
+URLs, request headers, and API keys are not persisted. Other guest preferences
+and uploaded placeholder photos use existing browser-local storage.
+
+When the live Leaflet map cannot load, the app displays the packaged
+OSM-derived orientation map with visible OpenStreetMap attribution. Refresh it
+intentionally from the `app` directory with:
+
+```sh
+node scripts/generate-offline-map.mjs
 ```
 
-## Content
+Regeneration fetches the fixed bounds documented in
+`public/images/ingleside-neighborhood.md`. Commit the generated SVG and update
+that provenance file's generation date if the source is refreshed. Preserve
+both the in-SVG `© OpenStreetMap contributors · ODbL` notice and the visible
+linked OpenStreetMap attribution in the app.
 
-All copy lives in `src/data/properties/sfcottage.json` — rooms, transit,
-food, explore places, emergency info, etc. Fields with a `_todo` sibling key
-are plausible stand-ins (call it "the SF Cottage" and it works, but codes,
-WiFi credentials, the host phone number, and the nearest hospital are all
-placeholders) — replace them with the real values before this goes live for
-actual guests. This mirrors the multi-property design in `uploads/SPEC.md`:
-adding a second property later means adding another JSON file under
-`properties/` and pointing the app at it.
+## Verification and deployment
 
-## Guest links (`/sfcottage#<hash>`)
+Run the complete automated gate:
 
-Per the spec, a guest's per-stay link carries their name, dates, and access
-code so the home screen can go stay-phase-aware (before / during /
-checkout) and show the door code. The real version of this is meant to come
-from an Airbnb-scraping injection pipeline that doesn't exist yet ("defined
-later" in the spec) — what's implemented here is the **consuming half**:
-`src/lib/stayHash.js` decodes a base64url-encoded JSON payload
-(`{ guestName, checkin, checkout, code }`) from the URL hash and derives the
-stay phase from today's date.
+```sh
+npm test
+npm run lint
+npm run build
+```
 
-Until the real pipeline exists, generic mode (no hash) shows a small "Dev:
-preview a guest stay link" control at the bottom of the home screen that
-builds one of these hashes for you — it's dev chrome, not part of the
-design, and disappears once real links are being issued by something else.
+`npm run build` writes the GitHub Pages production bundle to `dist/` using the
+base path `/guidebook/`. To inspect that exact bundle locally:
 
-You can also override the derived phase for a guest link with
-`?phase=before|during|checkout` while testing.
+```sh
+npm run preview -- --host 127.0.0.1
+```
 
-## Live data
+Open `http://127.0.0.1:4173/guidebook/`. For the offline smoke test, first load
+the preview online and exercise destination search and a route. In browser
+DevTools, switch Network to Offline and reload. Confirm the shell, property
+content, photographs, and attributed offline map remain readable; a new route
+search should explain that a connection is required instead of showing a blank
+screen. Restore Network to Online and confirm the live map and retry controls
+recover.
 
-- **Weather** — `src/lib/weather.js` calls api.weather.gov (NWS), no API key
-  needed. Falls back to the mockup's static copy if the request fails.
-- **Transit departures** — `src/lib/transit511.js` is wired for the 511.org
-  Transit API, but needs a free API key (`VITE_API_511_KEY` in `.env`) *and*
-  real 511 stop codes per stop (the ones in `sfcottage.json` are flagged
-  `_todo`, since they weren't available while building this). Until both
-  exist, the app falls back to the static departure times already in the
-  JSON — this is intentional graceful degradation, not a bug.
-- **Map** — `src/components/NearbyMap.jsx` is a real Leaflet/OpenStreetMap
-  map (no key needed), with geolocation via the browser's own permission
-  prompt (`src/lib/geo.js`).
-- **Photos** — `src/components/ImageSlot.jsx` lets you drag/drop or tap to
-  upload a photo for each placeholder (cottage exterior, gate/door keypad).
-  They're stored client-side (resized, as a data URL in `localStorage`) —
-  fine for a single host filling in their own photos once, but a real
-  multi-property deploy should eventually swap these for checked-in static
-  assets instead.
+Before deployment, also inspect DevTools Application:
 
-## PWA / offline
+- Cache Storage should contain the Workbox precache with
+  `images/ingleside-neighborhood.svg`, and no OSM tile, HERE, or 511 response.
+- IndexedDB should contain only normalized logical keys without credentials.
+  With current HERE `no-store` headers, no HERE provider entry should remain.
 
-`vite-plugin-pwa` generates the manifest and service worker (see
-`vite.config.js`). App shell assets are precached; map tiles, weather, and
-511 responses use network-first/cache-first runtime caching so the app
-still opens something useful offline, per the spec's "installable PWA...
-cached for offline use, live data degrades gracefully."
+Deploy `dist/` to the `keithah.github.io/guidebook/` project path after the
+automated gate and production-preview smoke test pass.
+
+## Content and guest links
+
+Property copy lives in `src/data/properties/sfcottage.json`. Fields with a
+`_todo` sibling are stand-ins that must be replaced before real guest use.
+
+Guest links use `/sfcottage#<hash>`, where the hash is base64url-encoded JSON
+containing `{ guestName, checkin, checkout, code }`. `src/lib/stayHash.js`
+decodes it and derives the stay phase. Until the upstream link-creation pipeline
+exists, generic mode exposes a development preview control on the home screen.
+Use `?phase=before|during|checkout` to override the derived phase while testing.
