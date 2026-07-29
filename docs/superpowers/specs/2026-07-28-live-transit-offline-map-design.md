@@ -64,16 +64,16 @@ It applies a San Francisco/Bay Area geographic constraint, limits the candidate 
 
 ```js
 {
-  (id,
-    departureTime,
-    arrivalTime,
-    durationSeconds,
-    transferCount,
-    walkingDurationSeconds,
-    lines,
-    sections,
-    notices,
-    plannedAt);
+  id,
+  departureTime,
+  arrivalTime,
+  durationSeconds,
+  transferCount,
+  walkingDurationSeconds,
+  lines,
+  sections,
+  notices,
+  plannedAt
 }
 ```
 
