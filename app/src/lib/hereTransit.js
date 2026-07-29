@@ -1,11 +1,16 @@
 import { cacheUntilFromHeaders } from './cachePolicy.js';
-import { dedupeRequest } from './requestCoordinator.js';
+import {
+  isFinitePosition,
+  providerFailureReason,
+  sharedProviderRequest,
+} from './providerFetch.js';
 import { providerResponseStore } from './responseStore.js';
 
 const HERE_TRANSIT_URL = 'https://transit.router.hereapi.com/v8/routes';
 const RETURN_ATTRIBUTES =
   'intermediate,actions,travelSummary,incidents,sourceFeedMapping';
 const REQUEST_TIMEOUT_MS = 10_000;
+const ROUTE_KEY_BUCKET_MS = 60_000;
 const KNOWN_SECTION_TYPES = new Set(['pedestrian', 'transit']);
 const KNOWN_ACTION_TYPES = new Set([
   'arrive',
@@ -22,6 +27,9 @@ const KNOWN_ACTION_TYPES = new Set([
 
 function formatPosition(position) {
   if (typeof position === 'string') return position.trim();
+  if (!isFinitePosition(position)) {
+    throw new TypeError('Route coordinates must be finite');
+  }
   return `${position.lat},${position.lng}`;
 }
 
@@ -74,9 +82,7 @@ function normalizePlace(place) {
           },
         }
       : {}),
-    ...(typeof place.platform === 'string'
-      ? { platform: place.platform }
-      : {}),
+    ...(typeof place.platform === 'string' ? { platform: place.platform } : {}),
     ...(typeof place.code === 'string' ? { stopCode: place.code } : {}),
   };
 }
@@ -85,9 +91,7 @@ function normalizeNotice(notice) {
   return {
     code: typeof notice?.code === 'string' ? notice.code : 'unknown',
     title:
-      typeof notice?.title === 'string'
-        ? notice.title
-        : labelFor(notice?.code),
+      typeof notice?.title === 'string' ? notice.title : labelFor(notice?.code),
     ...(typeof notice?.severity === 'string'
       ? { severity: notice.severity }
       : {}),
@@ -97,8 +101,7 @@ function normalizeNotice(notice) {
 function normalizeIncident(incident) {
   return {
     type: typeof incident?.type === 'string' ? incident.type : 'unknown',
-    effect:
-      typeof incident?.effect === 'string' ? incident.effect : 'unknown',
+    effect: typeof incident?.effect === 'string' ? incident.effect : 'unknown',
     ...(typeof incident?.summary === 'string'
       ? { summary: incident.summary }
       : {}),
@@ -133,9 +136,7 @@ function normalizeAction(action) {
     ...(Number.isFinite(action.duration)
       ? { durationSeconds: action.duration }
       : {}),
-    ...(Number.isFinite(action.length)
-      ? { lengthMeters: action.length }
-      : {}),
+    ...(Number.isFinite(action.length) ? { lengthMeters: action.length } : {}),
     ...(Number.isFinite(action.offset) ? { offset: action.offset } : {}),
     ...(typeof action.direction === 'string'
       ? { direction: action.direction }
@@ -170,9 +171,7 @@ function normalizeTransport(transport) {
     ...(typeof transport.category === 'string'
       ? { category: transport.category }
       : {}),
-    ...(typeof transport.color === 'string'
-      ? { color: transport.color }
-      : {}),
+    ...(typeof transport.color === 'string' ? { color: transport.color } : {}),
     ...(typeof transport.textColor === 'string'
       ? { textColor: transport.textColor }
       : {}),
@@ -340,11 +339,8 @@ export function normalizeHereRoutes(payload, plannedAt) {
 }
 
 function routeCacheKey(origin, destination, plannedAt) {
-  return `here-transit:${formatPosition(origin)}:${formatPosition(destination)}:${encodeURIComponent(plannedAt)}`;
-}
-
-function failureReason(error) {
-  return error?.name === 'AbortError' ? 'aborted' : 'network';
+  const bucket = Math.floor(Date.parse(plannedAt) / ROUTE_KEY_BUCKET_MS);
+  return `here-transit:${formatPosition(origin)}:${formatPosition(destination)}:${bucket}`;
 }
 
 async function fetchRoutes({
@@ -355,104 +351,72 @@ async function fetchRoutes({
   fetchImpl,
   now,
   key,
-  timeoutMs,
+  signal,
+  didTimeout,
 }) {
-  const controller = new AbortController();
-  let timedOut = false;
-  let timeout;
-  const timeoutResult = new Promise((resolve) => {
-    timeout = setTimeout(() => {
-      timedOut = true;
-      controller.abort();
-      resolve({ ok: false, reason: 'timeout' });
-    }, timeoutMs);
-  });
-  const operation = (async () => {
-    let response;
-    try {
-      response = await fetchImpl(
-        buildHereTransitUrl(origin, destination, plannedAt, apiKey),
-        { signal: controller.signal },
-      );
-    } catch (error) {
-      return {
-        ok: false,
-        reason: timedOut ? 'timeout' : failureReason(error),
-      };
-    }
-
-    if (timedOut) return { ok: false, reason: 'timeout' };
-    if (response.status === 401 || response.status === 403) {
-      return { ok: false, reason: 'unauthorized' };
-    }
-    if (response.status === 429) {
-      return { ok: false, reason: 'rate-limited' };
-    }
-    if (!response.ok) return { ok: false, reason: 'network' };
-
-    let payload;
-    try {
-      payload = await response.json();
-    } catch (error) {
-      return {
-        ok: false,
-        reason: timedOut
-          ? 'timeout'
-          : error?.name === 'AbortError'
-            ? 'aborted'
-            : 'invalid-response',
-      };
-    }
-    if (timedOut) return { ok: false, reason: 'timeout' };
-
-    const trips = normalizeHereRoutes(payload, plannedAt);
-    if (trips.length === 0) return { ok: false, reason: 'no-route' };
-
-    const responseTime = now();
-    const expiresAt = cacheUntilFromHeaders(response.headers, responseTime);
-    if (expiresAt !== null && expiresAt > responseTime) {
-      try {
-        await providerResponseStore.put({
-          key,
-          data: { trips },
-          fetchedAt: responseTime,
-          expiresAt,
-          staleUntil: expiresAt,
-        });
-      } catch {
-        // Persistent caching is best-effort; the network result remains usable.
-      }
-    }
-
+  let response;
+  try {
+    response = await fetchImpl(
+      buildHereTransitUrl(origin, destination, plannedAt, apiKey),
+      { signal },
+    );
+  } catch (error) {
     return {
-      ok: true,
-      trips,
-      source: 'network',
-      fetchedAt: responseTime,
-      expiresAt,
+      ok: false,
+      reason: didTimeout() ? 'timeout' : providerFailureReason(error),
     };
-  })();
-
-  return Promise.race([operation, timeoutResult]).finally(() => {
-    clearTimeout(timeout);
-  });
-}
-
-function settleForCaller(request, signal) {
-  if (!signal) return request;
-  if (signal.aborted) {
-    return Promise.resolve({ ok: false, reason: 'aborted' });
   }
 
-  let onAbort;
-  const aborted = new Promise((resolve) => {
-    onAbort = () => resolve({ ok: false, reason: 'aborted' });
-    signal.addEventListener('abort', onAbort, { once: true });
-  });
+  if (didTimeout()) return { ok: false, reason: 'timeout' };
+  if (response.status === 401 || response.status === 403) {
+    return { ok: false, reason: 'unauthorized' };
+  }
+  if (response.status === 429) {
+    return { ok: false, reason: 'rate-limited' };
+  }
+  if (!response.ok) return { ok: false, reason: 'network' };
 
-  return Promise.race([request, aborted]).finally(() => {
-    signal.removeEventListener('abort', onAbort);
-  });
+  let payload;
+  try {
+    payload = await response.json();
+  } catch (error) {
+    return {
+      ok: false,
+      reason: didTimeout()
+        ? 'timeout'
+        : error?.name === 'AbortError'
+          ? 'aborted'
+          : 'invalid-response',
+    };
+  }
+  if (didTimeout()) return { ok: false, reason: 'timeout' };
+
+  const trips = normalizeHereRoutes(payload, plannedAt);
+  if (trips.length === 0) return { ok: false, reason: 'no-route' };
+
+  const responseTime = now();
+  const expiresAt = cacheUntilFromHeaders(response.headers, responseTime);
+  if (expiresAt !== null && expiresAt > responseTime) {
+    try {
+      await providerResponseStore.put({
+        key,
+        data: { trips },
+        fetchedAt: responseTime,
+        expiresAt,
+        staleUntil: expiresAt,
+      });
+    } catch {
+      // Persistent caching is best-effort; the network result remains usable.
+    }
+  }
+
+  return {
+    ok: true,
+    trips,
+    source: 'network',
+    fetchedAt: responseTime,
+    expiresAt,
+  };
 }
 
 export async function fetchHereTransitRoutes(
@@ -469,14 +433,17 @@ export async function fetchHereTransitRoutes(
 ) {
   if (!apiKey?.trim()) return { ok: false, reason: 'missing-api-key' };
   if (signal?.aborted) return { ok: false, reason: 'aborted' };
+  if (!isFinitePosition(origin) || !isFinitePosition(destination)) {
+    return { ok: false, reason: 'invalid-request' };
+  }
 
   let plannedAt;
   let key;
   try {
     plannedAt = isoTime(departureTime);
     key = routeCacheKey(origin, destination, plannedAt);
-  } catch (error) {
-    return { ok: false, reason: failureReason(error) };
+  } catch {
+    return { ok: false, reason: 'invalid-request' };
   }
 
   const currentTime = now();
@@ -505,18 +472,21 @@ export async function fetchHereTransitRoutes(
     }
   }
 
-  const request = dedupeRequest(key, () =>
-    fetchRoutes({
-      origin,
-      destination,
-      plannedAt,
-      apiKey,
-      fetchImpl,
-      now,
-      key,
-      timeoutMs,
-    }),
-  ).catch((error) => ({ ok: false, reason: failureReason(error) }));
-
-  return settleForCaller(request, signal);
+  return sharedProviderRequest({
+    key,
+    signal,
+    timeoutMs,
+    loader: ({ signal: providerSignal, didTimeout }) =>
+      fetchRoutes({
+        origin,
+        destination,
+        plannedAt,
+        apiKey,
+        fetchImpl,
+        now,
+        key,
+        signal: providerSignal,
+        didTimeout,
+      }),
+  });
 }

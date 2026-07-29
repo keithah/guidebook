@@ -37,8 +37,7 @@ const stopPayload = {
 };
 
 function transitResponse(payload, options = {}) {
-  const text =
-    typeof payload === 'string' ? payload : JSON.stringify(payload);
+  const text = typeof payload === 'string' ? payload : JSON.stringify(payload);
   return {
     ok: options.ok ?? true,
     status: options.status ?? 200,
@@ -90,6 +89,7 @@ describe('511 requests', () => {
   });
 
   afterEach(() => {
+    vi.unstubAllEnvs();
     vi.useRealTimers();
     vi.restoreAllMocks();
   });
@@ -97,7 +97,9 @@ describe('511 requests', () => {
   it('strips a BOM and returns normalized Stop Monitoring metadata', async () => {
     const fetchImpl = vi
       .fn()
-      .mockResolvedValue(transitResponse(`\uFEFF${JSON.stringify(stopPayload)}`));
+      .mockResolvedValue(
+        transitResponse(`\uFEFF${JSON.stringify(stopPayload)}`),
+      );
 
     await expect(
       fetchStopDepartures('15794', 'SF', {
@@ -141,7 +143,6 @@ describe('511 requests', () => {
       ok: false,
       reason: 'missing-api-key',
     });
-    vi.unstubAllEnvs();
   });
 
   it('rejects a missing stop code without fetching', async () => {
@@ -239,7 +240,7 @@ describe('511 requests', () => {
     await vi.waitFor(() => expect(fetchImpl).toHaveBeenCalledTimes(1));
 
     controller.abort();
-    await expect(first).resolves.toEqual({ ok: false, reason: 'timeout' });
+    await expect(first).resolves.toEqual({ ok: false, reason: 'aborted' });
     resolveResponse(transitResponse(stopPayload));
 
     await expect(second).resolves.toMatchObject({
@@ -247,6 +248,29 @@ describe('511 requests', () => {
       source: 'network',
     });
     expect(fetchImpl).toHaveBeenCalledTimes(1);
+  });
+
+  it('does not serve stale data to a caller that cancels', async () => {
+    await providerResponseStore.put({
+      key: '511:departures:SF:15794',
+      data: { minutesList: [4, 12] },
+      fetchedAt: alertNow - 10 * 60_000,
+      expiresAt: alertNow - 5 * 60_000,
+      staleUntil: alertNow + 20 * 60_000,
+    });
+    const controller = new AbortController();
+    const fetchImpl = vi.fn(() => new Promise(() => {}));
+    const request = fetchStopDepartures('15794', 'SF', {
+      apiKey,
+      fetchImpl,
+      signal: controller.signal,
+      now: () => alertNow,
+    });
+    await vi.waitFor(() => expect(fetchImpl).toHaveBeenCalledTimes(1));
+
+    controller.abort();
+
+    await expect(request).resolves.toEqual({ ok: false, reason: 'aborted' });
   });
 
   it.each([
@@ -257,9 +281,7 @@ describe('511 requests', () => {
           apiKey,
           fetchImpl: vi
             .fn()
-            .mockResolvedValue(
-              transitResponse({ ServiceDelivery: {} }),
-            ),
+            .mockResolvedValue(transitResponse({ ServiceDelivery: {} })),
         }),
       '511:departures:SF:15794',
     ],
@@ -270,9 +292,7 @@ describe('511 requests', () => {
           apiKey,
           fetchImpl: vi
             .fn()
-            .mockResolvedValue(
-              transitResponse({ Header: {}, Entities: null }),
-            ),
+            .mockResolvedValue(transitResponse({ Header: {}, Entities: null })),
         }),
       '511:alerts:SF',
     ],
@@ -300,9 +320,7 @@ describe('511 requests', () => {
     await fetchStopDepartures('15794', 'SF', options);
     currentTime += 5 * 60_000;
     const result = await fetchStopDepartures('15794', 'SF', options);
-    const cached = await providerResponseStore.get(
-      '511:departures:SF:15794',
-    );
+    const cached = await providerResponseStore.get('511:departures:SF:15794');
 
     expect(result).toMatchObject({
       ok: true,

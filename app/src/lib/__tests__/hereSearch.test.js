@@ -54,9 +54,7 @@ describe('buildHereSearchUrl', () => {
     expect(url.origin).toBe('https://discover.search.hereapi.com');
     expect(url.pathname).toBe('/v1/discover');
     expect(url.searchParams.get('q')).toBe('coffee & tea');
-    expect(url.searchParams.get('in')).toBe(
-      'circle:37.7879,-122.4075;r=80000',
-    );
+    expect(url.searchParams.get('in')).toBe('circle:37.7879,-122.4075;r=80000');
     expect(url.searchParams.get('limit')).toBe('5');
     expect(url.searchParams.get('lang')).toBe('en-US');
     expect(url.searchParams.get('apiKey')).toBe(apiKey);
@@ -76,9 +74,11 @@ describe('searchHereDestinations', () => {
   });
 
   it('returns normalized candidates from the network', async () => {
-    const fetchImpl = vi.fn().mockResolvedValue(
-      hereResponse(fixture, { headers: { 'cache-control': 'no-store' } }),
-    );
+    const fetchImpl = vi
+      .fn()
+      .mockResolvedValue(
+        hereResponse(fixture, { headers: { 'cache-control': 'no-store' } }),
+      );
 
     const result = await searchHereDestinations('  Union Square  ', center, {
       apiKey,
@@ -188,6 +188,24 @@ describe('searchHereDestinations', () => {
     expect(fetchImpl).not.toHaveBeenCalled();
   });
 
+  it.each([
+    [{ lat: Number.NaN, lng: center.lng }],
+    [{ lat: center.lat, lng: Number.POSITIVE_INFINITY }],
+    [undefined],
+  ])(
+    'rejects an invalid search center without storage or network work',
+    async (invalidCenter) => {
+      const get = vi.spyOn(providerResponseStore, 'get');
+      const fetchImpl = vi.fn();
+
+      await expect(
+        searchHereDestinations('coffee', invalidCenter, { apiKey, fetchImpl }),
+      ).resolves.toEqual({ ok: false, reason: 'invalid-request' });
+      expect(get).not.toHaveBeenCalled();
+      expect(fetchImpl).not.toHaveBeenCalled();
+    },
+  );
+
   it('does not start work for an already-aborted caller', async () => {
     const controller = new AbortController();
     controller.abort();
@@ -205,9 +223,11 @@ describe('searchHereDestinations', () => {
 
   it('does not persist a response marked no-store', async () => {
     const put = vi.spyOn(providerResponseStore, 'put');
-    const fetchImpl = vi.fn().mockResolvedValue(
-      hereResponse(fixture, { headers: { 'cache-control': 'no-store' } }),
-    );
+    const fetchImpl = vi
+      .fn()
+      .mockResolvedValue(
+        hereResponse(fixture, { headers: { 'cache-control': 'no-store' } }),
+      );
 
     await searchHereDestinations('coffee', center, {
       apiKey,
@@ -222,9 +242,11 @@ describe('searchHereDestinations', () => {
     vi.spyOn(providerResponseStore, 'get').mockRejectedValue(
       new Error('IndexedDB unavailable'),
     );
-    const fetchImpl = vi.fn().mockResolvedValue(
-      hereResponse(fixture, { headers: { 'cache-control': 'no-store' } }),
-    );
+    const fetchImpl = vi
+      .fn()
+      .mockResolvedValue(
+        hereResponse(fixture, { headers: { 'cache-control': 'no-store' } }),
+      );
 
     const result = await searchHereDestinations('coffee', center, {
       apiKey,
@@ -253,9 +275,11 @@ describe('searchHereDestinations', () => {
     vi.spyOn(providerResponseStore, 'delete').mockRejectedValue(
       new Error('IndexedDB unavailable'),
     );
-    const fetchImpl = vi.fn().mockResolvedValue(
-      hereResponse(fixture, { headers: { 'cache-control': 'no-store' } }),
-    );
+    const fetchImpl = vi
+      .fn()
+      .mockResolvedValue(
+        hereResponse(fixture, { headers: { 'cache-control': 'no-store' } }),
+      );
 
     const result = await searchHereDestinations('coffee', center, {
       apiKey,
@@ -277,9 +301,11 @@ describe('searchHereDestinations', () => {
     vi.spyOn(providerResponseStore, 'put').mockRejectedValue(
       new Error('IndexedDB unavailable'),
     );
-    const fetchImpl = vi.fn().mockResolvedValue(
-      hereResponse(fixture, { headers: { 'cache-control': 'max-age=60' } }),
-    );
+    const fetchImpl = vi
+      .fn()
+      .mockResolvedValue(
+        hereResponse(fixture, { headers: { 'cache-control': 'max-age=60' } }),
+      );
 
     const result = await searchHereDestinations('coffee', center, {
       apiKey,
@@ -298,9 +324,11 @@ describe('searchHereDestinations', () => {
 
   it('persists normalized max-age responses and reuses a fresh cache entry', async () => {
     const put = vi.spyOn(providerResponseStore, 'put');
-    const fetchImpl = vi.fn().mockResolvedValue(
-      hereResponse(fixture, { headers: { 'cache-control': 'max-age=60' } }),
-    );
+    const fetchImpl = vi
+      .fn()
+      .mockResolvedValue(
+        hereResponse(fixture, { headers: { 'cache-control': 'max-age=60' } }),
+      );
     const options = { apiKey, fetchImpl, now: () => fetchedAt };
 
     const first = await searchHereDestinations('coffee', center, options);

@@ -3,18 +3,25 @@ import { describe, expect, it } from 'vitest';
 import { runtimeCaching } from '../../../vite.config.js';
 
 describe('PWA runtime caching', () => {
-  it('keeps live map and transit requests out of the service worker', () => {
-    const patterns = runtimeCaching.map((entry) => String(entry.urlPattern));
-    const registeredPatterns = patterns.join('\n');
-
-    expect(registeredPatterns).not.toMatch(/openstreetmap|511|hereapi/);
-  });
-
-  it('retains weather and font runtime caching', () => {
-    const patterns = runtimeCaching.map((entry) => String(entry.urlPattern));
-    const registeredPatterns = patterns.join('\n');
-
-    expect(registeredPatterns).toMatch(/weather/);
-    expect(registeredPatterns).toMatch(/googleapis|gstatic/);
+  it('allows only weather and font requests into runtime caches', () => {
+    expect(runtimeCaching).toHaveLength(2);
+    expect(
+      runtimeCaching.map(({ urlPattern, handler, options }) => ({
+        pattern: String(urlPattern),
+        handler,
+        cacheName: options.cacheName,
+      })),
+    ).toEqual([
+      {
+        pattern: String(/^https:\/\/api\.weather\.gov\//),
+        handler: 'NetworkFirst',
+        cacheName: 'nws-weather',
+      },
+      {
+        pattern: String(/^https:\/\/fonts\.(googleapis|gstatic)\.com\//),
+        handler: 'CacheFirst',
+        cacheName: 'google-fonts',
+      },
+    ]);
   });
 });

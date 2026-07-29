@@ -3,7 +3,9 @@ import { colors } from '../../theme.js';
 import LiveStatus from './LiveStatus.jsx';
 
 function normalizeLineId(value) {
-  return String(value ?? '').trim().toUpperCase();
+  return String(value ?? '')
+    .trim()
+    .toUpperCase();
 }
 
 function affectsLine(alert, lineIds) {
@@ -21,7 +23,8 @@ function alertErrorMessage(status, error) {
     return 'Live alert update is unavailable. Showing last known alerts.';
   }
   if (status !== 'unavailable') return null;
-  if (error === 'missing-api-key') return 'Live service alerts are not configured.';
+  if (error === 'missing-api-key')
+    return 'Live service alerts are not configured.';
   return 'Live service alerts are unavailable right now.';
 }
 
@@ -30,10 +33,10 @@ function AlertRow({ alert }) {
   const detailsId = useId();
   const hasDetails = Boolean(
     alert.description ||
-      alert.activePeriod?.start ||
-      alert.activePeriod?.end ||
-      alert.url ||
-      alert.updatedAt,
+    alert.activePeriod?.start ||
+    alert.activePeriod?.end ||
+    alert.url ||
+    alert.updatedAt,
   );
 
   return (
@@ -77,9 +80,10 @@ function AlertRow({ alert }) {
           </button>
         )}
       </div>
-      {expanded && (
+      {hasDetails && (
         <div
           id={detailsId}
+          hidden={!expanded}
           style={{
             marginTop: 6,
             color: colors.mutedText,
@@ -87,45 +91,49 @@ function AlertRow({ alert }) {
             lineHeight: 1.5,
           }}
         >
-          {alert.description && <div>{alert.description}</div>}
-          {(alert.activePeriod?.start || alert.activePeriod?.end) && (
-            <div style={{ marginTop: 4 }}>
-              {alert.activePeriod.start && (
-                <>
-                  From{' '}
-                  <time dateTime={alert.activePeriod.start}>
-                    {new Date(alert.activePeriod.start).toLocaleString()}
-                  </time>
-                </>
+          {expanded && (
+            <>
+              {alert.description && <div>{alert.description}</div>}
+              {(alert.activePeriod?.start || alert.activePeriod?.end) && (
+                <div style={{ marginTop: 4 }}>
+                  {alert.activePeriod.start && (
+                    <>
+                      From{' '}
+                      <time dateTime={alert.activePeriod.start}>
+                        {new Date(alert.activePeriod.start).toLocaleString()}
+                      </time>
+                    </>
+                  )}
+                  {alert.activePeriod.start && alert.activePeriod.end && ' · '}
+                  {alert.activePeriod.end && (
+                    <>
+                      Until{' '}
+                      <time dateTime={alert.activePeriod.end}>
+                        {new Date(alert.activePeriod.end).toLocaleString()}
+                      </time>
+                    </>
+                  )}
+                </div>
               )}
-              {alert.activePeriod.start && alert.activePeriod.end && ' · '}
-              {alert.activePeriod.end && (
-                <>
-                  Until{' '}
-                  <time dateTime={alert.activePeriod.end}>
-                    {new Date(alert.activePeriod.end).toLocaleString()}
+              {alert.updatedAt && (
+                <div style={{ marginTop: 4 }}>
+                  Updated{' '}
+                  <time dateTime={alert.updatedAt}>
+                    {new Date(alert.updatedAt).toLocaleString()}
                   </time>
-                </>
+                </div>
               )}
-            </div>
-          )}
-          {alert.updatedAt && (
-            <div style={{ marginTop: 4 }}>
-              Updated{' '}
-              <time dateTime={alert.updatedAt}>
-                {new Date(alert.updatedAt).toLocaleString()}
-              </time>
-            </div>
-          )}
-          {alert.url && (
-            <a
-              href={alert.url}
-              target="_blank"
-              rel="noreferrer"
-              style={{ display: 'inline-block', marginTop: 5 }}
-            >
-              Read alert ↗
-            </a>
+              {alert.url && (
+                <a
+                  href={alert.url}
+                  target="_blank"
+                  rel="noreferrer"
+                  style={{ display: 'inline-block', marginTop: 5 }}
+                >
+                  Read alert ↗
+                </a>
+              )}
+            </>
           )}
         </div>
       )}
@@ -193,7 +201,9 @@ export default function TransitAlerts({
         </div>
       )}
       {statusMessage && (
-        <div style={{ color: colors.mutedText, fontSize: 12, lineHeight: 1.45 }}>
+        <div
+          style={{ color: colors.mutedText, fontSize: 12, lineHeight: 1.45 }}
+        >
           {statusMessage}
         </div>
       )}

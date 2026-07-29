@@ -31,6 +31,7 @@ input {
 }
 
 .offline-neighborhood-map-frame {
+  position: relative;
   height: 100%;
 }
 
@@ -40,8 +41,7 @@ input {
   inset: 0;
   box-sizing: border-box;
   padding: max(12px, env(safe-area-inset-top))
-    max(12px, env(safe-area-inset-right))
-    max(12px, env(safe-area-inset-bottom))
+    max(12px, env(safe-area-inset-right)) max(12px, env(safe-area-inset-bottom))
     max(12px, env(safe-area-inset-left));
   background: #14201d;
 }
@@ -70,11 +70,31 @@ input {
   right: 8px;
   border: 1px solid rgb(255 255 255 / 65%);
   border-radius: 999px;
+  min-height: 44px;
   padding: 7px 10px;
   background: rgb(20 32 29 / 90%);
   color: #fff;
   cursor: pointer;
-  font: 600 11px/1.2 'Instrument Sans', sans-serif;
+  font:
+    600 11px/1.2 'Instrument Sans',
+    sans-serif;
+}
+
+.offline-neighborhood-map-retry {
+  position: absolute;
+  z-index: 1;
+  top: 60px;
+  right: 8px;
+  min-height: 44px;
+  border: 1px solid rgb(255 255 255 / 65%);
+  border-radius: 999px;
+  padding: 7px 12px;
+  background: rgb(20 32 29 / 90%);
+  color: #fff;
+  cursor: pointer;
+  font:
+    600 11px/1.2 'Instrument Sans',
+    sans-serif;
 }
 
 .offline-neighborhood-map figcaption {

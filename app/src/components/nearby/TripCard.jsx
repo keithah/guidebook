@@ -1,3 +1,4 @@
+import { useId } from 'react';
 import LineBadge from '../LineBadge.jsx';
 import { card, colors, fonts } from '../../theme.js';
 import ItinerarySteps, { formatDuration } from './ItinerarySteps.jsx';
@@ -13,7 +14,11 @@ function formatTime(value) {
 
 function RouteTime({ value }) {
   const text = formatTime(value);
-  return text ? <time dateTime={value}>{text}</time> : <span>Time pending</span>;
+  return text ? (
+    <time dateTime={value}>{text}</time>
+  ) : (
+    <span>Time pending</span>
+  );
 }
 
 function lineIdsFor(trip) {
@@ -21,7 +26,8 @@ function lineIdsFor(trip) {
     .filter((section) => section.type === 'transit')
     .map(
       (section) =>
-        section.transport?.shortName ?? section.transport?.name?.split(/\s+/)[0],
+        section.transport?.shortName ??
+        section.transport?.name?.split(/\s+/)[0],
     );
   return [...new Set(sectionIds.filter(Boolean))];
 }
@@ -48,9 +54,7 @@ function TripLines({ trip }) {
   }
 
   return (
-    <div
-      style={{ display: 'flex', flexWrap: 'wrap', gap: 9, marginTop: 11 }}
-    >
+    <div style={{ display: 'flex', flexWrap: 'wrap', gap: 9, marginTop: 11 }}>
       {transitSections.map((section, index) => {
         const line =
           section.transport?.shortName ??
@@ -82,9 +86,8 @@ export default function TripCard({
   onToggle,
   alerts,
   externalUrl,
-  instanceId,
 }) {
-  const itineraryId = `trip-itinerary-${String(instanceId).replace(/[^a-zA-Z0-9_-]/g, '-')}`;
+  const itineraryId = useId();
   const lineIds = lineIdsFor(trip);
   const transfers = Number.isFinite(trip.transferCount)
     ? trip.transferCount
@@ -197,31 +200,33 @@ export default function TripCard({
         {expanded ? 'Hide full itinerary' : 'View full itinerary'}
       </button>
 
-      {expanded && (
-        <div id={itineraryId}>
-          <TransitAlerts alerts={alerts} lineIds={lineIds} />
-          <ItinerarySteps trip={trip} />
-          {externalUrl && (
-            <a
-              href={externalUrl}
-              target="_blank"
-              rel="noreferrer"
-              style={{
-                display: 'block',
-                border: `1px solid ${colors.border}`,
-                borderRadius: 999,
-                padding: '10px 13px',
-                color: colors.ink,
-                textAlign: 'center',
-                fontSize: 13,
-                fontWeight: 600,
-              }}
-            >
-              Open in maps ↗
-            </a>
-          )}
-        </div>
-      )}
+      <div id={itineraryId} hidden={!expanded}>
+        {expanded && (
+          <>
+            <TransitAlerts alerts={alerts} lineIds={lineIds} />
+            <ItinerarySteps trip={trip} />
+            {externalUrl && (
+              <a
+                href={externalUrl}
+                target="_blank"
+                rel="noreferrer"
+                style={{
+                  display: 'block',
+                  border: `1px solid ${colors.border}`,
+                  borderRadius: 999,
+                  padding: '10px 13px',
+                  color: colors.ink,
+                  textAlign: 'center',
+                  fontSize: 13,
+                  fontWeight: 600,
+                }}
+              >
+                Open in maps ↗
+              </a>
+            )}
+          </>
+        )}
+      </div>
     </article>
   );
 }

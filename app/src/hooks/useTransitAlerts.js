@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import { fetchServiceAlerts } from '../lib/transit511.js';
 
 const REFRESH_MS = 10 * 60_000;
@@ -32,34 +32,53 @@ export function useTransitAlerts(agency = 'SF') {
     updatedAt: null,
     error: null,
   });
+  const mountedRef = useRef(false);
+  const timerRef = useRef();
+  const controllerRef = useRef();
+  const requestVersionRef = useRef(0);
+  const refreshRef = useRef();
 
   const refresh = useCallback(async () => {
-    const result = await fetchServiceAlerts(agency);
+    const requestVersion = requestVersionRef.current + 1;
+    requestVersionRef.current = requestVersion;
+    clearTimeout(timerRef.current);
+    controllerRef.current?.abort();
+    const controller = new AbortController();
+    controllerRef.current = controller;
+    const result = await fetchServiceAlerts(agency, {
+      signal: controller.signal,
+    });
+    if (
+      !mountedRef.current ||
+      requestVersion !== requestVersionRef.current ||
+      result.reason === 'aborted'
+    ) {
+      return result;
+    }
     setState(stateForResult(result));
+    const delay =
+      result.ok &&
+      result.source !== 'stale' &&
+      Number.isFinite(result.expiresAt)
+        ? Math.max(0, result.expiresAt - Date.now())
+        : REFRESH_MS;
+    timerRef.current = setTimeout(() => {
+      void refreshRef.current?.();
+    }, delay);
     return result;
   }, [agency]);
+  refreshRef.current = refresh;
 
   useEffect(() => {
-    let cancelled = false;
-    let timer;
-    const load = async () => {
-      const result = await fetchServiceAlerts(agency);
-      if (cancelled) return;
-      setState(stateForResult(result));
-      const delay =
-        result.ok &&
-        result.source !== 'stale' &&
-        Number.isFinite(result.expiresAt)
-          ? Math.max(0, result.expiresAt - Date.now())
-          : REFRESH_MS;
-      timer = setTimeout(load, delay);
-    };
-    load();
+    mountedRef.current = true;
+    void refresh();
     return () => {
-      cancelled = true;
-      clearTimeout(timer);
+      mountedRef.current = false;
+      requestVersionRef.current += 1;
+      controllerRef.current?.abort();
+      clearTimeout(timerRef.current);
     };
-  }, [agency]);
+  }, [refresh]);
 
   return { ...state, refresh };
 }

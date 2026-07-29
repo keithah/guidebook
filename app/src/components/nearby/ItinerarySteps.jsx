@@ -3,10 +3,15 @@ import { colors, fonts } from '../../theme.js';
 
 // oxlint-disable-next-line react/only-export-components -- required pure formatter API
 export const formatDuration = (seconds) => {
+  if (!Number.isFinite(seconds)) return '0 min';
   const minutes = Math.max(1, Math.round(seconds / 60));
-  return minutes >= 60
-    ? `${Math.floor(minutes / 60)} hr ${minutes % 60} min`
-    : `${minutes} min`;
+  if (minutes < 60) return `${minutes} min`;
+
+  const hours = Math.floor(minutes / 60);
+  const remainingMinutes = minutes % 60;
+  return remainingMinutes === 0
+    ? `${hours} hr`
+    : `${hours} hr ${remainingMinutes} min`;
 };
 
 function formatTime(value) {
@@ -32,11 +37,8 @@ function sectionHeading(section) {
   }
   if (section.type === 'transit') {
     const line =
-      section.transport?.name ??
-      section.transport?.shortName ??
-      'Transit';
-    const destination =
-      section.transport?.headsign || section.arrival?.name;
+      section.transport?.name ?? section.transport?.shortName ?? 'Transit';
+    const destination = section.transport?.headsign || section.arrival?.name;
     return destination ? `${line} toward ${destination}` : line;
   }
   return section.label || 'Route step';
@@ -265,9 +267,7 @@ function UnknownSection({ section }) {
       >
         {sectionHeading(section)}
       </h4>
-      <div
-        style={{ marginTop: 7, color: colors.tealText, fontSize: 13 }}
-      >
+      <div style={{ marginTop: 7, color: colors.tealText, fontSize: 13 }}>
         {section.instruction || 'Continue to the next part of the trip.'}
       </div>
     </>

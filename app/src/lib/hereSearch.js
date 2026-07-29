@@ -1,5 +1,9 @@
 import { cacheUntilFromHeaders } from './cachePolicy.js';
-import { dedupeRequest } from './requestCoordinator.js';
+import {
+  isFinitePosition,
+  providerFailureReason,
+  sharedProviderRequest,
+} from './providerFetch.js';
 import { providerResponseStore } from './responseStore.js';
 
 const HERE_DISCOVER_URL = 'https://discover.search.hereapi.com/v1/discover';
@@ -49,6 +53,9 @@ export function normalizeHereCandidates(payload) {
 
 function cacheKey(query, center) {
   const roundCoordinate = (value) => {
+    if (!Number.isFinite(value)) {
+      throw new TypeError('Search coordinates must be finite');
+    }
     const rounded =
       Math.sign(value) *
       (Math.round((Math.abs(value) + Number.EPSILON) * 1_000) / 1_000);
@@ -58,10 +65,6 @@ function cacheKey(query, center) {
   return `here-discover:${encodeURIComponent(query.toLowerCase())}:${roundCoordinate(center.lat)},${roundCoordinate(center.lng)}`;
 }
 
-function failureReason(error) {
-  return error?.name === 'AbortError' ? 'aborted' : 'network';
-}
-
 async function fetchHereDestinations({
   query,
   center,
@@ -69,105 +72,70 @@ async function fetchHereDestinations({
   fetchImpl,
   now,
   key,
-  timeoutMs,
+  signal,
+  didTimeout,
 }) {
-  const controller = new AbortController();
-  let timedOut = false;
-  let timeout;
-  const timeoutResult = new Promise((resolve) => {
-    timeout = setTimeout(() => {
-      timedOut = true;
-      controller.abort();
-      resolve({ ok: false, reason: 'timeout' });
-    }, timeoutMs);
-  });
-  const operation = (async () => {
-    let response;
-    try {
-      response = await fetchImpl(buildHereSearchUrl(query, center, apiKey), {
-        signal: controller.signal,
-      });
-    } catch (error) {
-      return {
-        ok: false,
-        reason: timedOut ? 'timeout' : failureReason(error),
-      };
-    }
-
-    if (timedOut) return { ok: false, reason: 'timeout' };
-    if (response.status === 401 || response.status === 403) {
-      return { ok: false, reason: 'unauthorized' };
-    }
-    if (response.status === 429) {
-      return { ok: false, reason: 'rate-limited' };
-    }
-    if (!response.ok) return { ok: false, reason: 'network' };
-
-    let payload;
-    try {
-      payload = await response.json();
-    } catch (error) {
-      return {
-        ok: false,
-        reason: timedOut
-          ? 'timeout'
-          : error?.name === 'AbortError'
-            ? 'aborted'
-            : 'invalid-response',
-      };
-    }
-    if (timedOut) return { ok: false, reason: 'timeout' };
-
-    const fetchedAt = now();
-    const candidates = normalizeHereCandidates(payload).slice(
-      0,
-      CANDIDATE_LIMIT,
-    );
-    const expiresAt = cacheUntilFromHeaders(response.headers, fetchedAt);
-
-    if (expiresAt !== null && expiresAt > fetchedAt) {
-      try {
-        await providerResponseStore.put({
-          key,
-          data: { candidates },
-          fetchedAt,
-          expiresAt,
-          staleUntil: expiresAt,
-        });
-      } catch {
-        // Persistent caching is best-effort; the network result remains usable.
-      }
-    }
-
+  let response;
+  try {
+    response = await fetchImpl(buildHereSearchUrl(query, center, apiKey), {
+      signal,
+    });
+  } catch (error) {
     return {
-      ok: true,
-      candidates,
-      source: 'network',
-      fetchedAt,
-      expiresAt,
+      ok: false,
+      reason: didTimeout() ? 'timeout' : providerFailureReason(error),
     };
-  })();
-
-  return Promise.race([operation, timeoutResult]).finally(() => {
-    clearTimeout(timeout);
-  });
-}
-
-function settleForCaller(request, signal) {
-  if (!signal) return request;
-  if (signal.aborted) {
-    return Promise.resolve({ ok: false, reason: 'aborted' });
   }
 
-  let onAbort;
-  const aborted = new Promise((resolve) => {
-    onAbort = () => resolve({ ok: false, reason: 'aborted' });
-    signal.addEventListener('abort', onAbort, { once: true });
-  });
+  if (didTimeout()) return { ok: false, reason: 'timeout' };
+  if (response.status === 401 || response.status === 403) {
+    return { ok: false, reason: 'unauthorized' };
+  }
+  if (response.status === 429) {
+    return { ok: false, reason: 'rate-limited' };
+  }
+  if (!response.ok) return { ok: false, reason: 'network' };
 
-  return Promise.race([request, aborted]).finally(() => {
-    signal.removeEventListener('abort', onAbort);
-  });
+  let payload;
+  try {
+    payload = await response.json();
+  } catch (error) {
+    return {
+      ok: false,
+      reason: didTimeout()
+        ? 'timeout'
+        : error?.name === 'AbortError'
+          ? 'aborted'
+          : 'invalid-response',
+    };
+  }
+  if (didTimeout()) return { ok: false, reason: 'timeout' };
+
+  const fetchedAt = now();
+  const candidates = normalizeHereCandidates(payload).slice(0, CANDIDATE_LIMIT);
+  const expiresAt = cacheUntilFromHeaders(response.headers, fetchedAt);
+
+  if (expiresAt !== null && expiresAt > fetchedAt) {
+    try {
+      await providerResponseStore.put({
+        key,
+        data: { candidates },
+        fetchedAt,
+        expiresAt,
+        staleUntil: expiresAt,
+      });
+    } catch {
+      // Persistent caching is best-effort; the network result remains usable.
+    }
+  }
+
+  return {
+    ok: true,
+    candidates,
+    source: 'network',
+    fetchedAt,
+    expiresAt,
+  };
 }
 
 export async function searchHereDestinations(
@@ -185,12 +153,15 @@ export async function searchHereDestinations(
   if (!normalizedQuery) return { ok: false, reason: 'empty-query' };
   if (!apiKey?.trim()) return { ok: false, reason: 'missing-api-key' };
   if (signal?.aborted) return { ok: false, reason: 'aborted' };
+  if (!isFinitePosition(center)) {
+    return { ok: false, reason: 'invalid-request' };
+  }
 
   let key;
   try {
     key = cacheKey(normalizedQuery, center);
-  } catch (error) {
-    return { ok: false, reason: failureReason(error) };
+  } catch {
+    return { ok: false, reason: 'invalid-request' };
   }
 
   const currentTime = now();
@@ -222,17 +193,20 @@ export async function searchHereDestinations(
     }
   }
 
-  const request = dedupeRequest(key, () =>
-    fetchHereDestinations({
-      query: normalizedQuery,
-      center,
-      apiKey,
-      fetchImpl,
-      now,
-      key,
-      timeoutMs,
-    }),
-  ).catch((error) => ({ ok: false, reason: failureReason(error) }));
-
-  return settleForCaller(request, signal);
+  return sharedProviderRequest({
+    key,
+    signal,
+    timeoutMs,
+    loader: ({ signal: providerSignal, didTimeout }) =>
+      fetchHereDestinations({
+        query: normalizedQuery,
+        center,
+        apiKey,
+        fetchImpl,
+        now,
+        key,
+        signal: providerSignal,
+        didTimeout,
+      }),
+  });
 }

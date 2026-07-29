@@ -2,9 +2,11 @@ import { cleanup, fireEvent, render, screen } from '@testing-library/react';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
 import transitFixture from '../../test/fixtures/here-transit.json';
-import { normalizeHereRoutes } from '../../lib/hereTransit.js';
+import {
+  fetchHereTransitRoutes,
+  normalizeHereRoutes,
+} from '../../lib/hereTransit.js';
 import { searchHereDestinations } from '../../lib/hereSearch.js';
-import { fetchHereTransitRoutes } from '../../lib/hereTransit.js';
 import { useTransitAlerts } from '../../hooks/useTransitAlerts.js';
 import { AppProvider } from '../../context/AppContext.jsx';
 import Nearby from './Nearby.jsx';
@@ -28,7 +30,10 @@ vi.mock('../../hooks/useLiveDepartures.js', () => ({
     times: { 0: '3, 12′', 1: '5, 18′' },
     meta: {
       0: { status: 'live', updatedAt: Date.parse('2026-07-28T18:58:00.000Z') },
-      1: { status: 'cached', updatedAt: Date.parse('2026-07-28T18:55:00.000Z') },
+      1: {
+        status: 'cached',
+        updatedAt: Date.parse('2026-07-28T18:55:00.000Z'),
+      },
     },
   }),
 }));
@@ -67,9 +72,7 @@ function renderNearby() {
       <Nearby />
     </AppProvider>,
   );
-  fireEvent.click(
-    screen.getByText('Not now — use the cottage as my location'),
-  );
+  fireEvent.click(screen.getByText('Not now — use the cottage as my location'));
 }
 
 describe('Nearby', () => {
@@ -119,7 +122,9 @@ describe('Nearby', () => {
     const candidate = await screen.findByRole('button', {
       name: /choose union square/i,
     });
-    expect(screen.queryByRole('region', { name: /transit options/i })).not.toBeInTheDocument();
+    expect(
+      screen.queryByRole('region', { name: /transit options/i }),
+    ).not.toBeInTheDocument();
     fireEvent.click(candidate);
 
     const toggles = await screen.findAllByRole('button', {
@@ -160,7 +165,9 @@ describe('Nearby', () => {
     });
     fireEvent.click(screen.getByRole('button', { name: 'Go' }));
     fireEvent.click(
-      await screen.findByRole('button', { name: /choose balboa park station/i }),
+      await screen.findByRole('button', {
+        name: /choose balboa park station/i,
+      }),
     );
     await screen.findAllByRole('button', { name: /view full itinerary/i });
 
@@ -178,14 +185,24 @@ describe('Nearby', () => {
     const input = screen.getByRole('searchbox', { name: /destination/i });
     fireEvent.change(input, { target: { value: 'Union Square' } });
     fireEvent.click(screen.getByRole('button', { name: 'Go' }));
-    expect(await screen.findByText(/place search needs a connection/i)).toBeVisible();
+    expect(
+      await screen.findByText(/place search needs a connection/i),
+    ).toBeVisible();
 
-    fireEvent.click(screen.getByRole('button', { name: /take me back to the cottage/i }));
-    expect(await screen.findByText(/transit directions need a connection/i)).toBeVisible();
+    fireEvent.click(
+      screen.getByRole('button', { name: /take me back to the cottage/i }),
+    );
+    expect(
+      await screen.findByText(/transit directions need a connection/i),
+    ).toBeVisible();
     expect(screen.getByText('Walking')).toBeVisible();
-    expect(screen.getByRole('button', { name: 'Downtown / Union Square' })).toBeVisible();
+    expect(
+      screen.getByRole('button', { name: 'Downtown / Union Square' }),
+    ).toBeVisible();
     expect(screen.getAllByText('Ocean Ave & Lee St')).toHaveLength(2);
-    expect(screen.getAllByRole('status', { name: /live/i }).length).toBeGreaterThan(0);
+    expect(
+      screen.getAllByRole('status', { name: /live/i }).length,
+    ).toBeGreaterThan(0);
     expect(screen.getByText('Data provided by 511.org')).toBeVisible();
     expect(screen.getByText('Uber')).toBeVisible();
     expect(screen.getByText('First time on Muni or BART?')).toBeVisible();
@@ -203,7 +220,9 @@ describe('Nearby', () => {
     await screen.findAllByRole('button', { name: /view full itinerary/i });
     expect(screen.getByText('K service delay')).toBeVisible();
     expect(screen.getByText('Systemwide service notice')).toBeVisible();
-    expect(screen.getAllByRole('status', { name: /live/i }).length).toBeGreaterThan(0);
+    expect(
+      screen.getAllByRole('status', { name: /live/i }).length,
+    ).toBeGreaterThan(0);
     expect(screen.getAllByText(/curated schedule/i).length).toBeGreaterThan(0);
 
     fireEvent.click(
@@ -211,16 +230,38 @@ describe('Nearby', () => {
     );
     expect(screen.getAllByText('K service delay')).toHaveLength(1);
 
-    fetchHereTransitRoutes.mockResolvedValueOnce({
-      ok: false,
-      reason: 'network',
+    const ferryBuilding = {
+      ...unionSquare,
+      id: 'here:ferry-building',
+      title: 'Ferry Building',
+      address: '1 Ferry Building, San Francisco, CA',
+    };
+    searchHereDestinations.mockResolvedValueOnce({
+      ok: true,
+      candidates: [ferryBuilding],
+      source: 'network',
     });
+    fetchHereTransitRoutes.mockResolvedValueOnce({
+      ok: true,
+      trips: trips.map((trip) => ({
+        ...trip,
+        plannedAt: '2026-07-28T19:15:00.000Z',
+      })),
+      source: 'network',
+      fetchedAt: Date.parse('2026-07-28T19:15:00.000Z'),
+    });
+    fireEvent.change(input, { target: { value: 'Ferry Building' } });
+    fireEvent.click(screen.getByRole('button', { name: 'Go' }));
     fireEvent.click(
-      screen.getByRole('button', { name: /choose union square/i }),
+      await screen.findByRole('button', { name: /choose ferry building/i }),
     );
-    expect(
-      await screen.findByText(/transit directions need a connection/i),
-    ).toBeVisible();
+
+    const replacementToggles = await screen.findAllByRole('button', {
+      name: /view full itinerary/i,
+    });
+    replacementToggles.forEach((toggle) =>
+      expect(toggle).toHaveAttribute('aria-expanded', 'false'),
+    );
     expect(screen.getByText('K service delay')).toBeVisible();
   });
 
@@ -246,7 +287,9 @@ describe('Nearby', () => {
       screen.getByRole('button', { name: /take me back to the cottage/i }),
     );
 
-    expect(await screen.findByText(/transit directions need a connection/i)).toBeVisible();
+    expect(
+      await screen.findByText(/transit directions need a connection/i),
+    ).toBeVisible();
     expect(screen.getByText('K service delay')).toBeVisible();
     expect(screen.getByRole('status', { name: /last known/i })).toBeVisible();
     expect(screen.getByText(/live alert update is unavailable/i)).toBeVisible();

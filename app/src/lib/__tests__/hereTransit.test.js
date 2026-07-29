@@ -141,13 +141,13 @@ describe('normalizeHereRoutes', () => {
   it('keeps pre, travel, and post actions in instruction order', () => {
     const [trip] = normalizeHereRoutes(fixture, plannedAt);
 
-    expect(trip.sections[0].actions.map((action) => action.instruction)).toEqual(
-      [
-        'Leave SF Cottage toward Ulloa Street.',
-        'Turn right onto West Portal Avenue.',
-        'Arrive at West Portal Station.',
-      ],
-    );
+    expect(
+      trip.sections[0].actions.map((action) => action.instruction),
+    ).toEqual([
+      'Leave SF Cottage toward Ulloa Street.',
+      'Turn right onto West Portal Avenue.',
+      'Arrive at West Portal Station.',
+    ]);
     expect(trip.sections[1].actions).toEqual([
       {
         type: 'board',
@@ -219,12 +219,7 @@ describe('normalizeHereRoutes', () => {
 
 describe('buildHereTransitUrl', () => {
   it('builds a three-option English imperial public transit request', () => {
-    const url = buildHereTransitUrl(
-      origin,
-      destination,
-      departureTime,
-      apiKey,
-    );
+    const url = buildHereTransitUrl(origin, destination, departureTime, apiKey);
 
     expect(url.origin).toBe('https://transit.router.hereapi.com');
     expect(url.pathname).toBe('/v8/routes');
@@ -253,9 +248,11 @@ describe('fetchHereTransitRoutes', () => {
   });
 
   it('returns normalized routes from the network', async () => {
-    const fetchImpl = vi.fn().mockResolvedValue(
-      hereResponse(fixture, { headers: { 'cache-control': 'no-store' } }),
-    );
+    const fetchImpl = vi
+      .fn()
+      .mockResolvedValue(
+        hereResponse(fixture, { headers: { 'cache-control': 'no-store' } }),
+      );
 
     await expect(
       fetchHereTransitRoutes(origin, destination, {
@@ -314,6 +311,32 @@ describe('fetchHereTransitRoutes', () => {
       fetchHereTransitRoutes(origin, destination, { apiKey, fetchImpl }),
     ).resolves.toEqual({ ok: false, reason: 'network' });
   });
+
+  it.each([
+    [{ lat: Number.NaN, lng: origin.lng }, destination, departureTime],
+    [
+      origin,
+      { lat: destination.lat, lng: Number.POSITIVE_INFINITY },
+      departureTime,
+    ],
+    [origin, destination, new Date('invalid')],
+  ])(
+    'rejects invalid route inputs without storage or network work',
+    async (invalidOrigin, invalidDestination, invalidDepartureTime) => {
+      const get = vi.spyOn(providerResponseStore, 'get');
+      const fetchImpl = vi.fn();
+
+      await expect(
+        fetchHereTransitRoutes(invalidOrigin, invalidDestination, {
+          departureTime: invalidDepartureTime,
+          apiKey,
+          fetchImpl,
+        }),
+      ).resolves.toEqual({ ok: false, reason: 'invalid-request' });
+      expect(get).not.toHaveBeenCalled();
+      expect(fetchImpl).not.toHaveBeenCalled();
+    },
+  );
 
   it('maps malformed JSON to invalid-response', async () => {
     const response = hereResponse();
@@ -385,9 +408,11 @@ describe('fetchHereTransitRoutes', () => {
     vi.spyOn(providerResponseStore, 'put').mockRejectedValue(
       new Error('IndexedDB unavailable'),
     );
-    const fetchImpl = vi.fn().mockResolvedValue(
-      hereResponse(fixture, { headers: { 'cache-control': 'max-age=60' } }),
-    );
+    const fetchImpl = vi
+      .fn()
+      .mockResolvedValue(
+        hereResponse(fixture, { headers: { 'cache-control': 'max-age=60' } }),
+      );
 
     const result = await fetchHereTransitRoutes(origin, destination, {
       departureTime,
@@ -406,9 +431,11 @@ describe('fetchHereTransitRoutes', () => {
   it('persists permitted responses, reuses them, and deletes them after expiry', async () => {
     const put = vi.spyOn(providerResponseStore, 'put');
     const remove = vi.spyOn(providerResponseStore, 'delete');
-    const fetchImpl = vi.fn().mockResolvedValue(
-      hereResponse(fixture, { headers: { 'cache-control': 'max-age=60' } }),
-    );
+    const fetchImpl = vi
+      .fn()
+      .mockResolvedValue(
+        hereResponse(fixture, { headers: { 'cache-control': 'max-age=60' } }),
+      );
     let currentTime = fetchedAt;
     const options = {
       departureTime,
@@ -432,10 +459,12 @@ describe('fetchHereTransitRoutes', () => {
     expect(put).toHaveBeenCalledTimes(1);
     const entry = put.mock.calls[0][0];
     expect(entry.key).toBe(
-      'here-transit:37.7401,-122.4661:37.7879,-122.4075:2026-07-28T18%3A00%3A00.000Z',
+      'here-transit:37.7401,-122.4661:37.7879,-122.4075:29754360',
     );
     expect(entry.key).not.toContain(apiKey);
-    expect(entry.data).toEqual({ trips: normalizeHereRoutes(fixture, plannedAt) });
+    expect(entry.data).toEqual({
+      trips: normalizeHereRoutes(fixture, plannedAt),
+    });
     expect(entry).not.toHaveProperty('rawUrl');
 
     currentTime = 70_001;
@@ -443,6 +472,36 @@ describe('fetchHereTransitRoutes', () => {
 
     expect(remove).toHaveBeenCalledWith(entry.key);
     expect(fetchImpl).toHaveBeenCalledTimes(2);
+  });
+
+  it('reuses a logical route cache key within one minute while sending precise time', async () => {
+    const firstDeparture = new Date('2026-07-28T18:00:01.100Z');
+    const secondDeparture = new Date('2026-07-28T18:00:59.900Z');
+    const fetchImpl = vi
+      .fn()
+      .mockResolvedValue(
+        hereResponse(fixture, { headers: { 'cache-control': 'max-age=60' } }),
+      );
+
+    const first = await fetchHereTransitRoutes(origin, destination, {
+      departureTime: firstDeparture,
+      apiKey,
+      fetchImpl,
+      now: () => fetchedAt,
+    });
+    const second = await fetchHereTransitRoutes(origin, destination, {
+      departureTime: secondDeparture,
+      apiKey,
+      fetchImpl,
+      now: () => fetchedAt,
+    });
+
+    expect(first.source).toBe('network');
+    expect(second.source).toBe('cache');
+    expect(fetchImpl).toHaveBeenCalledTimes(1);
+    expect(fetchImpl.mock.calls[0][0].searchParams.get('departureTime')).toBe(
+      firstDeparture.toISOString(),
+    );
   });
 
   it('continues to the network when deleting an expired entry fails', async () => {
@@ -456,9 +515,11 @@ describe('fetchHereTransitRoutes', () => {
     vi.spyOn(providerResponseStore, 'delete').mockRejectedValue(
       new Error('IndexedDB unavailable'),
     );
-    const fetchImpl = vi.fn().mockResolvedValue(
-      hereResponse(fixture, { headers: { 'cache-control': 'no-store' } }),
-    );
+    const fetchImpl = vi
+      .fn()
+      .mockResolvedValue(
+        hereResponse(fixture, { headers: { 'cache-control': 'no-store' } }),
+      );
 
     const result = await fetchHereTransitRoutes(origin, destination, {
       departureTime,

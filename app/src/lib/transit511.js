@@ -1,8 +1,7 @@
 import { dedupeRequest } from './requestCoordinator.js';
 import { providerResponseStore } from './responseStore.js';
 
-const STOP_MONITORING_URL =
-  'https://api.511.org/transit/StopMonitoring';
+const STOP_MONITORING_URL = 'https://api.511.org/transit/StopMonitoring';
 const SERVICE_ALERTS_URL = 'https://api.511.org/transit/servicealerts';
 const DEPARTURE_FRESH_MS = 5 * 60_000;
 const DEPARTURE_STALE_MS = 30 * 60_000;
@@ -105,7 +104,9 @@ export function normalizeServiceAlerts(payload, now = Date.now(), agency) {
       informedEntities.find(
         (informed) =>
           typeof informed?.AgencyId === 'string' && informed.AgencyId,
-      )?.AgencyId ?? agency ?? '';
+      )?.AgencyId ??
+      agency ??
+      '';
 
     return [
       {
@@ -190,8 +191,7 @@ async function request511({
     } catch (error) {
       return {
         ok: false,
-        reason:
-          error?.name === 'AbortError' ? 'timeout' : 'invalid-response',
+        reason: error?.name === 'AbortError' ? 'timeout' : 'invalid-response',
       };
     }
     if (timedOut) return { ok: false, reason: 'timeout' };
@@ -229,12 +229,12 @@ async function request511({
 function settleForCaller(request, signal) {
   if (!signal) return request;
   if (signal.aborted) {
-    return Promise.resolve({ ok: false, reason: 'timeout' });
+    return Promise.resolve({ ok: false, reason: 'aborted' });
   }
 
   let onAbort;
   const aborted = new Promise((resolve) => {
-    onAbort = () => resolve({ ok: false, reason: 'timeout' });
+    onAbort = () => resolve({ ok: false, reason: 'aborted' });
     signal.addEventListener('abort', onAbort, { once: true });
   });
   return Promise.race([request, aborted]).finally(() => {
@@ -299,6 +299,7 @@ async function cached511Request({
 
   if (
     !result.ok &&
+    result.reason !== 'aborted' &&
     validCache &&
     cached.expiresAt <= currentTime &&
     cached.staleUntil > currentTime
@@ -330,7 +331,7 @@ export async function fetchStopDepartures(
   if (!String(stopCode ?? '').trim()) {
     return { ok: false, reason: 'missing-stop-code' };
   }
-  if (signal?.aborted) return { ok: false, reason: 'timeout' };
+  if (signal?.aborted) return { ok: false, reason: 'aborted' };
 
   const normalizedAgency = String(agency || 'SF').trim();
   const normalizedStopCode = String(stopCode).trim();
@@ -367,7 +368,7 @@ export async function fetchServiceAlerts(
   } = {},
 ) {
   if (!apiKey?.trim()) return { ok: false, reason: 'missing-api-key' };
-  if (signal?.aborted) return { ok: false, reason: 'timeout' };
+  if (signal?.aborted) return { ok: false, reason: 'aborted' };
 
   const normalizedAgency = String(agency || 'SF').trim();
   const key = `511:alerts:${normalizedAgency}`;

@@ -65,9 +65,7 @@ export default function Nearby() {
   const stopRows = property.transit.nearbyStops.map((stop, index) => ({
     stop,
     index,
-    toward: selectedPosition
-      ? stopHeadsToward(stop, selectedPosition)
-      : null,
+    toward: selectedPosition ? stopHeadsToward(stop, selectedPosition) : null,
   }));
   const orderedStops = selectedPosition
     ? [...stopRows].sort(
@@ -107,7 +105,12 @@ export default function Nearby() {
       <button
         type="button"
         onClick={backToAround}
-        style={{ ...backLink, border: 0, padding: 0, background: 'transparent' }}
+        style={{
+          ...backLink,
+          border: 0,
+          padding: 0,
+          background: 'transparent',
+        }}
       >
         ← Around Here
       </button>
@@ -151,7 +154,9 @@ export default function Nearby() {
               ◎
             </div>
             <div>
-              <div style={{ fontSize: 15, fontWeight: 600 }}>Use your location?</div>
+              <div style={{ fontSize: 15, fontWeight: 600 }}>
+                Use your location?
+              </div>
               <div
                 style={{
                   marginTop: 3,
@@ -160,8 +165,8 @@ export default function Nearby() {
                   lineHeight: 1.6,
                 }}
               >
-                So {property.host.name} can show the stops nearest you and the way
-                back to the cottage. Nothing leaves your phone.
+                So {property.host.name} can show the stops nearest you and the
+                way back to the cottage. Nothing leaves your phone.
               </div>
             </div>
           </div>
@@ -264,7 +269,7 @@ export default function Nearby() {
               result={planner.routeResult}
               alerts={alerts}
               externalUrlForTrip={() =>
-                mapsUrl(origin, planner.selectedDestination.position)
+                selectedPosition ? mapsUrl(origin, selectedPosition) : undefined
               }
               onExpandedLineIdsChange={setExpandedAlertLineIds}
             />
@@ -448,9 +453,12 @@ export default function Nearby() {
             {orderedStops.map(({ stop, index, toward }) => {
               const meta = departureMeta[index];
               const hasLivePrediction = liveTimes[index] != null;
-              const showStatus = ['live', 'cached', 'stale', 'unavailable'].includes(
-                meta?.status,
-              );
+              const showStatus = [
+                'live',
+                'cached',
+                'stale',
+                'unavailable',
+              ].includes(meta?.status);
               return (
                 <div
                   key={`${stop.name}-${stop.sub}`}
@@ -475,8 +483,16 @@ export default function Nearby() {
                     }
                   />
                   <div style={{ minWidth: 0, flex: 1 }}>
-                    <div style={{ fontSize: 14, fontWeight: 600 }}>{stop.name}</div>
-                    <div style={{ marginTop: 1, color: colors.muted, fontSize: 12 }}>
+                    <div style={{ fontSize: 14, fontWeight: 600 }}>
+                      {stop.name}
+                    </div>
+                    <div
+                      style={{
+                        marginTop: 1,
+                        color: colors.muted,
+                        fontSize: 12,
+                      }}
+                    >
                       {stop.sub} · {stop.walkMin} min walk
                     </div>
                     {toward && (
@@ -494,13 +510,22 @@ export default function Nearby() {
                       </div>
                     )}
                     {selectedPosition && !toward && (
-                      <div style={{ marginTop: 2, color: colors.muted, fontSize: 11 }}>
+                      <div
+                        style={{
+                          marginTop: 2,
+                          color: colors.muted,
+                          fontSize: 11,
+                        }}
+                      >
                         heads the other way
                       </div>
                     )}
                   </div>
                   {showStatus && (
-                    <LiveStatus source={meta.status} timestamp={meta.updatedAt} />
+                    <LiveStatus
+                      source={meta.status}
+                      timestamp={meta.updatedAt}
+                    />
                   )}
                   <div
                     style={{
@@ -557,7 +582,9 @@ export default function Nearby() {
                     background: colors.white,
                   }}
                 >
-                  <div style={{ color: ride.color, fontSize: 15, fontWeight: 600 }}>
+                  <div
+                    style={{ color: ride.color, fontSize: 15, fontWeight: 600 }}
+                  >
                     {ride.name}
                   </div>
                   <div
@@ -574,10 +601,17 @@ export default function Nearby() {
               ))}
             </div>
             <div
-              style={{ marginTop: 8, color: colors.muted, fontSize: 12, lineHeight: 1.6 }}
+              style={{
+                marginTop: 8,
+                color: colors.muted,
+                fontSize: 12,
+                lineHeight: 1.6,
+              }}
             >
               No account yet?{' '}
-              <a href={property.transit.rides[0].referralUrl}>Grab a sign-up link</a>{' '}
+              <a href={property.transit.rides[0].referralUrl}>
+                Grab a sign-up link
+              </a>{' '}
               — first ride is usually discounted.
             </div>
           </section>

@@ -22,9 +22,7 @@ function normalizeCandidate(candidate) {
       lng: candidate.position.lng,
     },
     resultType:
-      typeof candidate.resultType === 'string'
-        ? candidate.resultType
-        : 'place',
+      typeof candidate.resultType === 'string' ? candidate.resultType : 'place',
     categories: Array.isArray(candidate.categories)
       ? candidate.categories.filter((category) => typeof category === 'string')
       : [],
@@ -47,10 +45,21 @@ function normalizeCollection(value) {
   return normalized;
 }
 
+function toggleCandidate(collection, candidate) {
+  return collection.some((place) => place.id === candidate.id)
+    ? collection.filter((place) => place.id !== candidate.id)
+    : [
+        candidate,
+        ...collection.filter((place) => place.id !== candidate.id),
+      ].slice(0, MAX_SAVED_DESTINATIONS);
+}
+
 export function useSavedDestinations() {
   const [savedDestinations, setSavedDestinations] = useState([]);
   const [loading, setLoading] = useState(true);
   const savedRef = useRef([]);
+  const hydratedRef = useRef(false);
+  const pendingMutationsRef = useRef([]);
 
   useEffect(() => {
     let cancelled = false;
@@ -58,14 +67,31 @@ export function useSavedDestinations() {
       try {
         const stored = await savedStateStore.get(STORE_KEY);
         if (cancelled) return;
-        const normalized = normalizeCollection(stored);
-        savedRef.current = normalized;
-        setSavedDestinations(normalized);
-        if (JSON.stringify(normalized) !== JSON.stringify(stored ?? [])) {
-          await savedStateStore.put(STORE_KEY, normalized);
+        const normalizedStored = normalizeCollection(stored);
+        const pendingMutations = pendingMutationsRef.current;
+        const hydrated = pendingMutations.reduce(
+          toggleCandidate,
+          normalizedStored,
+        );
+        pendingMutationsRef.current = [];
+        hydratedRef.current = true;
+        savedRef.current = hydrated;
+        setSavedDestinations(hydrated);
+        if (
+          pendingMutations.length > 0 ||
+          JSON.stringify(hydrated) !== JSON.stringify(stored ?? [])
+        ) {
+          await savedStateStore.put(STORE_KEY, hydrated);
         }
       } catch {
         // Saved destinations are an enhancement; the planner stays usable.
+        hydratedRef.current = true;
+        pendingMutationsRef.current = [];
+        try {
+          await savedStateStore.put(STORE_KEY, savedRef.current);
+        } catch {
+          // Keep the in-memory collection usable if persistence is unavailable.
+        }
       } finally {
         if (!cancelled) setLoading(false);
       }
@@ -79,9 +105,7 @@ export function useSavedDestinations() {
   const isSaved = useCallback(
     (candidateOrId) => {
       const id =
-        typeof candidateOrId === 'string'
-          ? candidateOrId
-          : candidateOrId?.id;
+        typeof candidateOrId === 'string' ? candidateOrId : candidateOrId?.id;
       return savedDestinations.some((candidate) => candidate.id === id);
     },
     [savedDestinations],
@@ -91,15 +115,13 @@ export function useSavedDestinations() {
     const normalized = normalizeCandidate(candidate);
     if (!normalized) return;
 
-    const current = savedRef.current;
-    const next = current.some((place) => place.id === normalized.id)
-      ? current.filter((place) => place.id !== normalized.id)
-      : [normalized, ...current.filter((place) => place.id !== normalized.id)].slice(
-          0,
-          MAX_SAVED_DESTINATIONS,
-        );
+    if (!hydratedRef.current) {
+      pendingMutationsRef.current.push(normalized);
+    }
+    const next = toggleCandidate(savedRef.current, normalized);
     savedRef.current = next;
     setSavedDestinations(next);
+    if (!hydratedRef.current) return;
     try {
       await savedStateStore.put(STORE_KEY, next);
     } catch {

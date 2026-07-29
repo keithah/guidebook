@@ -1,5 +1,5 @@
 import { act, renderHook, waitFor } from '@testing-library/react';
-import { beforeEach, describe, expect, it } from 'vitest';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { savedStateStore } from '../../lib/responseStore.js';
 import { useSavedDestinations } from '../useSavedDestinations.js';
@@ -16,6 +16,20 @@ const unionSquare = {
   rawUrl: 'https://example.test/?apiKey=secret',
   fetchedAt: 123,
 };
+const ferryBuilding = {
+  ...unionSquare,
+  id: 'here:ferry-building',
+  title: 'Ferry Building',
+  address: '1 Ferry Building, San Francisco, CA',
+};
+
+function deferred() {
+  let resolve;
+  const promise = new Promise((resolvePromise) => {
+    resolve = resolvePromise;
+  });
+  return { promise, resolve };
+}
 
 async function waitUntilLoaded(result) {
   await waitFor(() => expect(result.current.loading).toBe(false));
@@ -24,6 +38,10 @@ async function waitUntilLoaded(result) {
 describe('useSavedDestinations', () => {
   beforeEach(async () => {
     await savedStateStore.delete(STORE_KEY);
+  });
+
+  afterEach(() => {
+    vi.restoreAllMocks();
   });
 
   it('starts empty and persists only a normalized candidate across remounts', async () => {
@@ -50,7 +68,9 @@ describe('useSavedDestinations', () => {
 
     const second = renderHook(() => useSavedDestinations());
     await waitUntilLoaded(second.result);
-    expect(second.result.current.savedDestinations[0].title).toBe('Union Square');
+    expect(second.result.current.savedDestinations[0].title).toBe(
+      'Union Square',
+    );
 
     await act(async () => {
       await second.result.current.toggleSaved(unionSquare);
@@ -72,6 +92,29 @@ describe('useSavedDestinations', () => {
     expect(hook.result.current.savedDestinations[0].title).toBe('Union Square');
   });
 
+  it('merges a toggle made before hydration with the stored collection', async () => {
+    const pendingLoad = deferred();
+    vi.spyOn(savedStateStore, 'get').mockReturnValueOnce(pendingLoad.promise);
+
+    const hook = renderHook(() => useSavedDestinations());
+    expect(hook.result.current.loading).toBe(true);
+
+    await act(async () => {
+      await hook.result.current.toggleSaved(unionSquare);
+    });
+    expect(hook.result.current.isSaved(unionSquare.id)).toBe(true);
+
+    pendingLoad.resolve([ferryBuilding]);
+    await waitUntilLoaded(hook.result);
+
+    expect(
+      hook.result.current.savedDestinations.map((place) => place.id),
+    ).toEqual([unionSquare.id, ferryBuilding.id]);
+    expect(await savedStateStore.get(STORE_KEY)).toEqual(
+      hook.result.current.savedDestinations,
+    );
+  });
+
   it('keeps the ten most recently saved places', async () => {
     const hook = renderHook(() => useSavedDestinations());
     await waitUntilLoaded(hook.result);
@@ -86,7 +129,9 @@ describe('useSavedDestinations', () => {
       });
     }
 
-    expect(hook.result.current.savedDestinations.map((place) => place.id)).toEqual([
+    expect(
+      hook.result.current.savedDestinations.map((place) => place.id),
+    ).toEqual([
       'here:place-11',
       'here:place-10',
       'here:place-9',

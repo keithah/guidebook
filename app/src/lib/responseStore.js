@@ -22,6 +22,9 @@ function openDatabase() {
     };
     request.onsuccess = () => resolve(request.result);
     request.onerror = () => reject(request.error);
+  }).catch((error) => {
+    databasePromise = undefined;
+    throw error;
   });
 
   return databasePromise;

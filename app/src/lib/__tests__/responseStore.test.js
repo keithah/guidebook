@@ -1,10 +1,14 @@
-import { beforeEach, describe, expect, it } from 'vitest';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { providerResponseStore, savedStateStore } from '../responseStore.js';
 
 describe('response stores', () => {
   beforeEach(async () => {
     await providerResponseStore.clear();
+  });
+
+  afterEach(() => {
+    vi.unstubAllGlobals();
   });
 
   it('round-trips a normalized provider response entry', async () => {
@@ -76,5 +80,33 @@ describe('response stores', () => {
     expect(await savedStateStore.get(key)).toEqual(savedValue);
     await savedStateStore.delete(key);
     expect(await savedStateStore.get(key)).toBeUndefined();
+  });
+
+  it('retries opening IndexedDB after a transient initialization failure', async () => {
+    const realIndexedDb = globalThis.indexedDB;
+    let attempts = 0;
+    const transientIndexedDb = {
+      open(...args) {
+        attempts += 1;
+        if (attempts > 1) return realIndexedDb.open(...args);
+
+        const request = {};
+        queueMicrotask(() => {
+          request.error = new Error('temporary IndexedDB failure');
+          request.onerror?.();
+        });
+        return request;
+      },
+    };
+    vi.stubGlobal('indexedDB', transientIndexedDb);
+    vi.resetModules();
+    const { providerResponseStore: retryingStore } =
+      await import('../responseStore.js');
+
+    await expect(retryingStore.get('retry-key')).rejects.toThrow(
+      'temporary IndexedDB failure',
+    );
+    await expect(retryingStore.get('retry-key')).resolves.toBeUndefined();
+    expect(attempts).toBe(2);
   });
 });

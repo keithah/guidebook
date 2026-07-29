@@ -22,18 +22,45 @@ const overpassEndpoints = [
 
 const scriptPath = fileURLToPath(import.meta.url);
 const appRoot = path.dirname(path.dirname(scriptPath));
-const propertyPath = path.join(
-  appRoot,
-  'src/data/properties/sfcottage.json',
-);
-const svgPath = path.join(
-  appRoot,
-  'public/images/ingleside-neighborhood.svg',
-);
+const propertyPath = path.join(appRoot, 'src/data/properties/sfcottage.json');
+const svgPath = path.join(appRoot, 'public/images/ingleside-neighborhood.svg');
 const provenancePath = path.join(
   appRoot,
   'public/images/ingleside-neighborhood.md',
 );
+
+const LINE_BADGES = {
+  BART: 'BA',
+  BUS: '29',
+};
+
+export function lineBadge(line) {
+  return (
+    (LINE_BADGES[line] ??
+      String(line ?? '')
+        .slice(0, 2)
+        .toUpperCase()) ||
+    '?'
+  );
+}
+
+export function validatePropertyFixture(property) {
+  if (!Number.isFinite(property?.address?.lat)) {
+    throw new Error(
+      'Invalid property fixture: address.lat must be a finite number',
+    );
+  }
+  if (!Number.isFinite(property?.address?.lng)) {
+    throw new Error(
+      'Invalid property fixture: address.lng must be a finite number',
+    );
+  }
+  if (!Array.isArray(property?.transit?.nearbyStops)) {
+    throw new Error(
+      'Invalid property fixture: transit.nearbyStops must be an array',
+    );
+  }
+}
 
 function escapeXml(value) {
   return String(value)
@@ -205,7 +232,9 @@ async function downloadExtract() {
       clearTimeout(timeout);
     }
   }
-  throw new Error(`Unable to generate map: ${lastError?.message ?? 'no endpoint available'}`);
+  throw new Error(
+    `Unable to generate map: ${lastError?.message ?? 'no endpoint available'}`,
+  );
 }
 
 function renderSvg(extract, property) {
@@ -220,10 +249,7 @@ function renderSvg(extract, property) {
   const cottage = project(property.address.lat, property.address.lng);
 
   for (const way of ways) {
-    if (
-      !renderedHighways.has(way.tags?.highway) ||
-      !Array.isArray(way.nodes)
-    ) {
+    if (!renderedHighways.has(way.tags?.highway) || !Array.isArray(way.nodes)) {
       continue;
     }
     const points = way.nodes
@@ -245,15 +271,19 @@ function renderSvg(extract, property) {
 
     const displayName = isOceanAvenue ? 'Ocean Avenue' : name;
     const length = polylineLength(points);
-    if (!labelCandidates.has(displayName) || labelCandidates.get(displayName).length < length) {
+    if (
+      !labelCandidates.has(displayName) ||
+      labelCandidates.get(displayName).length < length
+    ) {
       labelCandidates.set(displayName, { displayName, length, points });
     }
   }
 
-  const roadLabels = selectRoadLabels(labelCandidates, cottage)
-    .map(({ displayName, angle, x, y }) => {
+  const roadLabels = selectRoadLabels(labelCandidates, cottage).map(
+    ({ displayName, angle, x, y }) => {
       return `    <text class="road-label" x="${coordinate(x)}" y="${coordinate(y)}" transform="rotate(${coordinate(angle)} ${coordinate(x)} ${coordinate(y)})" fill="#314944" font-family="system-ui,sans-serif" font-size="26" font-weight="700" text-anchor="middle">${escapeXml(displayName)}</text>`;
-    });
+    },
+  );
 
   const duplicateCounts = new Map();
   const curatedStops = property.transit.nearbyStops.map((stop, index) => {
@@ -263,7 +293,7 @@ function renderSvg(extract, property) {
     const point = project(stop.lat, stop.lng);
     const x = point.x + duplicateIndex * 30;
     const y = point.y;
-    const line = stop.line === 'BUS' ? '29' : stop.line === 'BART' ? 'BA' : stop.line;
+    const line = lineBadge(stop.line);
     return `    <g class="curated-stop" data-stop-index="${index}" transform="translate(${coordinate(x)} ${coordinate(y)})" aria-label="${escapeXml(`${stop.name}, ${stop.sub}`)}">
       <circle r="16" fill="#569bbe" stroke="#fff" stroke-width="4" />
       <text x="0" y="5" fill="#fff" font-family="system-ui,sans-serif" font-size="13" font-weight="700" text-anchor="middle">${escapeXml(line)}</text>
@@ -357,14 +387,25 @@ node scripts/generate-offline-map.mjs
 `;
 }
 
-const property = JSON.parse(await readFile(propertyPath, 'utf8'));
-const { endpoint, extract } = await downloadExtract();
-const svg = renderSvg(extract, property);
-await writeFile(svgPath, svg, 'utf8');
-await writeFile(provenancePath, renderProvenance(endpoint), 'utf8');
+async function main() {
+  const property = JSON.parse(await readFile(propertyPath, 'utf8'));
+  validatePropertyFixture(property);
+  const { endpoint, extract } = await downloadExtract();
+  const svg = renderSvg(extract, property);
+  await writeFile(svgPath, svg, 'utf8');
+  await writeFile(provenancePath, renderProvenance(endpoint), 'utf8');
 
-const wayCount = extract.elements.filter((element) => element.type === 'way').length;
-const nodeCount = extract.elements.filter((element) => element.type === 'node').length;
-console.log(
-  `Generated ${path.relative(appRoot, svgPath)} from ${endpoint} (${wayCount} ways, ${nodeCount} nodes).`,
-);
+  const wayCount = extract.elements.filter(
+    (element) => element.type === 'way',
+  ).length;
+  const nodeCount = extract.elements.filter(
+    (element) => element.type === 'node',
+  ).length;
+  console.log(
+    `Generated ${path.relative(appRoot, svgPath)} from ${endpoint} (${wayCount} ways, ${nodeCount} nodes).`,
+  );
+}
+
+if (path.resolve(process.argv[1] ?? '') === scriptPath) {
+  await main();
+}

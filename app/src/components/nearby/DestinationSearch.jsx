@@ -20,7 +20,7 @@ function PlaceRow({ candidate, selected, saved, onSelect, onToggleSaved }) {
     >
       <button
         type="button"
-        aria-label={`Choose ${candidate.title} — ${candidate.address}`}
+        aria-label={`Choose ${candidate.title}${candidate.address ? ` — ${candidate.address}` : ''}`}
         aria-pressed={selected}
         onClick={() => onSelect(candidate)}
         style={{
@@ -76,11 +76,11 @@ function PlaceRow({ candidate, selected, saved, onSelect, onToggleSaved }) {
 export default function DestinationSearch({
   query,
   onQueryChange,
-  candidates,
+  candidates = [],
   selectedDestination,
   searchStatus,
-  savedDestinations,
-  isSaved,
+  savedDestinations = [],
+  isSaved = () => false,
   onToggleSaved,
   onSubmit,
   onSelect,
@@ -153,7 +153,12 @@ export default function DestinationSearch({
       {SEARCH_MESSAGES[status] && (
         <div
           role="status"
-          style={{ marginTop: 7, color: colors.mutedText, fontSize: 12, lineHeight: 1.5 }}
+          style={{
+            marginTop: 7,
+            color: colors.mutedText,
+            fontSize: 12,
+            lineHeight: 1.5,
+          }}
         >
           {SEARCH_MESSAGES[status]}
           {status === 'error' && (
@@ -198,7 +203,12 @@ export default function DestinationSearch({
             type="button"
             aria-label="Clear destination"
             onClick={onClear}
-            style={{ border: 0, background: 'transparent', color: colors.teal, cursor: 'pointer' }}
+            style={{
+              border: 0,
+              background: 'transparent',
+              color: colors.teal,
+              cursor: 'pointer',
+            }}
           >
             ✕
           </button>

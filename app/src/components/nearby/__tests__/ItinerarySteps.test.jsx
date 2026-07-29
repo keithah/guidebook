@@ -3,9 +3,7 @@ import { afterEach, describe, expect, it } from 'vitest';
 
 import fixture from '../../../test/fixtures/here-transit.json';
 import { normalizeHereRoutes } from '../../../lib/hereTransit.js';
-import ItinerarySteps, {
-  formatDuration,
-} from '../ItinerarySteps.jsx';
+import ItinerarySteps, { formatDuration } from '../ItinerarySteps.jsx';
 
 const plannedAt = '2026-07-28T18:00:00.000Z';
 
@@ -17,9 +15,7 @@ describe('ItinerarySteps', () => {
 
     render(<ItinerarySteps trip={trip} />);
 
-    expect(
-      screen.getByRole('list', { name: /full itinerary/i }),
-    ).toBeVisible();
+    expect(screen.getByRole('list', { name: /full itinerary/i })).toBeVisible();
     expect(screen.getAllByTestId('itinerary-section')).toHaveLength(
       trip.sections.length,
     );
@@ -38,14 +34,10 @@ describe('ItinerarySteps', () => {
     const walkingGroups = screen.getAllByTestId('walking-maneuvers');
     expect(walkingGroups).toHaveLength(2);
     expect(
-      within(walkingGroups[0]).getByText(
-        'Turn right onto West Portal Avenue.',
-      ),
+      within(walkingGroups[0]).getByText('Turn right onto West Portal Avenue.'),
     ).toBeVisible();
     expect(
-      within(walkingGroups[1]).getByText(
-        'Continue toward Union Square.',
-      ),
+      within(walkingGroups[1]).getByText('Continue toward Union Square.'),
     ).toBeVisible();
     expect(
       within(walkingGroups[0]).queryByText('Continue toward Union Square.'),
@@ -59,20 +51,20 @@ describe('ItinerarySteps', () => {
 
     expect(screen.getAllByText(/platform 2/i).length).toBeGreaterThan(0);
     expect(screen.getAllByText(/stop 17217/i).length).toBeGreaterThan(0);
-    expect(screen.getByText(/board the k ingleside toward embarcadero/i)).toBeVisible();
+    expect(
+      screen.getByText(/board the k ingleside toward embarcadero/i),
+    ).toBeVisible();
     expect(screen.getByText('Forest Hill Station')).toBeVisible();
     expect(screen.getByText('Castro Station')).toBeVisible();
-    expect(screen.getByText(/leave the train at montgomery street/i)).toBeVisible();
+    expect(
+      screen.getByText(/leave the train at montgomery street/i),
+    ).toBeVisible();
     expect(screen.getByText(/arrive at union square/i)).toBeVisible();
     expect(
-      container.querySelector(
-        'time[datetime="2026-07-28T18:07:00-07:00"]',
-      ),
+      container.querySelector('time[datetime="2026-07-28T18:07:00-07:00"]'),
     ).toBeInTheDocument();
     expect(
-      container.querySelector(
-        'time[datetime="2026-07-28T18:11:00-07:00"]',
-      ),
+      container.querySelector('time[datetime="2026-07-28T18:11:00-07:00"]'),
     ).toBeInTheDocument();
   });
 
@@ -101,9 +93,7 @@ describe('ItinerarySteps', () => {
     const unknownActionTrip = trips[0];
     const unknownSectionTrip = trips[2];
 
-    const { rerender } = render(
-      <ItinerarySteps trip={unknownActionTrip} />,
-    );
+    const { rerender } = render(<ItinerarySteps trip={unknownActionTrip} />);
     expect(screen.getByText('Moonwalk across the plaza.')).toBeVisible();
 
     rerender(<ItinerarySteps trip={unknownSectionTrip} />);
@@ -111,14 +101,14 @@ describe('ItinerarySteps', () => {
     expect(
       screen.getByRole('heading', { name: /gondola portal/i }),
     ).toBeVisible();
-    expect(
-      screen.getByText('Step into the transfer portal.'),
-    ).toBeVisible();
+    expect(screen.getByText('Step into the transfer portal.')).toBeVisible();
   });
 
   it('formats route durations for guest-facing summaries', () => {
     expect(formatDuration(0)).toBe('1 min');
     expect(formatDuration(660)).toBe('11 min');
+    expect(formatDuration(3_600)).toBe('1 hr');
     expect(formatDuration(3_900)).toBe('1 hr 5 min');
+    expect(formatDuration(Number.NaN)).toBe('0 min');
   });
 });

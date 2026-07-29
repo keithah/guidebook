@@ -63,7 +63,9 @@ describe('TripOptions', () => {
     expect(screen.getByText(/walk 11 min/i)).toBeVisible();
     expect(screen.getAllByText(/no transfers/i)).toHaveLength(2);
     expect(screen.getByText(/1 transfer/i)).toBeVisible();
-    expect(within(toggles[2].closest('article')).getByText('No walking')).toBeVisible();
+    expect(
+      within(toggles[2].closest('article')).getByText('No walking'),
+    ).toBeVisible();
     expect(screen.queryByTestId('itinerary-section')).not.toBeInTheDocument();
   });
 
@@ -157,6 +159,71 @@ describe('TripOptions', () => {
     expect(toggles[1]).toHaveAttribute('aria-expanded', 'false');
     expect(screen.getAllByTestId('itinerary-section')).toHaveLength(3);
   });
+
+  it('resets expansion and line scope when a new route result arrives', () => {
+    const onExpandedLineIdsChange = vi.fn();
+    const firstResult = { ok: true, trips, source: 'network', fetchedAt };
+    const replacementResult = {
+      ok: true,
+      trips: trips.map((trip) => ({
+        ...trip,
+        plannedAt: '2026-07-28T19:00:00.000Z',
+      })),
+      source: 'network',
+      fetchedAt: fetchedAt + 60_000,
+    };
+    const { rerender } = render(
+      <TripOptions
+        result={firstResult}
+        alerts={[]}
+        onExpandedLineIdsChange={onExpandedLineIdsChange}
+      />,
+    );
+    fireEvent.click(
+      screen.getAllByRole('button', { name: /view full itinerary/i })[0],
+    );
+    expect(
+      screen.getAllByRole('button', { name: /hide full itinerary/i })[0],
+    ).toHaveAttribute('aria-expanded', 'true');
+
+    rerender(
+      <TripOptions
+        result={replacementResult}
+        alerts={[]}
+        onExpandedLineIdsChange={onExpandedLineIdsChange}
+      />,
+    );
+
+    screen
+      .getAllByRole('button', { name: /view full itinerary/i })
+      .forEach((toggle) =>
+        expect(toggle).toHaveAttribute('aria-expanded', 'false'),
+      );
+    expect(onExpandedLineIdsChange).toHaveBeenLastCalledWith([]);
+  });
+
+  it('uses unique controlled-region ids across multiple trip lists', () => {
+    const result = {
+      ok: true,
+      trips: [trips[0]],
+      source: 'network',
+      fetchedAt,
+    };
+    render(
+      <>
+        <TripOptions result={result} />
+        <TripOptions result={result} />
+      </>,
+    );
+
+    const controls = screen
+      .getAllByRole('button', { name: /view full itinerary/i })
+      .map((toggle) => toggle.getAttribute('aria-controls'));
+    expect(new Set(controls).size).toBe(2);
+    controls.forEach((id) =>
+      expect(document.getElementById(id)).toBeInTheDocument(),
+    );
+  });
 });
 
 describe('LiveStatus', () => {
@@ -186,9 +253,7 @@ describe('LiveStatus', () => {
     ).toBeVisible();
 
     rerender(<LiveStatus source="unavailable" timestamp={null} />);
-    expect(
-      screen.getByRole('status', { name: 'Unavailable' }),
-    ).toBeVisible();
+    expect(screen.getByRole('status', { name: 'Unavailable' })).toBeVisible();
     expect(container.querySelector('time')).not.toBeInTheDocument();
   });
 });

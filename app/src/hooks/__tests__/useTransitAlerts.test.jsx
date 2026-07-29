@@ -17,6 +17,14 @@ function alertResponse() {
   };
 }
 
+function deferred() {
+  let resolve;
+  const promise = new Promise((resolvePromise) => {
+    resolve = resolvePromise;
+  });
+  return { promise, resolve };
+}
+
 async function waitForHook(assertion) {
   await vi.waitFor(assertion, { timeout: 2_000, interval: 5 });
 }
@@ -40,7 +48,9 @@ describe('useTransitAlerts', () => {
   it('shares a ten-minute alert cache and exposes refresh metadata', async () => {
     globalThis.fetch = vi.fn().mockResolvedValue(alertResponse());
     const first = renderHook(() => useTransitAlerts('SF'));
-    await waitForHook(() => expect(first.result.current.alerts).toHaveLength(2));
+    await waitForHook(() =>
+      expect(first.result.current.alerts).toHaveLength(2),
+    );
     expect(first.result.current).toMatchObject({
       status: 'live',
       error: null,
@@ -49,7 +59,9 @@ describe('useTransitAlerts', () => {
     expect(first.result.current.refresh).toEqual(expect.any(Function));
 
     const second = renderHook(() => useTransitAlerts('SF'));
-    await waitForHook(() => expect(second.result.current.status).toBe('cached'));
+    await waitForHook(() =>
+      expect(second.result.current.status).toBe('cached'),
+    );
     expect(globalThis.fetch).toHaveBeenCalledTimes(1);
 
     await act(async () => {
@@ -59,6 +71,54 @@ describe('useTransitAlerts', () => {
 
     first.unmount();
     second.unmount();
+  });
+
+  it('manual refresh applies fresh data and resets the scheduled poll', async () => {
+    globalThis.fetch = vi.fn().mockResolvedValue(alertResponse());
+    const hook = renderHook(() => useTransitAlerts('SF'));
+    await waitForHook(() => expect(hook.result.current.status).toBe('live'));
+
+    await act(async () => {
+      await vi.advanceTimersByTimeAsync(9 * 60_000);
+    });
+    vi.spyOn(providerResponseStore, 'get').mockResolvedValueOnce(undefined);
+    vi.spyOn(providerResponseStore, 'put').mockResolvedValueOnce(undefined);
+    let refresh;
+    act(() => {
+      refresh = hook.result.current.refresh();
+    });
+    await refresh;
+    await waitForHook(() => expect(hook.result.current.status).toBe('live'));
+    expect(globalThis.fetch).toHaveBeenCalledTimes(2);
+    expect(hook.result.current.status).toBe('live');
+
+    await act(async () => {
+      await vi.advanceTimersByTimeAsync(60_000);
+    });
+    expect(globalThis.fetch).toHaveBeenCalledTimes(2);
+    expect(hook.result.current.status).toBe('live');
+    hook.unmount();
+  });
+
+  it('settles an in-flight manual refresh without applying it after unmount', async () => {
+    const pendingRefresh = deferred();
+    globalThis.fetch = vi
+      .fn()
+      .mockResolvedValueOnce(alertResponse())
+      .mockReturnValueOnce(pendingRefresh.promise);
+    const hook = renderHook(() => useTransitAlerts('SF'));
+    await waitForHook(() => expect(hook.result.current.status).toBe('live'));
+    vi.spyOn(providerResponseStore, 'get').mockResolvedValueOnce(undefined);
+
+    let refresh;
+    act(() => {
+      refresh = hook.result.current.refresh();
+    });
+    await waitForHook(() => expect(globalThis.fetch).toHaveBeenCalledTimes(2));
+    hook.unmount();
+
+    await expect(refresh).resolves.toMatchObject({ ok: false });
+    pendingRefresh.resolve(alertResponse());
   });
 
   it('keeps failed alert refreshes stale for at most 60 minutes', async () => {
@@ -108,17 +168,14 @@ describe('useTransitAlerts', () => {
           ? {
               ok: true,
               status: 200,
-              text: vi
-                .fn()
-                .mockResolvedValue(JSON.stringify(regionalFixture)),
+              text: vi.fn().mockResolvedValue(JSON.stringify(regionalFixture)),
             }
           : alertResponse(),
       );
     });
-    const hook = renderHook(
-      ({ agency }) => useTransitAlerts(agency),
-      { initialProps: { agency: 'SF' } },
-    );
+    const hook = renderHook(({ agency }) => useTransitAlerts(agency), {
+      initialProps: { agency: 'SF' },
+    });
     await waitForHook(() => expect(globalThis.fetch).toHaveBeenCalledTimes(1));
 
     hook.rerender({ agency: 'RG' });
@@ -137,9 +194,9 @@ describe('useTransitAlerts', () => {
       await vi.advanceTimersByTimeAsync(10 * 60_000);
     });
     await waitForHook(() => expect(globalThis.fetch).toHaveBeenCalledTimes(3));
-    expect(
-      globalThis.fetch.mock.calls[2][0].searchParams.get('agency'),
-    ).toBe('RG');
+    expect(globalThis.fetch.mock.calls[2][0].searchParams.get('agency')).toBe(
+      'RG',
+    );
 
     hook.unmount();
   });

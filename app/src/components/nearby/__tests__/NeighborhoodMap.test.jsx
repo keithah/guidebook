@@ -68,12 +68,21 @@ describe('NeighborhoodMap', () => {
     ).toBeVisible();
   });
 
-  it('falls back after a tile failure without changing browser connectivity', () => {
+  it('falls back only after repeated tile failures without changing browser connectivity', () => {
     render(<NeighborhoodMap {...mapProps} />);
 
-    fireEvent.click(
-      screen.getByRole('button', { name: 'Simulate tile failure' }),
-    );
+    const failTile = () =>
+      fireEvent.click(
+        screen.getByRole('button', { name: 'Simulate tile failure' }),
+      );
+
+    failTile();
+    failTile();
+    expect(
+      screen.getByRole('region', { name: 'Live neighborhood map' }),
+    ).toBeVisible();
+
+    failTile();
 
     expect(window.navigator.onLine).toBe(true);
     expect(
@@ -83,17 +92,32 @@ describe('NeighborhoodMap', () => {
     ).toBeVisible();
   });
 
+  it('can retry the live map after repeated tile failures', () => {
+    render(<NeighborhoodMap {...mapProps} />);
+
+    for (let count = 0; count < 3; count += 1) {
+      fireEvent.click(
+        screen.getByRole('button', { name: 'Simulate tile failure' }),
+      );
+    }
+
+    fireEvent.click(screen.getByRole('button', { name: 'Retry live map' }));
+
+    expect(
+      screen.getByRole('region', { name: 'Live neighborhood map' }),
+    ).toBeVisible();
+  });
+
   it('starts with the packaged orientation map when already offline', () => {
     setOnline(false);
     render(<NeighborhoodMap {...mapProps} />);
 
-    const mapImage =
-      screen.getByRole('img', {
-        name: 'Offline neighborhood map around The SF Cottage in Ingleside',
-      });
+    const mapImage = screen.getByRole('img', {
+      name: 'Offline neighborhood map around The SF Cottage in Ingleside',
+    });
 
     expect(mapImage).toBeVisible();
-    expect(mapImage).toHaveStyle({ objectFit: 'contain' });
+    expect(mapImage).not.toHaveAttribute('style');
     expect(
       screen.getByRole('button', { name: 'View full offline map' }),
     ).toHaveAttribute('aria-expanded', 'false');
@@ -120,6 +144,7 @@ describe('NeighborhoodMap', () => {
 
   it('isolates the background and contains focus until the modal closes', async () => {
     setOnline(false);
+    document.body.style.overflow = 'scroll';
     const { container } = render(<NeighborhoodMap {...mapProps} />);
     const trigger = screen.getByRole('button', {
       name: 'View full offline map',
@@ -135,6 +160,7 @@ describe('NeighborhoodMap', () => {
       name: 'OpenStreetMap contributors',
     });
     await waitFor(() => expect(closeButton).toHaveFocus());
+    expect(document.body).toHaveStyle({ overflow: 'hidden' });
     expect(container).toHaveAttribute('inert');
     expect(container).toHaveAttribute('aria-hidden', 'true');
 
@@ -148,5 +174,6 @@ describe('NeighborhoodMap', () => {
     expect(screen.queryByRole('dialog')).not.toBeInTheDocument();
     expect(container).not.toHaveAttribute('inert');
     expect(container).not.toHaveAttribute('aria-hidden');
+    expect(document.body).toHaveStyle({ overflow: 'scroll' });
   });
 });

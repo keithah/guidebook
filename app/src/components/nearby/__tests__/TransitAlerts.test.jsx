@@ -43,8 +43,14 @@ describe('TransitAlerts', () => {
       name: /show details for k ingleside delay/i,
     });
     expect(details).toHaveAttribute('aria-expanded', 'false');
+    const controlledDetails = document.getElementById(
+      details.getAttribute('aria-controls'),
+    );
+    expect(controlledDetails).toBeInTheDocument();
+    expect(controlledDetails).toHaveAttribute('hidden');
     fireEvent.click(details);
     expect(details).toHaveAttribute('aria-expanded', 'true');
+    expect(controlledDetails).not.toHaveAttribute('hidden');
     expect(
       screen.getByText('Allow extra travel time on the K line.'),
     ).toBeVisible();
@@ -103,16 +109,14 @@ describe('TransitAlerts', () => {
   });
 
   it('matches no alerts when trip mode receives no line IDs', () => {
-    render(
-      <TransitAlerts alerts={[...alerts, generalAlert]} lineIds={[]} />,
-    );
+    render(<TransitAlerts alerts={[...alerts, generalAlert]} lineIds={[]} />);
 
     expect(
       screen.queryByText('Systemwide fare machines update'),
     ).not.toBeInTheDocument();
     expect(screen.queryByText('K Ingleside delay')).not.toBeInTheDocument();
     expect(
-      screen.queryByRole('region', { name: /transit alerts/i }),
+      screen.queryByRole('region', { name: 'Alerts for this trip' }),
     ).not.toBeInTheDocument();
   });
 });

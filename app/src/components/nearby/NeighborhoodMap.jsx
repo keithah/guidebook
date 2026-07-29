@@ -2,13 +2,22 @@ import { useEffect, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
 import OnlineNearbyMap from './OnlineNearbyMap.jsx';
 
+const TILE_FAILURE_THRESHOLD = 3;
+const FOCUSABLE_SELECTOR = [
+  'a[href]',
+  'button:not([disabled])',
+  'input:not([disabled])',
+  'select:not([disabled])',
+  'textarea:not([disabled])',
+  '[tabindex]:not([tabindex="-1"])',
+].join(', ');
+
 function OfflineNeighborhoodFigure({ expanded, onToggle, buttonRef }) {
   return (
     <figure className="offline-neighborhood-map">
       <img
         src={`${import.meta.env.BASE_URL}images/ingleside-neighborhood.svg`}
         alt="Offline neighborhood map around The SF Cottage in Ingleside"
-        style={{ objectFit: 'contain' }}
       />
       <button
         ref={buttonRef}
@@ -33,9 +42,7 @@ function trapModalFocus(event) {
   if (event.key !== 'Tab') return;
 
   const dialog = event.currentTarget;
-  const focusable = [
-    ...dialog.querySelectorAll('button:not([disabled]), a[href]'),
-  ];
+  const focusable = [...dialog.querySelectorAll(FOCUSABLE_SELECTOR)];
   const first = focusable[0];
   const last = focusable.at(-1);
   if (!first || !last) return;
@@ -57,7 +64,7 @@ function trapModalFocus(event) {
   }
 }
 
-function OfflineNeighborhoodMap() {
+function OfflineNeighborhoodMap({ onRetry }) {
   const [expanded, setExpanded] = useState(false);
   const dialogRef = useRef(null);
   const triggerRef = useRef(null);
@@ -68,6 +75,8 @@ function OfflineNeighborhoodMap() {
 
     const dialog = dialogRef.current;
     const trigger = triggerRef.current;
+    const previousBodyOverflow = document.body.style.overflow;
+    document.body.style.overflow = 'hidden';
     closeButtonRef.current?.focus();
     const backgroundElements = [...document.body.children]
       .filter((element) => element !== dialog)
@@ -87,6 +96,7 @@ function OfflineNeighborhoodMap() {
     window.addEventListener('keydown', closeOnEscape);
     return () => {
       window.removeEventListener('keydown', closeOnEscape);
+      document.body.style.overflow = previousBodyOverflow;
       backgroundElements.forEach(({ element, hadInert, ariaHidden }) => {
         if (!hadInert) element.removeAttribute('inert');
         if (ariaHidden === null) element.removeAttribute('aria-hidden');
@@ -104,6 +114,15 @@ function OfflineNeighborhoodMap() {
           onToggle={() => setExpanded(true)}
           buttonRef={triggerRef}
         />
+        {onRetry && (
+          <button
+            type="button"
+            className="offline-neighborhood-map-retry"
+            onClick={onRetry}
+          >
+            Retry live map
+          </button>
+        )}
       </div>
       {expanded &&
         createPortal(
@@ -129,12 +148,12 @@ function OfflineNeighborhoodMap() {
 
 export default function NeighborhoodMap(props) {
   const [isOnline, setIsOnline] = useState(() => navigator.onLine);
-  const [tileFailed, setTileFailed] = useState(false);
+  const [tileFailureCount, setTileFailureCount] = useState(0);
 
   useEffect(() => {
     const handleOffline = () => setIsOnline(false);
     const handleOnline = () => {
-      setTileFailed(false);
+      setTileFailureCount(0);
       setIsOnline(true);
     };
 
@@ -146,9 +165,19 @@ export default function NeighborhoodMap(props) {
     };
   }, []);
 
+  const tileFailed = tileFailureCount >= TILE_FAILURE_THRESHOLD;
   if (!isOnline || tileFailed) {
-    return <OfflineNeighborhoodMap />;
+    return (
+      <OfflineNeighborhoodMap
+        onRetry={isOnline ? () => setTileFailureCount(0) : undefined}
+      />
+    );
   }
 
-  return <OnlineNearbyMap {...props} onTileFailure={() => setTileFailed(true)} />;
+  return (
+    <OnlineNearbyMap
+      {...props}
+      onTileFailure={() => setTileFailureCount((count) => count + 1)}
+    />
+  );
 }

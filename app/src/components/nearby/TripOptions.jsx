@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { colors } from '../../theme.js';
 import LiveStatus from './LiveStatus.jsx';
 import TripCard from './TripCard.jsx';
@@ -16,7 +16,15 @@ export default function TripOptions({
   externalUrlForTrip,
   onExpandedLineIdsChange,
 }) {
-  const [expandedTripId, setExpandedTripId] = useState(null);
+  const [expansion, setExpansion] = useState({ result, tripId: null });
+  const expandedTripId = expansion.result === result ? expansion.tripId : null;
+  const expandedLinesCallbackRef = useRef(onExpandedLineIdsChange);
+  expandedLinesCallbackRef.current = onExpandedLineIdsChange;
+
+  useEffect(() => {
+    setExpansion({ result, tripId: null });
+    expandedLinesCallbackRef.current?.([]);
+  }, [result]);
 
   if (!result) return null;
   if (!result.ok) {
@@ -71,12 +79,14 @@ export default function TripOptions({
               index={index}
               expanded={expanded}
               onToggle={(lineIds) => {
-                setExpandedTripId(expanded ? null : tripKey);
+                setExpansion({
+                  result,
+                  tripId: expanded ? null : tripKey,
+                });
                 onExpandedLineIdsChange?.(expanded ? [] : lineIds);
               }}
               alerts={alerts}
               externalUrl={externalUrlForTrip?.(trip)}
-              instanceId={tripKey}
             />
           );
         })}

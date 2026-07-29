@@ -34,4 +34,19 @@ describe('dedupeRequest', () => {
     expect(loader).toHaveBeenCalledTimes(2);
     expect(second).toEqual({ request: 2 });
   });
+
+  it('removes a rejected request so a later call can retry', async () => {
+    const loader = vi
+      .fn()
+      .mockRejectedValueOnce(new Error('temporary failure'))
+      .mockResolvedValueOnce({ request: 2 });
+
+    await expect(dedupeRequest('alerts:SF', loader)).rejects.toThrow(
+      'temporary failure',
+    );
+    await expect(dedupeRequest('alerts:SF', loader)).resolves.toEqual({
+      request: 2,
+    });
+    expect(loader).toHaveBeenCalledTimes(2);
+  });
 });

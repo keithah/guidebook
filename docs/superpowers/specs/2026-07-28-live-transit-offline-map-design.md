@@ -64,16 +64,16 @@ It applies a San Francisco/Bay Area geographic constraint, limits the candidate 
 
 ```js
 {
-  id,
-  departureTime,
-  arrivalTime,
-  durationSeconds,
-  transferCount,
-  walkingDurationSeconds,
-  lines,
-  sections,
-  notices,
-  plannedAt
+  (id,
+    departureTime,
+    arrivalTime,
+    durationSeconds,
+    transferCount,
+    walkingDurationSeconds,
+    lines,
+    sections,
+    notices,
+    plannedAt);
 }
 ```
 
@@ -88,7 +88,7 @@ Each section identifies its mode and contains the available departure/arrival pl
 - provider responses and their cache metadata;
 - guest-saved destinations and preferences.
 
-A shared request coordinator deduplicates in-flight and recently completed calls. This prevents the top bar and Nearby screen from independently spending requests on the same 511 stop.
+A shared request coordinator deduplicates overlapping in-flight calls. This prevents the top bar and Nearby screen from independently spending requests on the same 511 stop.
 
 511 stop boards use a five-minute freshness window and remain as a labeled stale fallback for 30 minutes. SF alerts use a ten-minute freshness window and remain as a labeled stale fallback for 60 minutes. With the currently configured monitored stops, deduplication keeps one active guest below 511's default limit of 60 requests per hour.
 
