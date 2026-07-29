@@ -64,4 +64,18 @@ describe('TransitAlerts', () => {
     expect(screen.queryByText('K Ingleside delay')).not.toBeInTheDocument();
     expect(screen.queryByText('43 Masonic reroute')).not.toBeInTheDocument();
   });
+
+  it('matches no alerts when trip mode receives no line IDs', () => {
+    render(
+      <TransitAlerts alerts={[...alerts, generalAlert]} lineIds={[]} />,
+    );
+
+    expect(
+      screen.queryByText('Systemwide fare machines update'),
+    ).not.toBeInTheDocument();
+    expect(screen.queryByText('K Ingleside delay')).not.toBeInTheDocument();
+    expect(
+      screen.queryByRole('region', { name: /transit alerts/i }),
+    ).not.toBeInTheDocument();
+  });
 });

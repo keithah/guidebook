@@ -9,7 +9,8 @@ function isRelevant(alert, lineIds) {
   const affectedLines = Array.isArray(alert?.affectedLines)
     ? alert.affectedLines
     : [];
-  if (!lineIds?.length) return affectedLines.length === 0;
+  if (lineIds === undefined) return affectedLines.length === 0;
+  if (!Array.isArray(lineIds) || lineIds.length === 0) return false;
 
   const requested = new Set(lineIds.map(normalizeLineId));
   return affectedLines.some((line) => requested.has(normalizeLineId(line)));
@@ -124,6 +125,7 @@ function AlertRow({ alert }) {
 }
 
 export default function TransitAlerts({ alerts = [], lineIds }) {
+  const standalone = lineIds === undefined;
   const relevantAlerts = alerts.filter((alert) =>
     isRelevant(alert, lineIds),
   );
@@ -131,7 +133,7 @@ export default function TransitAlerts({ alerts = [], lineIds }) {
 
   return (
     <section
-      aria-label={lineIds?.length ? 'Alerts for this trip' : 'Transit alerts'}
+      aria-label={standalone ? 'Transit alerts' : 'Alerts for this trip'}
       style={{
         marginTop: 12,
         borderRadius: 12,
@@ -149,7 +151,7 @@ export default function TransitAlerts({ alerts = [], lineIds }) {
           textTransform: 'uppercase',
         }}
       >
-        {lineIds?.length ? 'Service alert' : 'General service alert'}
+        {standalone ? 'General service alert' : 'Service alert'}
       </div>
       <ul style={{ listStyle: 'none', margin: 0, padding: 0 }}>
         {relevantAlerts.map((alert) => (

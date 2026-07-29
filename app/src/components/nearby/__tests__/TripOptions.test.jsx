@@ -18,6 +18,20 @@ const plannedAt = '2026-07-28T18:00:00.000Z';
 const trips = normalizeHereRoutes(fixture, plannedAt);
 const fetchedAt = Date.parse('2026-07-28T18:58:00.000Z');
 const now = Date.parse('2026-07-28T19:00:00.000Z');
+const generalAlert = {
+  id: 'sf-system-notice',
+  agency: 'SF',
+  affectedLines: [],
+  severity: 'OTHER_EFFECT',
+  header: 'Systemwide fare machines update',
+  description: 'Some fare machines may take longer to respond.',
+  activePeriod: {
+    start: '2026-07-28T18:00:00.000Z',
+    end: '2026-07-28T22:00:00.000Z',
+  },
+  url: 'https://example.test/system-notice',
+  updatedAt: '2026-07-28T18:55:00.000Z',
+};
 
 afterEach(() => {
   cleanup();
@@ -100,6 +114,25 @@ describe('TripOptions', () => {
     );
     expect(screen.getByText('K Ingleside delay')).toBeVisible();
     expect(screen.queryByText('43 Masonic reroute')).not.toBeInTheDocument();
+  });
+
+  it('keeps a general alert out of an expanded trip with no transit lines', () => {
+    render(
+      <TripOptions
+        result={{ ok: true, trips, source: 'network', fetchedAt }}
+        alerts={[generalAlert]}
+        externalUrlForTrip={() => 'https://example.test/directions'}
+      />,
+    );
+
+    fireEvent.click(
+      screen.getAllByRole('button', { name: /view full itinerary/i })[2],
+    );
+
+    expect(screen.getByText('Step into the transfer portal.')).toBeVisible();
+    expect(
+      screen.queryByText('Systemwide fare machines update'),
+    ).not.toBeInTheDocument();
   });
 
   it('keeps id-less route expansion isolated by ranked position', () => {
