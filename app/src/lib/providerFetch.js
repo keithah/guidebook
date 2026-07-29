@@ -4,6 +4,14 @@ export function providerFailureReason(error) {
   return error?.name === 'AbortError' ? 'aborted' : 'network';
 }
 
+export function providerHttpFailure(response) {
+  if (response.status === 401 || response.status === 403) {
+    return 'unauthorized';
+  }
+  if (response.status === 429) return 'rate-limited';
+  return response.ok ? null : 'network';
+}
+
 export function isFinitePosition(position) {
   return Number.isFinite(position?.lat) && Number.isFinite(position?.lng);
 }

@@ -2,6 +2,7 @@ import { cacheUntilFromHeaders } from './cachePolicy.js';
 import {
   isFinitePosition,
   providerFailureReason,
+  providerHttpFailure,
   sharedProviderRequest,
 } from './providerFetch.js';
 import { providerResponseStore } from './responseStore.js';
@@ -88,13 +89,8 @@ async function fetchHereDestinations({
   }
 
   if (didTimeout()) return { ok: false, reason: 'timeout' };
-  if (response.status === 401 || response.status === 403) {
-    return { ok: false, reason: 'unauthorized' };
-  }
-  if (response.status === 429) {
-    return { ok: false, reason: 'rate-limited' };
-  }
-  if (!response.ok) return { ok: false, reason: 'network' };
+  const httpFailure = providerHttpFailure(response);
+  if (httpFailure) return { ok: false, reason: httpFailure };
 
   let payload;
   try {
