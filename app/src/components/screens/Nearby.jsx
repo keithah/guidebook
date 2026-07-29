@@ -19,11 +19,21 @@ const BACK_HOME_ICON = {
   ride: { glyph: '→', style: { background: colors.sage, color: colors.teal } },
 };
 
+/**
+ * Build a Google Maps transit directions URL between two positions.
+ * @param {{lat: number, lng: number}} origin - The starting geographic position.
+ * @param {{lat: number, lng: number}} destination - The destination geographic position.
+ * @return {string} A URL for transit directions between the positions.
+ */
 function mapsUrl(origin, destination) {
   const formatPosition = (position) => `${position.lat},${position.lng}`;
   return `https://www.google.com/maps/dir/?api=1&origin=${encodeURIComponent(formatPosition(origin))}&destination=${encodeURIComponent(formatPosition(destination))}&travelmode=transit`;
 }
 
+/**
+ * Render the nearby transit, trip-planning, and rideshare interface.
+ * @returns {JSX.Element} The nearby transportation page.
+ */
 export default function Nearby() {
   const {
     property,

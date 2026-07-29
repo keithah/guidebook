@@ -4,6 +4,12 @@ import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
 import { lineColors, lineLabel } from '../../theme.js';
 
+/**
+ * Creates a circular map icon labeled with a transit line.
+ * @param {string} line - The transit line identifier used to determine the icon color and label.
+ * @param {number} [size=30] - The icon diameter in pixels.
+ * @return {L.DivIcon} A Leaflet div icon for the transit line.
+ */
 function lineDivIcon(line, size = 30) {
   const bg = lineColors[line] || '#5A6B65';
   const label = lineLabel(line);
@@ -16,6 +22,10 @@ function lineDivIcon(line, size = 30) {
   });
 }
 
+/**
+ * Creates the map icon for the SF Cottage marker.
+ * @return {L.DivIcon} A Leaflet icon displaying the SF Cottage marker.
+ */
 function homeDivIcon() {
   return L.divIcon({
     className: 'sfc-home-pin',
@@ -25,6 +35,10 @@ function homeDivIcon() {
   });
 }
 
+/**
+ * Creates the map icon marking the user's current location.
+ * @return {L.DivIcon} The user's location icon.
+ */
 function meDivIcon() {
   return L.divIcon({
     className: 'sfc-me-pin',
@@ -34,6 +48,10 @@ function meDivIcon() {
   });
 }
 
+/**
+ * Create the map icon used to mark a destination.
+ * @return {L.DivIcon} The destination marker icon.
+ */
 function destDivIcon() {
   return L.divIcon({
     className: 'sfc-dest-pin',
@@ -43,6 +61,11 @@ function destDivIcon() {
   });
 }
 
+/**
+ * Adjusts the map view to include the center and destination locations.
+ * @param {{ lat: number, lng: number }} center - The reference location.
+ * @param {{ lat: number, lng: number }|undefined} dest - The destination location, when available.
+ */
 function FitToDest({ center, dest }) {
   const map = useMap();
   useEffect(() => {
@@ -59,6 +82,17 @@ function FitToDest({ center, dest }) {
   return null;
 }
 
+/**
+ * Render an interactive map with location, stop, and optional destination markers.
+ * @param {Object} props - Map configuration and marker data.
+ * @param {Object} props.center - Current map center coordinates.
+ * @param {Object} props.cottage - Cottage marker coordinates.
+ * @param {Array<Object>} props.stops - Stops to display on the map.
+ * @param {boolean} props.showMe - Whether to display the current-location marker.
+ * @param {Object} [props.dest] - Optional destination to display and fit within the map view.
+ * @param {Function} props.onTileFailure - Callback invoked when a map tile fails to load.
+ * @returns {JSX.Element} The rendered Leaflet map.
+ */
 export default function OnlineNearbyMap({
   center,
   cottage,

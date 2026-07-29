@@ -14,6 +14,11 @@ export const formatDuration = (seconds) => {
     : `${hours} hr ${remainingMinutes} min`;
 };
 
+/**
+ * Formats a valid date or time value for display.
+ * @param {*} value - The date or time value to format.
+ * @return {?string} The localized time string, or `null` for an absent or invalid value.
+ */
 function formatTime(value) {
   if (!value || !Number.isFinite(Date.parse(value))) return null;
   return new Intl.DateTimeFormat('en-US', {
@@ -22,6 +27,11 @@ function formatTime(value) {
   }).format(new Date(value));
 }
 
+/**
+ * Derive a display identifier for a transit line.
+ * @param {Object} section - The itinerary section containing transport details.
+ * @returns {string} The transport short name, first name token, mode, or `?` when unavailable.
+ */
 function lineIdFor(section) {
   return (
     section.transport?.shortName ??
@@ -31,6 +41,11 @@ function lineIdFor(section) {
   );
 }
 
+/**
+ * Create a display heading for an itinerary section.
+ * @param {Object} section - The itinerary section to describe.
+ * @returns {string} A heading based on the section type, destination, line, or label.
+ */
 function sectionHeading(section) {
   if (section.type === 'pedestrian') {
     return `Walk to ${section.arrival?.name || 'the next stop'}`;
@@ -44,11 +59,22 @@ function sectionHeading(section) {
   return section.label || 'Route step';
 }
 
+/**
+ * Render a localized time value as a semantic time element.
+ * @param {*} value - The date or time value to format.
+ * @returns {JSX.Element|null} A time element for valid values, or `null` when the value is invalid or absent.
+ */
 function RouteTime({ value }) {
   const text = formatTime(value);
   return text ? <time dateTime={value}>{text}</time> : null;
 }
 
+/**
+ * Display a place name with optional platform and stop code details.
+ * @param {Object} place - The place information to display.
+ * @param {string} prefix - The label shown before the place name.
+ * @returns {JSX.Element|null} The place details, or `null` when the place has no name.
+ */
 function PlaceDetails({ place, prefix }) {
   if (!place?.name) return null;
   const details = [
@@ -68,6 +94,11 @@ function PlaceDetails({ place, prefix }) {
   );
 }
 
+/**
+ * Render the ordered instructions associated with an itinerary section.
+ * @param {Object} section - The itinerary section containing the actions to display.
+ * @returns {JSX.Element|null} An ordered instruction list, or `null` when the section has no actions.
+ */
 function ActionList({ section }) {
   if (!section.actions?.length) return null;
 
@@ -101,6 +132,11 @@ function ActionList({ section }) {
   );
 }
 
+/**
+ * Display intermediate stops with optional platform and departure-time details.
+ * @param {Array<Object>} stops - The intermediate stops to display.
+ * @returns {JSX.Element|null} The rendered stop list, or `null` when no stops are provided.
+ */
 function IntermediateStops({ stops }) {
   if (!stops?.length) return null;
 
@@ -143,6 +179,11 @@ function IntermediateStops({ stops }) {
   );
 }
 
+/**
+ * Display service notices and incident descriptions for a route section.
+ * @param {Object} section - The route section containing notices and incidents.
+ * @returns {JSX.Element|null} A list of service notes, or null when none are available.
+ */
 function SectionNotices({ section }) {
   const notices = [
     ...(section.notices ?? []).map((notice) => notice.title),
@@ -173,6 +214,10 @@ function SectionNotices({ section }) {
   );
 }
 
+/**
+ * Render detailed information for a known itinerary section.
+ * @param {Object} section - The itinerary section to display.
+ */
 function KnownSection({ section }) {
   const isTransit = section.type === 'transit';
   return (
@@ -253,6 +298,10 @@ function KnownSection({ section }) {
   );
 }
 
+/**
+ * Render a simplified itinerary section with its heading and instruction.
+ * @param {Object} section - The itinerary section to display.
+ */
 function UnknownSection({ section }) {
   return (
     <>
@@ -274,6 +323,11 @@ function UnknownSection({ section }) {
   );
 }
 
+/**
+ * Render all itinerary sections in order.
+ * @param {Object} trip - Trip data containing an optional `sections` array.
+ * @returns {JSX.Element} An ordered list of itinerary sections.
+ */
 export default function ItinerarySteps({ trip }) {
   const sections = Array.isArray(trip?.sections) ? trip.sections : [];
 

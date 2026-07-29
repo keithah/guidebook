@@ -9,6 +9,11 @@ const SOURCE_LABELS = {
   unavailable: 'Unavailable',
 };
 
+/**
+ * Converts a timestamp value to milliseconds since the Unix epoch.
+ * @param {*} timestamp - A date, date string, or number-like timestamp.
+ * @return {number} The timestamp in milliseconds, or `NaN` when the value cannot be converted.
+ */
 function timestampValue(timestamp) {
   if (timestamp == null || timestamp === '') return Number.NaN;
   if (timestamp instanceof Date) return timestamp.getTime();
@@ -16,6 +21,12 @@ function timestampValue(timestamp) {
   return Number(timestamp);
 }
 
+/**
+ * Formats a timestamp as a relative age.
+ * @param {Date|string|number} timestamp - The timestamp to format.
+ * @param {number} [now=Date.now()] - The reference time in milliseconds.
+ * @return {string} A relative age such as “just now”, “5 min ago”, or “2 days ago”.
+ */
 function relativeAge(timestamp, now = Date.now()) {
   const elapsedSeconds = Math.max(
     0,
@@ -30,6 +41,14 @@ function relativeAge(timestamp, now = Date.now()) {
   return `${days} day${days === 1 ? '' : 's'} ago`;
 }
 
+/**
+ * Render a compact status label with optional live indicator and relative update time.
+ * @param {Object} props - Component properties.
+ * @param {string} props.source - Status source used to select the default label and live indicator.
+ * @param {Date|string|number} [props.timestamp] - Timestamp used to display the relative update age.
+ * @param {string} [props.label] - Custom status label that overrides the source label.
+ * @returns {JSX.Element} The rendered status indicator.
+ */
 export default function LiveStatus({ source, timestamp, label }) {
   const statusLabel = label ?? SOURCE_LABELS[source] ?? 'Updated';
   const value = timestampValue(timestamp);

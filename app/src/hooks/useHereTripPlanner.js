@@ -2,11 +2,21 @@ import { useCallback, useEffect, useRef, useState } from 'react';
 import { searchHereDestinations } from '../lib/hereSearch.js';
 import { fetchHereTransitRoutes } from '../lib/hereTransit.js';
 
+/**
+ * Creates a stable string key for an origin.
+ * @param {string|Object} origin - The origin value or an object containing latitude and longitude.
+ * @return {string} The origin string or a comma-separated latitude and longitude key.
+ */
 function keyForOrigin(origin) {
   if (typeof origin === 'string') return origin;
   return `${origin?.lat ?? ''},${origin?.lng ?? ''}`;
 }
 
+/**
+ * Manage destination search and transit route retrieval for an origin.
+ * @param {{origin: object|string}} options - The origin used for destination searches and route requests.
+ * @returns {object} The planner state and actions for searching, selecting, clearing, and retrying destinations and routes.
+ */
 export function useHereTripPlanner({ origin }) {
   const [query, setQuery] = useState('');
   const [candidates, setCandidates] = useState([]);

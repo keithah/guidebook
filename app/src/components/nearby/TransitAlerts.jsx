@@ -2,12 +2,23 @@ import { useId, useState } from 'react';
 import { colors } from '../../theme.js';
 import LiveStatus from './LiveStatus.jsx';
 
+/**
+ * Normalizes a transit line identifier for consistent comparison.
+ * @param {*} value - The value to convert into a line identifier.
+ * @return {string} The trimmed, uppercase line identifier.
+ */
 function normalizeLineId(value) {
   return String(value ?? '')
     .trim()
     .toUpperCase();
 }
 
+/**
+ * Determines whether an alert affects any requested transit line.
+ * @param {Object} alert - The alert to inspect.
+ * @param {Array<*>} lineIds - The transit line identifiers to match.
+ * @return {boolean} `true` if the alert affects a requested line, `false` otherwise.
+ */
 function affectsLine(alert, lineIds) {
   const affectedLines = Array.isArray(alert?.affectedLines)
     ? alert.affectedLines
@@ -18,6 +29,12 @@ function affectsLine(alert, lineIds) {
   return affectedLines.some((line) => requested.has(normalizeLineId(line)));
 }
 
+/**
+ * Creates a user-facing message for a live alert service status.
+ * @param {string} status - The current alert service status.
+ * @param {string} error - The specific error condition, when applicable.
+ * @return {string|null} The corresponding status message, or `null` when no message is needed.
+ */
 function alertErrorMessage(status, error) {
   if (status === 'stale') {
     return 'Live alert update is unavailable. Showing last known alerts.';
@@ -28,6 +45,10 @@ function alertErrorMessage(status, error) {
   return 'Live service alerts are unavailable right now.';
 }
 
+/**
+ * Renders a transit alert with optionally expandable details.
+ * @param {{ alert: Object }} props - The component props containing the alert to display.
+ */
 function AlertRow({ alert }) {
   const [expanded, setExpanded] = useState(false);
   const detailsId = useId();
@@ -141,6 +162,17 @@ function AlertRow({ alert }) {
   );
 }
 
+/**
+ * Displays relevant transit service alerts and live update status.
+ * @param {Object} props - Component properties.
+ * @param {Array} [props.alerts=[]] - Transit alerts to filter and display.
+ * @param {Array} [props.lineIds] - Line identifiers used to select alerts for a trip.
+ * @param {string} [props.status] - Live alert update status.
+ * @param {string|Date} [props.updatedAt] - Time of the latest alert update.
+ * @param {string} [props.error] - Error identifier associated with the alert update.
+ * @param {Array} [props.excludeLineIds=[]] - Line identifiers whose alerts are excluded in standalone mode.
+ * @returns {JSX.Element|null} The alerts section, or `null` when there is no relevant content.
+ */
 export default function TransitAlerts({
   alerts = [],
   lineIds,

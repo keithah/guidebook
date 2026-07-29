@@ -3,6 +3,11 @@ import { fetchServiceAlerts } from '../lib/transit511.js';
 
 const REFRESH_MS = 10 * 60_000;
 
+/**
+ * Converts a service-alert fetch result into UI state.
+ * @param {Object} result - The fetch result to convert.
+ * @returns {Object} The corresponding alerts, status, timestamp, and error state.
+ */
 function stateForResult(result) {
   if (!result.ok) {
     return {
@@ -25,6 +30,11 @@ function stateForResult(result) {
   };
 }
 
+/**
+ * Fetches and periodically refreshes transit service alerts for an agency.
+ * @param {string} [agency='SF'] - The transit agency whose alerts are fetched.
+ * @returns {{alerts: Array, status: string, updatedAt: (number|null), error: (string|null), refresh: Function}} The current alert state and a function for manually refreshing it.
+ */
 export function useTransitAlerts(agency = 'SF') {
   const [state, setState] = useState({
     alerts: [],

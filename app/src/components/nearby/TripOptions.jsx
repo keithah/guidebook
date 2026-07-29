@@ -10,6 +10,14 @@ const FAILURE_MESSAGES = {
   'no-route': 'No transit route was found for this destination.',
 };
 
+/**
+ * Display transit trip options, status messages, and expandable trip details.
+ * @param {Object|null} result - Transit search result data.
+ * @param {Array} [alerts=[]] - Alerts to display on trip cards.
+ * @param {Function} [externalUrlForTrip] - Creates an external URL for a trip.
+ * @param {Function} [onExpandedLineIdsChange] - Receives the line IDs of the expanded trip, or an empty array when collapsed.
+ * @return {JSX.Element|null} The transit options content, or `null` when no result is provided.
+ */
 export default function TripOptions({
   result,
   alerts = [],

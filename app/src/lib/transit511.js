@@ -9,11 +9,21 @@ const ALERT_FRESH_MS = 10 * 60_000;
 const ALERT_STALE_MS = 60 * 60_000;
 const REQUEST_TIMEOUT_MS = 10_000;
 
+/**
+ * Converts a date-like value to a numeric timestamp.
+ * @param {*} value - A Date object or value coercible to a number.
+ * @return {number} The corresponding timestamp or numeric value.
+ */
 function asTime(value) {
   if (value instanceof Date) return value.getTime();
   return Number(value);
 }
 
+/**
+ * Converts a GTFS timestamp value to milliseconds since the Unix epoch.
+ * @param {*} value - The timestamp value to convert.
+ * @return {number|null} The timestamp in milliseconds, or `null` if the value is empty or invalid.
+ */
 function gtfsTime(value) {
   if (value == null || value === '') return null;
   const numeric = Number(value);
@@ -21,11 +31,22 @@ function gtfsTime(value) {
   return numeric < 10_000_000_000 ? numeric * 1_000 : numeric;
 }
 
+/**
+ * Converts a GTFS time value to an ISO 8601 timestamp.
+ * @param {*} value - The GTFS time value to convert.
+ * @return {string|null} The ISO 8601 timestamp, or `null` if the value is invalid.
+ */
 function isoGtfsTime(value) {
   const time = gtfsTime(value);
   return time === null ? null : new Date(time).toISOString();
 }
 
+/**
+ * Converts monitored stop visit arrival times into minutes from the current time.
+ * @param {object} payload - The stop monitoring response payload.
+ * @param {Date|number} [now=Date.now()] - The reference time for calculating arrival offsets.
+ * @returns {number[]} The arrival times in minutes, with past arrivals represented as zero.
+ */
 export function normalizeStopDepartures(payload, now = Date.now()) {
   const currentTime = asTime(now);
   const visits =
@@ -44,6 +65,11 @@ export function normalizeStopDepartures(payload, now = Date.now()) {
     .filter(Number.isFinite);
 }
 
+/**
+ * Selects the most suitable non-empty translated text, preferring English.
+ * @param {object} translated - An object containing a `Translations` collection.
+ * @return {string} The trimmed English translation, the first valid translation, or an empty string.
+ */
 function translationText(translated) {
   const translations = translated?.Translations;
   if (!Array.isArray(translations)) return '';
@@ -59,6 +85,12 @@ function translationText(translated) {
   return (english ?? valid[0])?.Text.trim() ?? '';
 }
 
+/**
+ * Finds the period that is active at the specified time.
+ * @param {Array<Object>} periods - The periods to evaluate.
+ * @param {number} now - The current time in GTFS milliseconds.
+ * @return {{start: string|null, end: string|null}|null} The active period with ISO timestamps, `null` if no period is active, or an object with null boundaries when no periods are provided.
+ */
 function currentActivePeriod(periods, now) {
   if (!Array.isArray(periods) || periods.length === 0) {
     return { start: null, end: null };
@@ -76,6 +108,13 @@ function currentActivePeriod(periods, now) {
   };
 }
 
+/**
+ * Normalize active service alerts into a consistent alert representation.
+ * @param {Object} payload - The service alerts response payload.
+ * @param {Date|number} [now=Date.now()] - The reference time used to determine active periods.
+ * @param {string} [agency] - Fallback agency identifier when an alert does not specify one.
+ * @returns {Array<Object>} The normalized active alerts with translated text, affected routes, severity, and timing information.
+ */
 export function normalizeServiceAlerts(payload, now = Date.now(), agency) {
   const currentTime = asTime(now);
   const entities = payload?.Entities;
@@ -125,10 +164,20 @@ export function normalizeServiceAlerts(payload, now = Date.now(), agency) {
   });
 }
 
+/**
+ * Classifies an error as a timeout or network failure.
+ * @param {Error} error - The error to classify.
+ * @return {'timeout'|'network'} `timeout` for an abort error, `network` otherwise.
+ */
 function failureReason(error) {
   return error?.name === 'AbortError' ? 'timeout' : 'network';
 }
 
+/**
+ * Classify an HTTP response failure.
+ * @param {Response} response - The HTTP response to classify.
+ * @return {string|null} The failure reason, or `null` for a successful response.
+ */
 function responseFailure(response) {
   if (response.status === 401 || response.status === 403) {
     return 'unauthorized';
@@ -137,11 +186,23 @@ function responseFailure(response) {
   return response.ok ? null : 'network';
 }
 
+/**
+ * Parses a response body as JSON after removing a leading UTF-8 byte-order mark.
+ * @param {Response} response - The response whose body should be parsed.
+ * @return {any} The parsed JSON value.
+ */
 async function readJson(response) {
   const text = (await response.text()).replace(/^\uFEFF/, '');
   return JSON.parse(text);
 }
 
+/**
+ * Builds an endpoint URL with API credentials and query parameters.
+ * @param {string} base - The base endpoint URL.
+ * @param {string} apiKey - The API key to include in the query.
+ * @param {Object} parameters - Additional query parameter values.
+ * @returns {URL} The configured endpoint URL.
+ */
 function buildUrl(base, apiKey, parameters) {
   const url = new URL(base);
   url.searchParams.set('api_key', apiKey);
@@ -152,6 +213,20 @@ function buildUrl(base, apiKey, parameters) {
   return url;
 }
 
+/**
+ * Fetch, validate, normalize, and cache a 511.org response.
+ * @param {Object} options - Request and caching configuration.
+ * @param {URL|string} options.url - Endpoint URL.
+ * @param {Function} options.fetchImpl - Fetch implementation.
+ * @param {Function} options.normalize - Converts the validated payload into cached data.
+ * @param {Function} options.validate - Determines whether the response payload is valid.
+ * @param {string} options.dataField - Property name for the normalized data.
+ * @param {string} options.key - Cache key.
+ * @param {number} options.freshMs - Fresh-cache duration in milliseconds.
+ * @param {number} options.staleMs - Stale-cache duration in milliseconds.
+ * @param {Function} options.now - Function that returns the current time in milliseconds.
+ * @returns {Promise<Object>} A successful network result containing normalized data and cache timestamps, or a failure result with a reason.
+ */
 async function request511({
   url,
   fetchImpl,
@@ -226,6 +301,12 @@ async function request511({
   });
 }
 
+/**
+ * Resolves a request with an aborted result when the caller's signal is aborted.
+ * @param {Promise} request - The pending request.
+ * @param {AbortSignal} signal - The caller's cancellation signal.
+ * @returns {Promise} The request result or an aborted result.
+ */
 function settleForCaller(request, signal) {
   if (!signal) return request;
   if (signal.aborted) {
@@ -242,6 +323,14 @@ function settleForCaller(request, signal) {
   });
 }
 
+/**
+ * Retrieves and caches normalized transit data, using stale cached data when an unavailable network response permits it.
+ * @param {Object} options - Request and caching configuration.
+ * @param {string} options.key - Cache key for the request.
+ * @param {string} options.dataField - Property containing the normalized data.
+ * @param {AbortSignal} [options.signal] - Signal used to cancel the caller's request.
+ * @returns {Promise<Object>} A result containing normalized data and its source, or a failure reason.
+ */
 async function cached511Request({
   key,
   dataField,
@@ -317,6 +406,15 @@ async function cached511Request({
   return result;
 }
 
+/**
+ * Fetch departure times for a transit stop.
+ * @param {string} stopCode - The stop identifier.
+ * @param {string} [agency='SF'] - The transit agency identifier.
+ * @param {Object} [options] - Request configuration.
+ * @param {AbortSignal} [options.signal] - Signal used to cancel the request.
+ * @param {string} [options.apiKey] - 511 API key.
+ * @returns {Promise<Object>} A result containing departure minutes or a failure reason.
+ */
 export async function fetchStopDepartures(
   stopCode,
   agency = 'SF',
@@ -358,6 +456,16 @@ export async function fetchStopDepartures(
   });
 }
 
+/**
+ * Fetches and normalizes active service alerts for an agency.
+ * @param {string} [agency='SF'] - The agency identifier used to request alerts.
+ * @param {Object} [options] - Request configuration.
+ * @param {AbortSignal} [options.signal] - Signal used to cancel the request.
+ * @param {Function} [options.fetchImpl=fetch] - Fetch implementation.
+ * @param {string} [options.apiKey] - API key for the 511 service.
+ * @param {Function} [options.now=Date.now] - Function used to obtain the current time.
+ * @returns {Promise<Object>} The request result containing normalized alerts or a failure reason.
+ */
 export async function fetchServiceAlerts(
   agency = 'SF',
   {

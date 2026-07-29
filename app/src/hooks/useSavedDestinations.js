@@ -4,6 +4,11 @@ import { savedStateStore } from '../lib/responseStore.js';
 const STORE_KEY = 'saved-destinations';
 const MAX_SAVED_DESTINATIONS = 10;
 
+/**
+ * Normalizes a saved destination candidate.
+ * @param {*} candidate - The candidate to validate and normalize.
+ * @return {?Object} The normalized candidate, or `null` when its ID or coordinates are invalid.
+ */
 function normalizeCandidate(candidate) {
   if (
     typeof candidate?.id !== 'string' ||
@@ -32,6 +37,11 @@ function normalizeCandidate(candidate) {
   };
 }
 
+/**
+ * Normalize, deduplicate, and limit a collection of saved destinations.
+ * @param {*} value - The value containing candidate destinations.
+ * @return {Array<Object>} The normalized collection, capped at the maximum number of saved destinations.
+ */
 function normalizeCollection(value) {
   const seen = new Set();
   const normalized = [];
@@ -45,6 +55,12 @@ function normalizeCollection(value) {
   return normalized;
 }
 
+/**
+ * Toggles a destination in a saved collection.
+ * @param {Array<Object>} collection - The current saved destinations.
+ * @param {Object} candidate - The destination to add or remove.
+ * @return {Array<Object>} The updated collection, capped at the maximum number of saved destinations.
+ */
 function toggleCandidate(collection, candidate) {
   return collection.some((place) => place.id === candidate.id)
     ? collection.filter((place) => place.id !== candidate.id)
@@ -54,6 +70,15 @@ function toggleCandidate(collection, candidate) {
       ].slice(0, MAX_SAVED_DESTINATIONS);
 }
 
+/**
+ * Manage a user's saved destinations with persistent storage.
+ * @returns {{
+ *   savedDestinations: Array,
+ *   loading: boolean,
+ *   isSaved: Function,
+ *   toggleSaved: Function
+ * }} The saved destinations, loading state, membership check, and toggle action.
+ */
 export function useSavedDestinations() {
   const [savedDestinations, setSavedDestinations] = useState([]);
   const [loading, setLoading] = useState(true);

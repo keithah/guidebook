@@ -4,6 +4,11 @@ import { card, colors, fonts } from '../../theme.js';
 import ItinerarySteps, { formatDuration } from './ItinerarySteps.jsx';
 import TransitAlerts from './TransitAlerts.jsx';
 
+/**
+ * Formats a date value as an hour-and-minute time string.
+ * @param {*} value - The date value to parse.
+ * @return {?string} The formatted time, or `null` when the value cannot be parsed.
+ */
 function formatTime(value) {
   if (!value || !Number.isFinite(Date.parse(value))) return null;
   return new Intl.DateTimeFormat('en-US', {
@@ -12,6 +17,11 @@ function formatTime(value) {
   }).format(new Date(value));
 }
 
+/**
+ * Render a formatted time or a pending-time placeholder.
+ * @param {*} value - The date value used to generate the displayed time.
+ * @return {JSX.Element} A time element when the value is valid; otherwise, a pending-time placeholder.
+ */
 function RouteTime({ value }) {
   const text = formatTime(value);
   return text ? (
@@ -21,6 +31,11 @@ function RouteTime({ value }) {
   );
 }
 
+/**
+ * Extracts unique identifiers for the transit lines in a trip.
+ * @param {Object} trip - The trip whose transit sections provide the line identifiers.
+ * @return {string[]} The unique truthy short names or first name tokens for transit lines.
+ */
 function lineIdsFor(trip) {
   const sectionIds = (trip.sections ?? [])
     .filter((section) => section.type === 'transit')
@@ -32,6 +47,11 @@ function lineIdsFor(trip) {
   return [...new Set(sectionIds.filter(Boolean))];
 }
 
+/**
+ * Builds a human-readable label for a transit option.
+ * @param {Object} trip - The trip containing line names and route sections.
+ * @return {string} The joined line names, an unknown-section label, or `transit option`.
+ */
 function optionLabel(trip) {
   const lines = (trip.lines ?? []).map((line) => line.name).filter(Boolean);
   return (
@@ -41,6 +61,10 @@ function optionLabel(trip) {
   );
 }
 
+/**
+ * Displays the transit lines and destinations for a trip.
+ * @param {Object} trip - The trip containing transit sections to display.
+ */
 function TripLines({ trip }) {
   const transitSections = (trip.sections ?? []).filter(
     (section) => section.type === 'transit',
@@ -79,6 +103,15 @@ function TripLines({ trip }) {
   );
 }
 
+/**
+ * Render a transit trip card with timing, route details, transfer information, and an expandable itinerary.
+ * @param {Object} trip - The transit trip to display.
+ * @param {number} index - The trip's position in the results.
+ * @param {boolean} expanded - Whether the full itinerary is visible.
+ * @param {Function} onToggle - Called with the trip's line identifiers when the itinerary toggle is activated.
+ * @param {Array} alerts - Transit alerts associated with the trip.
+ * @param {string} [externalUrl] - Optional URL for opening the trip in a maps application.
+ */
 export default function TripCard({
   trip,
   index,

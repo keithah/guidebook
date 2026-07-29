@@ -16,6 +16,10 @@ export function useApp() {
 
 const TABS = ['home', 'arrive', 'cottage', 'around', 'explore', 'help'];
 
+/**
+ * Provide application-wide state and actions through `AppContext`.
+ * @returns {JSX.Element} The context provider containing the application children.
+ */
 export function AppProvider({ children }) {
   const scrollRef = useRef(null);
 

@@ -7,6 +7,14 @@ const SEARCH_MESSAGES = {
     'Place search needs a connection. Saved places and nearby transit are still available.',
 };
 
+/**
+ * Render a destination row with selection and saved-place controls.
+ * @param {Object} candidate - The destination to display.
+ * @param {boolean} selected - Whether the destination is currently selected.
+ * @param {boolean} saved - Whether the destination is in saved places.
+ * @param {Function} onSelect - Called with the destination when it is selected.
+ * @param {Function} onToggleSaved - Called with the destination when its saved state is toggled.
+ */
 function PlaceRow({ candidate, selected, saved, onSelect, onToggleSaved }) {
   return (
     <div
@@ -73,6 +81,22 @@ function PlaceRow({ candidate, selected, saved, onSelect, onToggleSaved }) {
   );
 }
 
+/**
+ * Render a destination search form with search results, saved places, and the selected destination.
+ * @param {Object} props - Destination search configuration and event handlers.
+ * @param {string} props.query - Current search query.
+ * @param {Function} props.onQueryChange - Handles changes to the search query.
+ * @param {Array} [props.candidates] - Destinations matching the query.
+ * @param {Object} [props.selectedDestination] - Currently selected destination.
+ * @param {Object} [props.searchStatus] - Current search status.
+ * @param {Array} [props.savedDestinations] - Destinations saved by the user.
+ * @param {Function} [props.isSaved] - Determines whether a destination is saved.
+ * @param {Function} props.onToggleSaved - Toggles a destination's saved state.
+ * @param {Function} props.onSubmit - Submits the current search query.
+ * @param {Function} props.onSelect - Selects a destination.
+ * @param {Function} props.onClear - Clears the selected destination.
+ * @return {JSX.Element} The destination search interface.
+ */
 export default function DestinationSearch({
   query,
   onQueryChange,

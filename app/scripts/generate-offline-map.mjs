@@ -34,6 +34,11 @@ const LINE_BADGES = {
   BUS: '29',
 };
 
+/**
+ * Creates a short display badge for a transit line.
+ * @param {string} line - The transit line identifier.
+ * @returns {string} The mapped badge, or the first two uppercase characters of the identifier; returns `?` when no identifier is provided.
+ */
 export function lineBadge(line) {
   return (
     (LINE_BADGES[line] ??
@@ -44,6 +49,11 @@ export function lineBadge(line) {
   );
 }
 
+/**
+ * Validate the required location and transit data in a property fixture.
+ * @param {Object} property - The property fixture to validate.
+ * @throws {Error} If the latitude or longitude is not finite, or nearby stops is not an array.
+ */
 export function validatePropertyFixture(property) {
   if (!Number.isFinite(property?.address?.lat)) {
     throw new Error(
@@ -62,6 +72,11 @@ export function validatePropertyFixture(property) {
   }
 }
 
+/**
+ * Escapes XML special characters in a value.
+ * @param {*} value - The value to convert and escape.
+ * @return {string} The XML-escaped string.
+ */
 function escapeXml(value) {
   return String(value)
     .replaceAll('&', '&amp;')
@@ -71,16 +86,32 @@ function escapeXml(value) {
     .replaceAll("'", '&apos;');
 }
 
+/**
+ * Projects geographic coordinates into the map's SVG coordinate system.
+ * @param {number} lat - The latitude to project.
+ * @param {number} lon - The longitude to project.
+ * @returns {{x: number, y: number}} The projected SVG coordinates.
+ */
 function project(lat, lon) {
   const x = 34 + ((lon - west) / (east - west)) * (width - 68);
   const y = 30 + ((north - lat) / (north - south)) * (height - 100);
   return { x, y };
 }
 
+/**
+ * Rounds a numeric value to two decimal places.
+ * @param {number} value - The value to round.
+ * @return {number} The value rounded to two decimal places.
+ */
 function coordinate(value) {
   return Number(value.toFixed(2));
 }
 
+/**
+ * Builds an SVG path data string from projected points.
+ * @param {Array<{x: number, y: number}>} points - The points that define the path.
+ * @return {string} The SVG path data string.
+ */
 function pathData(points) {
   return points
     .map(({ x, y }, index) => {
@@ -90,6 +121,11 @@ function pathData(points) {
     .join(' ');
 }
 
+/**
+ * Calculates the total length of a polyline.
+ * @param {Array<{x: number, y: number}>} points - The ordered points defining the polyline.
+ * @returns {number} The sum of the distances between consecutive points.
+ */
 function polylineLength(points) {
   return points.slice(1).reduce((total, point, index) => {
     const previous = points[index];
@@ -97,6 +133,11 @@ function polylineLength(points) {
   }, 0);
 }
 
+/**
+ * Finds the midpoint of a polyline and its normalized segment angle.
+ * @param {Array<{x: number, y: number}>} points - The polyline points in SVG coordinates.
+ * @returns {{angle: number, x: number, y: number}} The midpoint coordinates and angle in degrees.
+ */
 function midpointOnPolyline(points) {
   const totalLength = polylineLength(points);
   let distance = totalLength / 2;
@@ -140,6 +181,11 @@ const renderedHighways = new Set([
   'unclassified',
 ]);
 
+/**
+ * Maps a highway tag to its SVG road style class.
+ * @param {string} highway - The highway tag value.
+ * @return {string|null} The corresponding road style class, or `null` when no class is defined.
+ */
 function roadClass(highway) {
   if (/^(motorway|trunk)/.test(highway)) return 'road-expressway';
   if (highway.startsWith('primary')) return 'road-primary';
@@ -151,6 +197,12 @@ function roadClass(highway) {
   return null;
 }
 
+/**
+ * Selects visible road labels while avoiding overlap with the cottage marker and other labels.
+ * @param {Map<string, Object>} labelCandidates - Road label candidates keyed by display name.
+ * @param {{x: number, y: number}} cottage - Projected cottage position used as an exclusion area.
+ * @returns {Object[]} Up to 14 selected label candidates, sorted alphabetically by display name and enriched with midpoint coordinates and rotation angles.
+ */
 function selectRoadLabels(labelCandidates, cottage) {
   const occupied = [
     { x: cottage.x, y: cottage.y, halfWidth: 210, halfHeight: 65 },
@@ -201,6 +253,11 @@ function selectRoadLabels(labelCandidates, cottage) {
   );
 }
 
+/**
+ * Downloads Overpass map data, trying each configured endpoint until one succeeds.
+ * @returns {{endpoint: string, extract: object}} The successful endpoint and its parsed Overpass response.
+ * @throws {Error} If all configured endpoints fail.
+ */
 async function downloadExtract() {
   let lastError;
   for (const endpoint of overpassEndpoints) {
@@ -237,6 +294,12 @@ async function downloadExtract() {
   );
 }
 
+/**
+ * Renders an SVG neighborhood map from Overpass data and property transit information.
+ * @param {Object} extract - Overpass response containing map elements.
+ * @param {Object} property - Property fixture containing the cottage location and nearby transit stops.
+ * @return {string} The generated SVG document.
+ */
 function renderSvg(extract, property) {
   const sortedElements = [...extract.elements].sort(
     (left, right) => Number(left.id) - Number(right.id),
@@ -361,6 +424,11 @@ ${stopLabels.join('\n')}
 `;
 }
 
+/**
+ * Generates provenance documentation for the neighborhood map.
+ * @param {string} endpoint - The Overpass endpoint used to retrieve the map data.
+ * @return {string} Markdown containing the map bounds, generation date, data source, query, and regeneration instructions.
+ */
 function renderProvenance(endpoint) {
   const generatedOn = new Date().toISOString().slice(0, 10);
   return `# Ingleside neighborhood map provenance
@@ -387,6 +455,9 @@ node scripts/generate-offline-map.mjs
 `;
 }
 
+/**
+ * Generates the neighborhood map SVG and its provenance document from the property fixture and Overpass data.
+ */
 async function main() {
   const property = JSON.parse(await readFile(propertyPath, 'utf8'));
   validatePropertyFixture(property);

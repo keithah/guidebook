@@ -5,6 +5,10 @@ const SAVED_STATE = 'savedState';
 
 let databasePromise;
 
+/**
+ * Opens the IndexedDB database and creates the required object stores when needed.
+ * @return {Promise<IDBDatabase>} The opened database connection.
+ */
 function openDatabase() {
   if (databasePromise) return databasePromise;
 
@@ -30,6 +34,13 @@ function openDatabase() {
   return databasePromise;
 }
 
+/**
+ * Executes an operation within a transaction on the specified object store.
+ * @param {string} storeName - The name of the object store to access.
+ * @param {IDBTransactionMode} mode - The transaction access mode.
+ * @param {function(IDBObjectStore): IDBRequest} operation - The operation to perform on the object store.
+ * @return {Promise<*>} The result of the IndexedDB request.
+ */
 async function runTransaction(storeName, mode, operation) {
   const database = await openDatabase();
 

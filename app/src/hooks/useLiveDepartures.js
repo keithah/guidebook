@@ -5,11 +5,21 @@ import { fetchStopDepartures } from '../lib/transit511.js';
 // duplicate consumers from independently spending that request budget.
 const REFRESH_MS = 5 * 60_000;
 
+/**
+ * Formats up to the first two departure times for display.
+ * @param {Array<number>} list - The departure times in minutes.
+ * @return {string|null} The formatted departure times, or `null` when the list is empty.
+ */
 function formatMinutes(list) {
   if (!list?.length) return null;
   return `${list.slice(0, 2).join(', ')}′`;
 }
 
+/**
+ * Normalize departure-fetch results into status and timing metadata.
+ * @param {Object} result - The departure-fetch result to normalize.
+ * @return {Object} Metadata describing availability, source status, timestamps, and errors.
+ */
 function resultMeta(result) {
   if (!result.ok) {
     return {
@@ -31,6 +41,11 @@ function resultMeta(result) {
   };
 }
 
+/**
+ * Fetches and tracks live departure times and fetch metadata for transit stops.
+ * @param {Array<Object>} stops - Transit stops with `stopCode` and optional `agency` properties.
+ * @returns {{times: Object, meta: Object}} Departure strings and per-stop fetch metadata keyed by stop index.
+ */
 export function useLiveDepartures(stops) {
   const [state, setState] = useState({ times: {}, meta: {} });
 

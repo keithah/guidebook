@@ -12,6 +12,13 @@ const SEARCH_RADIUS_METERS = 80_000;
 const CANDIDATE_LIMIT = 5;
 const REQUEST_TIMEOUT_MS = 10_000;
 
+/**
+ * Builds a HERE Discover search URL for a query centered on a map position.
+ * @param {string} query - The search text.
+ * @param {{lat: number, lng: number}} center - The search center coordinates.
+ * @param {string} apiKey - The HERE API key.
+ * @return {URL} The configured HERE Discover search URL.
+ */
 export function buildHereSearchUrl(query, center, apiKey) {
   const url = new URL(HERE_DISCOVER_URL);
   url.searchParams.set('q', query.trim());
@@ -25,6 +32,11 @@ export function buildHereSearchUrl(query, center, apiKey) {
   return url;
 }
 
+/**
+ * Normalize HERE search results into destination candidates.
+ * @param {object} payload - The HERE response payload containing search items.
+ * @return {Array<object>} Candidates with valid coordinates and normalized optional fields.
+ */
 export function normalizeHereCandidates(payload) {
   if (!Array.isArray(payload?.items)) return [];
 
@@ -52,6 +64,13 @@ export function normalizeHereCandidates(payload) {
     }));
 }
 
+/**
+ * Creates a deterministic cache key for a search query and map center.
+ * @param {string} query - The search query.
+ * @param {{lat: number, lng: number}} center - The geographic center of the search.
+ * @returns {string} A cache key containing the encoded query and rounded coordinates.
+ * @throws {TypeError} If either coordinate is not finite.
+ */
 function cacheKey(query, center) {
   const roundCoordinate = (value) => {
     if (!Number.isFinite(value)) {
@@ -66,6 +85,19 @@ function cacheKey(query, center) {
   return `here-discover:${encodeURIComponent(query.toLowerCase())}:${roundCoordinate(center.lat)},${roundCoordinate(center.lng)}`;
 }
 
+/**
+ * Fetches and normalizes destination candidates from HERE, with best-effort response caching.
+ * @param {Object} options - Request and caching context.
+ * @param {string} options.query - Destination search query.
+ * @param {{lat: number, lng: number}} options.center - Search center coordinates.
+ * @param {string} options.apiKey - HERE API key.
+ * @param {Function} options.fetchImpl - Fetch implementation.
+ * @param {Function} options.now - Function that provides the current timestamp.
+ * @param {string} options.key - Cache key for the request.
+ * @param {AbortSignal} options.signal - Signal used to cancel the request.
+ * @param {Function} options.didTimeout - Indicates whether the request timeout has elapsed.
+ * @returns {Promise<Object>} A success result with normalized candidates and cache metadata, or a failure result with a reason.
+ */
 async function fetchHereDestinations({
   query,
   center,
@@ -134,6 +166,14 @@ async function fetchHereDestinations({
   };
 }
 
+/**
+ * Searches HERE for destinations near a map center.
+ * @param {string} query - The destination search text.
+ * @param {{lat: number, lng: number}} center - The search area's geographic center.
+ * @param {Object} [options] - Request, caching, and timeout options.
+ * @param {AbortSignal} [options.signal] - Signal used to cancel the search.
+ * @returns {Promise<Object>} A successful result with candidates and their source, or a failure result with a reason.
+ */
 export async function searchHereDestinations(
   query,
   center,

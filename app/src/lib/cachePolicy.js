@@ -1,3 +1,9 @@
+/**
+ * Determines when a response should stop being cached based on its HTTP caching headers.
+ * @param {Headers} headers - The response headers containing cache directives.
+ * @param {number} nowMs - The current time in milliseconds since the Unix epoch.
+ * @return {number|null} The cache expiration time in milliseconds since the Unix epoch, or `null` when caching is disallowed or no valid future expiration is available.
+ */
 export function cacheUntilFromHeaders(headers, nowMs) {
   const cacheControl = headers.get('cache-control');
 

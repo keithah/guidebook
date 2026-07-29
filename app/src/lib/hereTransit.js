@@ -26,6 +26,12 @@ const KNOWN_ACTION_TYPES = new Set([
   'wait',
 ]);
 
+/**
+ * Formats a route position as a trimmed string or latitude-longitude pair.
+ * @param {string|Object} position - A position string or an object with finite `lat` and `lng` values.
+ * @returns {string} The trimmed position string or formatted coordinate pair.
+ * @throws {TypeError} If the position object does not contain finite coordinates.
+ */
 function formatPosition(position) {
   if (typeof position === 'string') return position.trim();
   if (!isFinitePosition(position)) {
@@ -34,12 +40,25 @@ function formatPosition(position) {
   return `${position.lat},${position.lng}`;
 }
 
+/**
+ * Converts a date value to an ISO 8601 timestamp.
+ * @param {Date|string|number} value - The date value to convert.
+ * @return {string} The ISO 8601 timestamp.
+ */
 function isoTime(value) {
   return value instanceof Date
     ? value.toISOString()
     : new Date(value).toISOString();
 }
 
+/**
+ * Build a HERE Transit routing request URL.
+ * @param {string|Object} origin - The route origin.
+ * @param {string|Object} destination - The route destination.
+ * @param {Date|string|number} departureTime - The planned departure time.
+ * @param {string} apiKey - The HERE API key.
+ * @return {URL} The configured HERE Transit request URL.
+ */
 export function buildHereTransitUrl(
   origin,
   destination,
@@ -58,6 +77,11 @@ export function buildHereTransitUrl(
   return url;
 }
 
+/**
+ * Converts a value into a human-readable, capitalized label.
+ * @param {*} value - The value to format as a label.
+ * @return {string} The formatted label, or `"Unknown"` when the value is null, undefined, or empty.
+ */
 function labelFor(value) {
   const words = String(value ?? 'unknown')
     .replace(/([a-z\d])([A-Z])/g, '$1 $2')
@@ -67,6 +91,11 @@ function labelFor(value) {
   return words ? `${words[0].toUpperCase()}${words.slice(1)}` : 'Unknown';
 }
 
+/**
+ * Normalize a place into the route data format.
+ * @param {object} place - The place data to normalize.
+ * @return {object|null} The normalized place, or `null` when the input is invalid.
+ */
 function normalizePlace(place) {
   if (!place || typeof place !== 'object') return null;
 
@@ -88,6 +117,11 @@ function normalizePlace(place) {
   };
 }
 
+/**
+ * Normalize a route notice into a consistent representation.
+ * @param {Object} notice - The notice data to normalize.
+ * @returns {Object} An object containing the notice code, title, and optional severity.
+ */
 function normalizeNotice(notice) {
   return {
     code: typeof notice?.code === 'string' ? notice.code : 'unknown',
@@ -99,6 +133,11 @@ function normalizeNotice(notice) {
   };
 }
 
+/**
+ * Normalize an incident into a consistent route incident object.
+ * @param {Object} incident - The incident data to normalize.
+ * @returns {Object} The normalized incident with type and effect values, plus any valid optional details.
+ */
 function normalizeIncident(incident) {
   return {
     type: typeof incident?.type === 'string' ? incident.type : 'unknown',
@@ -119,6 +158,11 @@ function normalizeIncident(incident) {
   };
 }
 
+/**
+ * Normalize a route action into a recognized or unknown action representation.
+ * @param {object} action - The source action data.
+ * @returns {object} The normalized action with its type, instruction, and available metadata.
+ */
 function normalizeAction(action) {
   const actionType = action?.action;
   const label = labelFor(actionType);
@@ -149,12 +193,22 @@ function normalizeAction(action) {
   };
 }
 
+/**
+ * Collects all actions associated with a route section.
+ * @param {Object} section - The route section whose pre-actions, actions, and post-actions are collected.
+ * @returns {Array} The section's actions in execution order.
+ */
 function allSectionActions(section) {
   return [section?.preActions, section?.actions, section?.postActions]
     .filter(Array.isArray)
     .flat();
 }
 
+/**
+ * Normalize public transport details into a consistent object.
+ * @param {object} transport - The transport details to normalize.
+ * @return {object|null} The normalized transport details, or `null` when the input is missing or invalid.
+ */
 function normalizeTransport(transport) {
   if (!transport || typeof transport !== 'object') return null;
   return {
@@ -182,6 +236,11 @@ function normalizeTransport(transport) {
   };
 }
 
+/**
+ * Normalize a transit agency into its supported fields.
+ * @param {object} agency - The agency data to normalize.
+ * @return {object|null} The normalized agency, or `null` when the input is not an object.
+ */
 function normalizeAgency(agency) {
   if (!agency || typeof agency !== 'object') return null;
   return {
@@ -191,6 +250,11 @@ function normalizeAgency(agency) {
   };
 }
 
+/**
+ * Normalize an intermediate transit stop and its departure details.
+ * @param {Object} stop - The transit stop data to normalize.
+ * @return {Object} The normalized stop, including optional departure time, delay, status, and stop duration.
+ */
 function normalizeIntermediateStop(stop) {
   const place = normalizePlace(stop?.departure?.place) ?? {};
   return {
@@ -210,6 +274,11 @@ function normalizeIntermediateStop(stop) {
   };
 }
 
+/**
+ * Normalize a recognized route section into the application's section format.
+ * @param {Object} section - The route section to normalize.
+ * @returns {Object} The normalized section with timing, location, transport, stop, notice, incident, and action details.
+ */
 function normalizeKnownSection(section) {
   const durationSeconds = Number.isFinite(section.travelSummary?.duration)
     ? section.travelSummary.duration
@@ -253,6 +322,11 @@ function normalizeKnownSection(section) {
   };
 }
 
+/**
+ * Normalizes a route section into a supported or unknown section representation.
+ * @param {Object} section - The route section to normalize.
+ * @returns {Object} The normalized section, including its known section data or a descriptive label and instruction.
+ */
 function normalizeSection(section) {
   if (KNOWN_SECTION_TYPES.has(section?.type)) {
     return normalizeKnownSection(section);
@@ -269,6 +343,11 @@ function normalizeSection(section) {
   };
 }
 
+/**
+ * Calculates the total route duration in seconds.
+ * @param {Array<Object>} sections - The route sections used to determine the duration.
+ * @returns {number} The duration in seconds.
+ */
 function routeDurationSeconds(sections) {
   const departure = Date.parse(sections[0]?.departure?.time ?? '');
   const arrival = Date.parse(sections.at(-1)?.arrival?.time ?? '');
@@ -281,6 +360,12 @@ function routeDurationSeconds(sections) {
   );
 }
 
+/**
+ * Normalize a route into the application's transit route format.
+ * @param {Object} route - The provider route containing sections and notices.
+ * @param {string} plannedAt - The planned departure time associated with the route.
+ * @returns {Object} The normalized route with timing, walking, transfer, line, section, and notice data.
+ */
 function normalizeRoute(route, plannedAt) {
   const rawSections = route.sections;
   const transitSections = rawSections.filter(
@@ -318,6 +403,12 @@ function normalizeRoute(route, plannedAt) {
   };
 }
 
+/**
+ * Normalize HERE route data into up to three eligible internal route objects.
+ * @param {object} payload - HERE API response containing route data.
+ * @param {string} plannedAt - Planned departure time associated with the routes.
+ * @return {Array<object>} Normalized routes with at least one section, excluding pedestrian-only routes when transit routes are available.
+ */
 export function normalizeHereRoutes(payload, plannedAt) {
   if (!Array.isArray(payload?.routes)) return [];
 
@@ -339,11 +430,22 @@ export function normalizeHereRoutes(payload, plannedAt) {
     .map((route) => normalizeRoute(route, plannedAt));
 }
 
+/**
+ * Creates a cache key for a route query.
+ * @param {string|Object} origin - The route origin position.
+ * @param {string|Object} destination - The route destination position.
+ * @param {string} plannedAt - The planned departure time in ISO format.
+ * @returns {string} A cache key containing the origin, destination, and time bucket.
+ */
 function routeCacheKey(origin, destination, plannedAt) {
   const bucket = Math.floor(Date.parse(plannedAt) / ROUTE_KEY_BUCKET_MS);
   return `here-transit:${formatPosition(origin)}:${formatPosition(destination)}:${bucket}`;
 }
 
+/**
+ * Fetches and normalizes transit routes for a planned journey.
+ * @returns {Promise<object>} A success result containing normalized trips and cache metadata, or a failure result with a reason.
+ */
 async function fetchRoutes({
   origin,
   destination,
@@ -415,6 +517,17 @@ async function fetchRoutes({
   };
 }
 
+/**
+ * Fetch transit routes between two locations for a planned departure time.
+ * @param {Object|string} origin - The starting position.
+ * @param {Object|string} destination - The ending position.
+ * @param {Object} [options] - Request and transport options.
+ * @param {Date|string|number} [options.departureTime] - The planned departure time.
+ * @param {AbortSignal} [options.signal] - Signal used to cancel the request.
+ * @param {string} [options.apiKey] - HERE API key.
+ * @param {number} [options.timeoutMs] - Network request timeout in milliseconds.
+ * @return {Promise<Object>} A result containing normalized trips on success, or a reason such as `missing-api-key`, `aborted`, `invalid-request`, or a provider failure on error.
+ */
 export async function fetchHereTransitRoutes(
   origin,
   destination,

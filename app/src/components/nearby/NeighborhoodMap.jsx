@@ -12,6 +12,12 @@ const FOCUSABLE_SELECTOR = [
   '[tabindex]:not([tabindex="-1"])',
 ].join(', ');
 
+/**
+ * Render the offline neighborhood map and a control for expanding it.
+ * @param {boolean} expanded - Whether the full offline map is displayed.
+ * @param {Function} onToggle - Handles toggling the map's expanded state.
+ * @param {object} buttonRef - Ref assigned to the toggle button.
+ */
 function OfflineNeighborhoodFigure({ expanded, onToggle, buttonRef }) {
   return (
     <figure className="offline-neighborhood-map">
@@ -38,6 +44,10 @@ function OfflineNeighborhoodFigure({ expanded, onToggle, buttonRef }) {
   );
 }
 
+/**
+ * Keeps keyboard focus within the modal while navigating with the Tab key.
+ * @param {KeyboardEvent} event - The keyboard event from the modal container.
+ */
 function trapModalFocus(event) {
   if (event.key !== 'Tab') return;
 
@@ -64,6 +74,11 @@ function trapModalFocus(event) {
   }
 }
 
+/**
+ * Render an offline neighborhood map with an optional live-map retry action and an expandable modal view.
+ * @param {Function} [onRetry] - Callback invoked to retry loading the live map.
+ * @return {JSX.Element} The offline neighborhood map interface.
+ */
 function OfflineNeighborhoodMap({ onRetry }) {
   const [expanded, setExpanded] = useState(false);
   const dialogRef = useRef(null);
@@ -146,6 +161,10 @@ function OfflineNeighborhoodMap({ onRetry }) {
   );
 }
 
+/**
+ * Displays the online neighborhood map or an offline fallback based on connectivity and tile failures.
+ * @return {JSX.Element} The online map or offline neighborhood map interface.
+ */
 export default function NeighborhoodMap(props) {
   const [isOnline, setIsOnline] = useState(() => navigator.onLine);
   const [tileFailureCount, setTileFailureCount] = useState(0);
