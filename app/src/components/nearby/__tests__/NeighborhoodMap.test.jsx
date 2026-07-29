@@ -81,10 +81,34 @@ describe('NeighborhoodMap', () => {
     setOnline(false);
     render(<NeighborhoodMap {...mapProps} />);
 
-    expect(
+    const mapImage =
       screen.getByRole('img', {
         name: 'Offline neighborhood map around The SF Cottage in Ingleside',
-      }),
+      });
+
+    expect(mapImage).toBeVisible();
+    expect(mapImage).toHaveStyle({ objectFit: 'contain' });
+    expect(
+      screen.getByRole('button', { name: 'View full offline map' }),
+    ).toHaveAttribute('aria-expanded', 'false');
+  });
+
+  it('opens the complete offline map accessibly and closes it with Escape', () => {
+    setOnline(false);
+    render(<NeighborhoodMap {...mapProps} />);
+
+    fireEvent.click(
+      screen.getByRole('button', { name: 'View full offline map' }),
+    );
+
+    expect(
+      screen.getByRole('dialog', { name: 'Full offline neighborhood map' }),
     ).toBeVisible();
+    expect(
+      screen.getByRole('button', { name: 'Close full offline map' }),
+    ).toHaveAttribute('aria-expanded', 'true');
+
+    fireEvent.keyDown(window, { key: 'Escape' });
+    expect(screen.queryByRole('dialog')).not.toBeInTheDocument();
   });
 });

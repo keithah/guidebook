@@ -70,18 +70,108 @@ function polylineLength(points) {
   }, 0);
 }
 
+function midpointOnPolyline(points) {
+  const totalLength = polylineLength(points);
+  let distance = totalLength / 2;
+
+  for (let index = 1; index < points.length; index += 1) {
+    const start = points[index - 1];
+    const end = points[index];
+    const segmentLength = Math.hypot(end.x - start.x, end.y - start.y);
+    if (distance > segmentLength) {
+      distance -= segmentLength;
+      continue;
+    }
+
+    const ratio = segmentLength === 0 ? 0 : distance / segmentLength;
+    let angle = (Math.atan2(end.y - start.y, end.x - start.x) * 180) / Math.PI;
+    if (angle > 90) angle -= 180;
+    if (angle < -90) angle += 180;
+    return {
+      angle,
+      x: start.x + (end.x - start.x) * ratio,
+      y: start.y + (end.y - start.y) * ratio,
+    };
+  }
+
+  return { ...points[0], angle: 0 };
+}
+
+const renderedHighways = new Set([
+  'motorway',
+  'motorway_link',
+  'trunk',
+  'trunk_link',
+  'primary',
+  'primary_link',
+  'secondary',
+  'secondary_link',
+  'tertiary',
+  'tertiary_link',
+  'residential',
+  'living_street',
+  'unclassified',
+]);
+
 function roadClass(highway) {
-  if (['motorway', 'trunk'].includes(highway)) return 'road-expressway';
-  if (highway === 'primary') return 'road-primary';
-  if (highway === 'secondary') return 'road-secondary';
-  if (highway === 'tertiary') return 'road-tertiary';
+  if (/^(motorway|trunk)/.test(highway)) return 'road-expressway';
+  if (highway.startsWith('primary')) return 'road-primary';
+  if (highway.startsWith('secondary')) return 'road-secondary';
+  if (highway.startsWith('tertiary')) return 'road-tertiary';
   if (['residential', 'living_street', 'unclassified'].includes(highway)) {
     return 'road-local';
   }
-  if (['footway', 'path', 'pedestrian', 'steps', 'cycleway'].includes(highway)) {
-    return 'road-path';
+  return null;
+}
+
+function selectRoadLabels(labelCandidates, cottage) {
+  const occupied = [
+    { x: cottage.x, y: cottage.y, halfWidth: 210, halfHeight: 65 },
+  ];
+  const selected = [];
+  const candidates = [...labelCandidates.values()]
+    .map((candidate) => ({
+      ...candidate,
+      ...midpointOnPolyline(candidate.points),
+    }))
+    .filter(
+      (candidate) =>
+        candidate.x >= 100 &&
+        candidate.x <= 1100 &&
+        candidate.y >= 90 &&
+        candidate.y <= 790 &&
+        (candidate.displayName === 'Ocean Avenue' || candidate.length >= 100),
+    )
+    .sort(
+      (left, right) =>
+        Number(right.displayName === 'Ocean Avenue') -
+          Number(left.displayName === 'Ocean Avenue') ||
+        right.length - left.length ||
+        left.displayName.localeCompare(right.displayName),
+    );
+
+  for (const candidate of candidates) {
+    const bounds = {
+      x: candidate.x,
+      y: candidate.y,
+      halfWidth: Math.min(175, Math.max(70, candidate.displayName.length * 7)),
+      halfHeight: 30,
+    };
+    const overlaps = occupied.some(
+      (other) =>
+        Math.abs(bounds.x - other.x) < bounds.halfWidth + other.halfWidth &&
+        Math.abs(bounds.y - other.y) < bounds.halfHeight + other.halfHeight,
+    );
+    if (overlaps && candidate.displayName !== 'Ocean Avenue') continue;
+
+    selected.push(candidate);
+    occupied.push(bounds);
+    if (selected.length === 14) break;
   }
-  return 'road-other';
+
+  return selected.sort((left, right) =>
+    left.displayName.localeCompare(right.displayName),
+  );
 }
 
 async function downloadExtract() {
@@ -127,9 +217,15 @@ function renderSvg(extract, property) {
   const nodesById = new Map(nodes.map((node) => [node.id, node]));
   const renderedWays = [];
   const labelCandidates = new Map();
+  const cottage = project(property.address.lat, property.address.lng);
 
   for (const way of ways) {
-    if (!way.tags?.highway || !Array.isArray(way.nodes)) continue;
+    if (
+      !renderedHighways.has(way.tags?.highway) ||
+      !Array.isArray(way.nodes)
+    ) {
+      continue;
+    }
     const points = way.nodes
       .map((nodeId) => nodesById.get(nodeId))
       .filter(Boolean)
@@ -137,7 +233,7 @@ function renderSvg(extract, property) {
     if (points.length < 2) continue;
 
     renderedWays.push(
-      `    <path class="${roadClass(way.tags.highway)}" data-osm-way="${way.id}" d="${pathData(points)}" fill="none" />`,
+      `    <path class="${roadClass(way.tags.highway)}" data-osm-way="${way.id}" data-highway="${way.tags.highway}" d="${pathData(points)}" fill="none" />`,
     );
 
     const name = way.tags.name;
@@ -154,27 +250,9 @@ function renderSvg(extract, property) {
     }
   }
 
-  const roadLabels = [...labelCandidates.values()]
-    .sort((left, right) => left.displayName.localeCompare(right.displayName))
-    .map(({ displayName, points }) => {
-      const middleIndex = Math.floor((points.length - 1) / 2);
-      const start = points[middleIndex];
-      const end = points[Math.min(middleIndex + 1, points.length - 1)];
-      let angle = (Math.atan2(end.y - start.y, end.x - start.x) * 180) / Math.PI;
-      if (angle > 90 || angle < -90) angle += 180;
-      const x = (start.x + end.x) / 2;
-      const y = (start.y + end.y) / 2;
-      return `    <text class="road-label" x="${coordinate(x)}" y="${coordinate(y)}" transform="rotate(${coordinate(angle)} ${coordinate(x)} ${coordinate(y)})" fill="#314944" font-family="system-ui,sans-serif" font-size="15" font-weight="650" text-anchor="middle">${escapeXml(displayName)}</text>`;
-    });
-
-  const osmTransitNodes = nodes
-    .filter(
-      (node) =>
-        node.tags?.public_transport || node.tags?.railway === 'station',
-    )
-    .map((node) => {
-      const { x, y } = project(node.lat, node.lon);
-      return `    <rect class="osm-transit" data-osm-node="${node.id}" x="${coordinate(x - 3)}" y="${coordinate(y - 3)}" width="6" height="6" fill="#6e807b" transform="rotate(45 ${coordinate(x)} ${coordinate(y)})"><title>${escapeXml(node.tags?.name ?? 'Transit stop')}</title></rect>`;
+  const roadLabels = selectRoadLabels(labelCandidates, cottage)
+    .map(({ displayName, angle, x, y }) => {
+      return `    <text class="road-label" x="${coordinate(x)}" y="${coordinate(y)}" transform="rotate(${coordinate(angle)} ${coordinate(x)} ${coordinate(y)})" fill="#314944" font-family="system-ui,sans-serif" font-size="26" font-weight="700" text-anchor="middle">${escapeXml(displayName)}</text>`;
     });
 
   const duplicateCounts = new Map();
@@ -183,24 +261,36 @@ function renderSvg(extract, property) {
     const duplicateIndex = duplicateCounts.get(duplicateKey) ?? 0;
     duplicateCounts.set(duplicateKey, duplicateIndex + 1);
     const point = project(stop.lat, stop.lng);
-    const x = point.x + duplicateIndex * 20;
+    const x = point.x + duplicateIndex * 30;
     const y = point.y;
-    const line = stop.line === 'BUS' ? '29' : stop.line;
+    const line = stop.line === 'BUS' ? '29' : stop.line === 'BART' ? 'BA' : stop.line;
     return `    <g class="curated-stop" data-stop-index="${index}" transform="translate(${coordinate(x)} ${coordinate(y)})" aria-label="${escapeXml(`${stop.name}, ${stop.sub}`)}">
-      <circle r="10" fill="#569bbe" stroke="#fff" stroke-width="3" />
-      <text x="0" y="3.5" fill="#fff" font-family="system-ui,sans-serif" font-size="9" font-weight="700" text-anchor="middle">${escapeXml(line)}</text>
+      <circle r="16" fill="#569bbe" stroke="#fff" stroke-width="4" />
+      <text x="0" y="5" fill="#fff" font-family="system-ui,sans-serif" font-size="13" font-weight="700" text-anchor="middle">${escapeXml(line)}</text>
       <title>${escapeXml(`${stop.name} · ${stop.sub}`)}</title>
     </g>`;
   });
 
-  const stopLabels = [...new Set(property.transit.nearbyStops.map((stop) => stop.name))]
-    .map((name) => {
-      const stop = property.transit.nearbyStops.find((item) => item.name === name);
+  const labeledStopNames = new Set();
+  const labeledStopCoordinates = new Set();
+  const stopLabels = property.transit.nearbyStops
+    .filter((stop) => {
+      const coordinates = `${stop.lat},${stop.lng}`;
+      if (
+        labeledStopNames.has(stop.name) ||
+        labeledStopCoordinates.has(coordinates)
+      ) {
+        return false;
+      }
+      labeledStopNames.add(stop.name);
+      labeledStopCoordinates.add(coordinates);
+      return true;
+    })
+    .map((stop) => {
       const { x, y } = project(stop.lat, stop.lng);
-      return `    <text class="stop-label" x="${coordinate(x + 14)}" y="${coordinate(y - 13)}" fill="#314944" font-family="system-ui,sans-serif" font-size="13" font-weight="650">${escapeXml(name)}</text>`;
+      const isPlymouth = stop.name.startsWith('Plymouth');
+      return `    <text class="stop-label" x="${coordinate(x + (isPlymouth ? -24 : 25))}" y="${coordinate(y - 28)}" fill="#314944" font-family="system-ui,sans-serif" font-size="22" font-weight="700" text-anchor="${isPlymouth ? 'end' : 'start'}">${escapeXml(stop.name)}</text>`;
     });
-
-  const cottage = project(property.address.lat, property.address.lng);
 
   return `<?xml version="1.0" encoding="UTF-8"?>
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${width} ${height}" role="img" aria-labelledby="map-title map-description">
@@ -208,10 +298,10 @@ function renderSvg(extract, property) {
   <desc id="map-description">Street and transit orientation map bounded by south ${south}, west ${west}, north ${north}, east ${east}.</desc>
   <metadata>OpenStreetMap data query: ${escapeXml(query)}</metadata>
   <style>
-    .road-expressway,.road-primary,.road-secondary,.road-tertiary,.road-local,.road-other,.road-path{fill:none;stroke-linecap:round;stroke-linejoin:round}
-    .road-expressway{stroke:#bd8e6c;stroke-width:8}.road-primary{stroke:#d5a46c;stroke-width:7}.road-secondary{stroke:#e2bd86;stroke-width:6}.road-tertiary{stroke:#ead2a7;stroke-width:5}.road-local{stroke:#fff;stroke-width:3}.road-other{stroke:#f7f8f5;stroke-width:2}.road-path{stroke:#cbd6cc;stroke-width:1.5;stroke-dasharray:4 4}
-    .road-label,.stop-label{paint-order:stroke;stroke:#edf1ef;stroke-width:5;stroke-linejoin:round;fill:#314944;font-family:system-ui,sans-serif}.road-label{font-size:15px;font-weight:650;text-anchor:middle}.stop-label{font-size:13px;font-weight:650}
-    .osm-transit{fill:#6e807b}.curated-stop circle{fill:#569bbe;stroke:#fff;stroke-width:3}.curated-stop text{fill:#fff;font:700 9px system-ui,sans-serif;text-anchor:middle}.cottage-marker{fill:#2c6d61;stroke:#fff;stroke-width:4}.cottage-label{fill:#14201d;font:700 17px system-ui,sans-serif;paint-order:stroke;stroke:#edf1ef;stroke-width:6}.map-attribution{fill:#4a605a;font:13px system-ui,sans-serif}.neighborhood-label{fill:#78908a;font:700 30px system-ui,sans-serif;letter-spacing:5px}
+    .road-expressway,.road-primary,.road-secondary,.road-tertiary,.road-local{fill:none;stroke-linecap:round;stroke-linejoin:round}
+    .road-expressway{stroke:#bd8e6c;stroke-width:12}.road-primary{stroke:#d5a46c;stroke-width:10}.road-secondary{stroke:#e2bd86;stroke-width:8}.road-tertiary{stroke:#ead2a7;stroke-width:7}.road-local{stroke:#fff;stroke-width:4}
+    .road-label,.stop-label{paint-order:stroke;stroke:#edf1ef;stroke-width:8;stroke-linejoin:round;fill:#314944;font-family:system-ui,sans-serif}.road-label{font-size:26px;font-weight:700;text-anchor:middle}.stop-label{font-size:22px;font-weight:700}
+    .curated-stop circle{fill:#569bbe;stroke:#fff;stroke-width:4}.curated-stop text{fill:#fff;font:700 13px system-ui,sans-serif;text-anchor:middle}.cottage-marker{fill:#2c6d61;stroke:#fff;stroke-width:5}.cottage-label{fill:#14201d;font:700 28px system-ui,sans-serif;paint-order:stroke;stroke:#edf1ef;stroke-width:9}.map-attribution{fill:#4a605a;font:20px system-ui,sans-serif}.neighborhood-label{fill:#78908a;font:700 34px system-ui,sans-serif;letter-spacing:5px}
   </style>
   <rect width="${width}" height="${height}" fill="#edf1ef" />
   <text class="neighborhood-label" x="42" y="64">INGLESIDE</text>
@@ -221,21 +311,18 @@ ${renderedWays.join('\n')}
   <g aria-label="Road labels">
 ${roadLabels.join('\n')}
   </g>
-  <g aria-label="OpenStreetMap transit features">
-${osmTransitNodes.join('\n')}
-  </g>
   <g aria-label="Curated nearby transit stops">
 ${curatedStops.join('\n')}
 ${stopLabels.join('\n')}
   </g>
   <g aria-label="The SF Cottage" transform="translate(${coordinate(cottage.x)} ${coordinate(cottage.y)})">
-    <circle class="cottage-marker" r="13" />
-    <circle fill="#fff" r="4" />
-    <text class="cottage-label" x="19" y="6">The SF Cottage</text>
+    <circle class="cottage-marker" r="20" />
+    <circle fill="#fff" r="6" />
+    <text class="cottage-label" x="0" y="55" text-anchor="middle">The SF Cottage</text>
   </g>
   <g aria-label="North arrow" transform="translate(1130 64)">
-    <path d="M0 24 L0 -16 M0 -16 L-7 -3 M0 -16 L7 -3" fill="none" stroke="#14201d" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" />
-    <text x="0" y="-25" text-anchor="middle" fill="#14201d" font-family="system-ui,sans-serif" font-size="15" font-weight="700">N</text>
+    <path d="M0 32 L0 -20 M0 -20 L-10 -3 M0 -20 L10 -3" fill="none" stroke="#14201d" stroke-width="5" stroke-linecap="round" stroke-linejoin="round" />
+    <text x="0" y="-32" text-anchor="middle" fill="#14201d" font-family="system-ui,sans-serif" font-size="24" font-weight="700">N</text>
   </g>
   <rect x="0" y="846" width="1200" height="54" fill="#fdf6e7" />
   <text class="map-attribution" x="24" y="878">© OpenStreetMap contributors · ODbL</text>

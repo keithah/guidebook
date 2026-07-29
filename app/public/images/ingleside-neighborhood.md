@@ -2,7 +2,7 @@
 
 - Bounds: south `37.708`, west `-122.475`, north `37.738`, east `-122.435`
 - Generated: 2026-07-29
-- Overpass endpoint: https://overpass.private.coffee/api/interpreter
+- Overpass endpoint: https://overpass-api.de/api/interpreter
 - Generator: `scripts/generate-offline-map.mjs`
 - Data attribution: © OpenStreetMap contributors, available under the Open Data Commons Open Database License (ODbL).
 
