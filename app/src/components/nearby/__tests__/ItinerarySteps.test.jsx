@@ -3,7 +3,8 @@ import { afterEach, describe, expect, it } from 'vitest';
 
 import fixture from '../../../test/fixtures/here-transit.json';
 import { normalizeHereRoutes } from '../../../lib/hereTransit.js';
-import ItinerarySteps, { formatDuration } from '../ItinerarySteps.jsx';
+import ItinerarySteps from '../ItinerarySteps.jsx';
+import { formatDuration } from '../itineraryFormat.jsx';
 
 const plannedAt = '2026-07-28T18:00:00.000Z';
 

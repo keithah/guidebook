@@ -1,35 +1,9 @@
 import { useId } from 'react';
 import LineBadge from '../LineBadge.jsx';
 import { card, colors, fonts } from '../../theme.js';
-import ItinerarySteps, { formatDuration } from './ItinerarySteps.jsx';
+import ItinerarySteps from './ItinerarySteps.jsx';
+import { formatDuration, RouteTime } from './itineraryFormat.jsx';
 import TransitAlerts from './TransitAlerts.jsx';
-
-/**
- * Formats a date value as an hour-and-minute time string.
- * @param {*} value - The date value to parse.
- * @return {?string} The formatted time, or `null` when the value cannot be parsed.
- */
-function formatTime(value) {
-  if (!value || !Number.isFinite(Date.parse(value))) return null;
-  return new Intl.DateTimeFormat('en-US', {
-    hour: 'numeric',
-    minute: '2-digit',
-  }).format(new Date(value));
-}
-
-/**
- * Render a formatted time or a pending-time placeholder.
- * @param {*} value - The date value used to generate the displayed time.
- * @return {JSX.Element} A time element when the value is valid; otherwise, a pending-time placeholder.
- */
-function RouteTime({ value }) {
-  const text = formatTime(value);
-  return text ? (
-    <time dateTime={value}>{text}</time>
-  ) : (
-    <span>Time pending</span>
-  );
-}
 
 /**
  * Extracts unique identifiers for the transit lines in a trip.
@@ -174,9 +148,15 @@ export default function TripCard({
                 lineHeight: 1,
               }}
             >
-              <RouteTime value={trip.departureTime} />
+              <RouteTime
+                value={trip.departureTime}
+                fallback={<span>Time pending</span>}
+              />
               {' – '}
-              <RouteTime value={trip.arrivalTime} />
+              <RouteTime
+                value={trip.arrivalTime}
+                fallback={<span>Time pending</span>}
+              />
             </span>
             <span style={{ color: colors.teal, fontSize: 13, fontWeight: 600 }}>
               {formatDuration(trip.durationSeconds ?? 0)}
