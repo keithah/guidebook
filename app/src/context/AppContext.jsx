@@ -140,7 +140,6 @@ export function AppProvider({ children }) {
   const [locating, setLocating] = useState(false);
   const [locateError, setLocateError] = useState(null);
   const [backOpen, setBackOpen] = useState(false);
-  const [dest, setDest] = useState('');
 
   const allowLocation = useCallback(async () => {
     setLocating(true);
@@ -245,8 +244,6 @@ export function AppProvider({ children }) {
       useCottageAsLocation,
       backOpen,
       setBackOpen,
-      dest,
-      setDest,
       weather,
       arrivalWeather,
       forecastDays,
@@ -288,7 +285,6 @@ export function AppProvider({ children }) {
       allowLocation,
       useCottageAsLocation,
       backOpen,
-      dest,
       weather,
       arrivalWeather,
       forecastDays,
