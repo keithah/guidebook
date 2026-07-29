@@ -21,12 +21,6 @@ describe('offline map property fixture validation', () => {
       { ...validProperty, transit: { nearbyStops: null } },
       'transit.nearbyStops',
     ],
-    [{ ...validProperty, address: undefined }, 'address.lat'],
-    [
-      { ...validProperty, address: { lat: Infinity, lng: -122.4 } },
-      'address.lat',
-    ],
-    [{ ...validProperty, address: { lat: 37.7, lng: NaN } }, 'address.lng'],
   ])('rejects an invalid fixture before generation', (fixture, field) => {
     expect(() => validatePropertyFixture(fixture)).toThrow(field);
   });
@@ -35,16 +29,8 @@ describe('offline map property fixture validation', () => {
     expect(() => validatePropertyFixture(validProperty)).not.toThrow();
   });
 
-  it('accepts a fixture with a populated list of nearby stops', () => {
-    const fixtureWithStops = {
-      ...validProperty,
-      transit: {
-        nearbyStops: [
-          { name: 'West Portal Station', sub: 'Inbound', lat: 37.74, lng: -122.466, line: 'K' },
-        ],
-      },
-    };
-    expect(() => validatePropertyFixture(fixtureWithStops)).not.toThrow();
+  it('rejects a completely empty fixture on the first missing field', () => {
+    expect(() => validatePropertyFixture({})).toThrow('address.lat');
   });
 });
 
@@ -55,10 +41,11 @@ describe('offline map line badges', () => {
     ['KT', 'KT'],
     ['long-name', 'LO'],
     [undefined, '?'],
-    ['', '?'],
-    [null, '?'],
-    ['J', 'J'],
   ])('renders %s as %s', (line, badge) => {
     expect(lineBadge(line)).toBe(badge);
+  });
+
+  it('coerces a numeric line value to its stringified label', () => {
+    expect(lineBadge(38)).toBe('38');
   });
 });

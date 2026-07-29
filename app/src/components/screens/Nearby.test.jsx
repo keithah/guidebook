@@ -265,6 +265,48 @@ describe('Nearby', () => {
     expect(screen.getByText('K service delay')).toBeVisible();
   });
 
+  it('retries a failed route lookup and clears the failure once it succeeds', async () => {
+    fetchHereTransitRoutes.mockResolvedValueOnce({ ok: false, reason: 'network' });
+    renderNearby();
+
+    fireEvent.click(
+      screen.getByRole('button', { name: /take me back to the cottage/i }),
+    );
+    expect(
+      await screen.findByText(/transit directions need a connection/i),
+    ).toBeVisible();
+    const retryButton = screen.getByRole('button', {
+      name: 'Retry transit directions',
+    });
+
+    fireEvent.click(retryButton);
+    expect(fetchHereTransitRoutes).toHaveBeenCalledTimes(2);
+    await screen.findAllByRole('button', { name: /view full itinerary/i });
+    expect(
+      screen.queryByText(/transit directions need a connection/i),
+    ).not.toBeInTheDocument();
+    expect(
+      screen.queryByRole('button', { name: 'Retry transit directions' }),
+    ).not.toBeInTheDocument();
+  });
+
+  it('lets a destination quick-suggestion button search without typing in the box', async () => {
+    renderNearby();
+
+    fireEvent.click(screen.getByRole('button', { name: 'SFO' }));
+    expect(searchHereDestinations).toHaveBeenCalledWith(
+      'SFO',
+      expect.anything(),
+      expect.objectContaining({ signal: expect.anything() }),
+    );
+    expect(
+      screen.getByRole('searchbox', { name: /destination/i }),
+    ).toHaveValue('SFO');
+    expect(
+      await screen.findByRole('button', { name: /choose union square/i }),
+    ).toBeVisible();
+  });
+
   it('shows last-known route alerts even when HERE routing fails', async () => {
     fetchHereTransitRoutes.mockResolvedValue({ ok: false, reason: 'network' });
     useTransitAlerts.mockReturnValue({
