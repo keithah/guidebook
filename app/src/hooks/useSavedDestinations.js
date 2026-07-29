@@ -56,18 +56,18 @@ function normalizeCollection(value) {
 }
 
 /**
- * Toggles a destination in a saved collection.
+ * Applies an explicit saved-state mutation to a destination collection.
  * @param {Array<Object>} collection - The current saved destinations.
- * @param {Object} candidate - The destination to add or remove.
+ * @param {{candidate: Object, saved: boolean}} mutation - The destination and its intended saved state.
  * @return {Array<Object>} The updated collection, capped at the maximum number of saved destinations.
  */
-function toggleCandidate(collection, candidate) {
-  return collection.some((place) => place.id === candidate.id)
-    ? collection.filter((place) => place.id !== candidate.id)
-    : [
-        candidate,
-        ...collection.filter((place) => place.id !== candidate.id),
-      ].slice(0, MAX_SAVED_DESTINATIONS);
+function applySavedMutation(collection, { candidate, saved }) {
+  const withoutCandidate = collection.filter(
+    (place) => place.id !== candidate.id,
+  );
+  return saved
+    ? [candidate, ...withoutCandidate].slice(0, MAX_SAVED_DESTINATIONS)
+    : withoutCandidate;
 }
 
 /**
@@ -84,6 +84,7 @@ export function useSavedDestinations() {
   const [loading, setLoading] = useState(true);
   const savedRef = useRef([]);
   const hydratedRef = useRef(false);
+  const persistenceReadyRef = useRef(false);
   const pendingMutationsRef = useRef([]);
 
   useEffect(() => {
@@ -95,28 +96,30 @@ export function useSavedDestinations() {
         const normalizedStored = normalizeCollection(stored);
         const pendingMutations = pendingMutationsRef.current;
         const hydrated = pendingMutations.reduce(
-          toggleCandidate,
+          applySavedMutation,
           normalizedStored,
         );
         pendingMutationsRef.current = [];
         hydratedRef.current = true;
+        persistenceReadyRef.current = true;
         savedRef.current = hydrated;
         setSavedDestinations(hydrated);
         if (
           pendingMutations.length > 0 ||
           JSON.stringify(hydrated) !== JSON.stringify(stored ?? [])
         ) {
-          await savedStateStore.put(STORE_KEY, hydrated);
+          try {
+            await savedStateStore.put(STORE_KEY, hydrated);
+          } catch {
+            // Keep the in-memory collection usable if persistence is unavailable.
+          }
         }
       } catch {
+        if (cancelled) return;
         // Saved destinations are an enhancement; the planner stays usable.
         hydratedRef.current = true;
+        persistenceReadyRef.current = false;
         pendingMutationsRef.current = [];
-        try {
-          await savedStateStore.put(STORE_KEY, savedRef.current);
-        } catch {
-          // Keep the in-memory collection usable if persistence is unavailable.
-        }
       } finally {
         if (!cancelled) setLoading(false);
       }
@@ -140,13 +143,17 @@ export function useSavedDestinations() {
     const normalized = normalizeCandidate(candidate);
     if (!normalized) return;
 
+    const saved = !savedRef.current.some(
+      (place) => place.id === normalized.id,
+    );
+    const mutation = { candidate: normalized, saved };
     if (!hydratedRef.current) {
-      pendingMutationsRef.current.push(normalized);
+      pendingMutationsRef.current.push(mutation);
     }
-    const next = toggleCandidate(savedRef.current, normalized);
+    const next = applySavedMutation(savedRef.current, mutation);
     savedRef.current = next;
     setSavedDestinations(next);
-    if (!hydratedRef.current) return;
+    if (!hydratedRef.current || !persistenceReadyRef.current) return;
     try {
       await savedStateStore.put(STORE_KEY, next);
     } catch {

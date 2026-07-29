@@ -1,3 +1,4 @@
+import { StrictMode } from 'react';
 import { act, renderHook, waitFor } from '@testing-library/react';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
@@ -25,10 +26,12 @@ const ferryBuilding = {
 
 function deferred() {
   let resolve;
-  const promise = new Promise((resolvePromise) => {
+  let reject;
+  const promise = new Promise((resolvePromise, rejectPromise) => {
     resolve = resolvePromise;
+    reject = rejectPromise;
   });
-  return { promise, resolve };
+  return { promise, reject, resolve };
 }
 
 async function waitUntilLoaded(result) {
@@ -113,6 +116,107 @@ describe('useSavedDestinations', () => {
     expect(await savedStateStore.get(STORE_KEY)).toEqual(
       hook.result.current.savedDestinations,
     );
+  });
+
+  it('keeps an already-stored destination when Save is tapped before hydration', async () => {
+    const pendingLoad = deferred();
+    vi.spyOn(savedStateStore, 'get').mockReturnValueOnce(pendingLoad.promise);
+    const hook = renderHook(() => useSavedDestinations());
+
+    await act(async () => hook.result.current.toggleSaved(unionSquare));
+    pendingLoad.resolve([unionSquare, ferryBuilding]);
+    await waitUntilLoaded(hook.result);
+
+    expect(
+      hook.result.current.savedDestinations.map(({ id }) => id),
+    ).toEqual([unionSquare.id, ferryBuilding.id]);
+  });
+
+  it('replays multiple pre-hydration actions as their intended final states', async () => {
+    const pendingLoad = deferred();
+    vi.spyOn(savedStateStore, 'get').mockReturnValueOnce(pendingLoad.promise);
+    const hook = renderHook(() => useSavedDestinations());
+
+    await act(async () => hook.result.current.toggleSaved(unionSquare));
+    await act(async () => hook.result.current.toggleSaved(unionSquare));
+    await act(async () => hook.result.current.toggleSaved(ferryBuilding));
+    pendingLoad.resolve([unionSquare]);
+    await waitUntilLoaded(hook.result);
+
+    expect(
+      hook.result.current.savedDestinations.map(({ id }) => id),
+    ).toEqual([ferryBuilding.id]);
+  });
+
+  it('does not write when the initial saved-state read fails', async () => {
+    vi.spyOn(savedStateStore, 'get').mockRejectedValueOnce(
+      new Error('temporary IndexedDB read failure'),
+    );
+    const put = vi.spyOn(savedStateStore, 'put');
+    const hook = renderHook(() => useSavedDestinations());
+
+    await waitUntilLoaded(hook.result);
+
+    expect(put).not.toHaveBeenCalled();
+  });
+
+  it('keeps later toggles in memory without writing after a failed read', async () => {
+    vi.spyOn(savedStateStore, 'get').mockRejectedValueOnce(
+      new Error('temporary IndexedDB read failure'),
+    );
+    const put = vi.spyOn(savedStateStore, 'put');
+    const hook = renderHook(() => useSavedDestinations());
+    await waitUntilLoaded(hook.result);
+
+    await act(async () => hook.result.current.toggleSaved(unionSquare));
+
+    expect(hook.result.current.isSaved(unionSquare.id)).toBe(true);
+    expect(put).not.toHaveBeenCalled();
+  });
+
+  it('keeps queued intent when a cancelled StrictMode read fails', async () => {
+    const cancelledLoad = deferred();
+    const activeLoad = deferred();
+    vi.spyOn(savedStateStore, 'get')
+      .mockReturnValueOnce(cancelledLoad.promise)
+      .mockReturnValueOnce(activeLoad.promise);
+    const hook = renderHook(() => useSavedDestinations(), {
+      wrapper: StrictMode,
+    });
+
+    await act(async () => hook.result.current.toggleSaved(unionSquare));
+    await act(async () => {
+      cancelledLoad.reject(new Error('cancelled IndexedDB read failure'));
+    });
+    activeLoad.resolve([ferryBuilding]);
+    await waitUntilLoaded(hook.result);
+
+    expect(
+      hook.result.current.savedDestinations.map(({ id }) => id),
+    ).toEqual([unionSquare.id, ferryBuilding.id]);
+  });
+
+  it('keeps persistence enabled when a cancelled StrictMode read fails late', async () => {
+    const cancelledLoad = deferred();
+    const activeLoad = deferred();
+    vi.spyOn(savedStateStore, 'get')
+      .mockReturnValueOnce(cancelledLoad.promise)
+      .mockReturnValueOnce(activeLoad.promise);
+    const put = vi.spyOn(savedStateStore, 'put');
+    const hook = renderHook(() => useSavedDestinations(), {
+      wrapper: StrictMode,
+    });
+
+    activeLoad.resolve([ferryBuilding]);
+    await waitUntilLoaded(hook.result);
+    await act(async () => {
+      cancelledLoad.reject(new Error('cancelled IndexedDB read failure'));
+    });
+    const writesBeforeToggle = put.mock.calls.length;
+
+    await act(async () => hook.result.current.toggleSaved(unionSquare));
+
+    expect(put).toHaveBeenCalledTimes(writesBeforeToggle + 1);
   });
 
   it('keeps the ten most recently saved places', async () => {
