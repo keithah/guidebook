@@ -1,4 +1,10 @@
-import { cleanup, fireEvent, render, screen } from '@testing-library/react';
+import {
+  cleanup,
+  fireEvent,
+  render,
+  screen,
+  waitFor,
+} from '@testing-library/react';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
 import NeighborhoodMap from '../NeighborhoodMap.jsx';
@@ -110,5 +116,37 @@ describe('NeighborhoodMap', () => {
 
     fireEvent.keyDown(window, { key: 'Escape' });
     expect(screen.queryByRole('dialog')).not.toBeInTheDocument();
+  });
+
+  it('isolates the background and contains focus until the modal closes', async () => {
+    setOnline(false);
+    const { container } = render(<NeighborhoodMap {...mapProps} />);
+    const trigger = screen.getByRole('button', {
+      name: 'View full offline map',
+    });
+    trigger.focus();
+
+    fireEvent.click(trigger);
+
+    const closeButton = screen.getByRole('button', {
+      name: 'Close full offline map',
+    });
+    const attributionLink = screen.getByRole('link', {
+      name: 'OpenStreetMap contributors',
+    });
+    await waitFor(() => expect(closeButton).toHaveFocus());
+    expect(container).toHaveAttribute('inert');
+    expect(container).toHaveAttribute('aria-hidden', 'true');
+
+    fireEvent.keyDown(closeButton, { key: 'Tab', shiftKey: true });
+    expect(attributionLink).toHaveFocus();
+    fireEvent.keyDown(attributionLink, { key: 'Tab' });
+    expect(closeButton).toHaveFocus();
+
+    fireEvent.keyDown(attributionLink, { key: 'Escape' });
+    await waitFor(() => expect(trigger).toHaveFocus());
+    expect(screen.queryByRole('dialog')).not.toBeInTheDocument();
+    expect(container).not.toHaveAttribute('inert');
+    expect(container).not.toHaveAttribute('aria-hidden');
   });
 });
