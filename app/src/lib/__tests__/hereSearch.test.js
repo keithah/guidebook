@@ -202,6 +202,84 @@ describe('searchHereDestinations', () => {
     expect(put).not.toHaveBeenCalled();
   });
 
+  it('uses the network when reading the persistent cache fails', async () => {
+    vi.spyOn(providerResponseStore, 'get').mockRejectedValue(
+      new Error('IndexedDB unavailable'),
+    );
+    const fetchImpl = vi.fn().mockResolvedValue(
+      hereResponse(fixture, { headers: { 'cache-control': 'no-store' } }),
+    );
+
+    const result = await searchHereDestinations('coffee', center, {
+      apiKey,
+      fetchImpl,
+      now: () => fetchedAt,
+    });
+
+    expect(result).toEqual({
+      ok: true,
+      candidates: normalizeHereCandidates(fixture),
+      source: 'network',
+      fetchedAt,
+      expiresAt: null,
+    });
+    expect(fetchImpl).toHaveBeenCalledTimes(1);
+  });
+
+  it('uses the network when deleting an expired cache entry fails', async () => {
+    vi.spyOn(providerResponseStore, 'get').mockResolvedValue({
+      key: 'here-discover:coffee:37.788,-122.408',
+      data: { candidates: [] },
+      fetchedAt: 1_000,
+      expiresAt: 2_000,
+      staleUntil: 2_000,
+    });
+    vi.spyOn(providerResponseStore, 'delete').mockRejectedValue(
+      new Error('IndexedDB unavailable'),
+    );
+    const fetchImpl = vi.fn().mockResolvedValue(
+      hereResponse(fixture, { headers: { 'cache-control': 'no-store' } }),
+    );
+
+    const result = await searchHereDestinations('coffee', center, {
+      apiKey,
+      fetchImpl,
+      now: () => fetchedAt,
+    });
+
+    expect(result).toEqual({
+      ok: true,
+      candidates: normalizeHereCandidates(fixture),
+      source: 'network',
+      fetchedAt,
+      expiresAt: null,
+    });
+    expect(fetchImpl).toHaveBeenCalledTimes(1);
+  });
+
+  it('returns network candidates when persistent cache writes fail', async () => {
+    vi.spyOn(providerResponseStore, 'put').mockRejectedValue(
+      new Error('IndexedDB unavailable'),
+    );
+    const fetchImpl = vi.fn().mockResolvedValue(
+      hereResponse(fixture, { headers: { 'cache-control': 'max-age=60' } }),
+    );
+
+    const result = await searchHereDestinations('coffee', center, {
+      apiKey,
+      fetchImpl,
+      now: () => fetchedAt,
+    });
+
+    expect(result).toEqual({
+      ok: true,
+      candidates: normalizeHereCandidates(fixture),
+      source: 'network',
+      fetchedAt,
+      expiresAt: 70_000,
+    });
+  });
+
   it('persists normalized max-age responses and reuses a fresh cache entry', async () => {
     const put = vi.spyOn(providerResponseStore, 'put');
     const fetchImpl = vi.fn().mockResolvedValue(
@@ -247,6 +325,88 @@ describe('searchHereDestinations', () => {
     resolveResponse(hereResponse());
 
     expect(await first).toEqual(await second);
+    expect(fetchImpl).toHaveBeenCalledTimes(1);
+  });
+
+  it('lets a later deduplicated caller abort without cancelling the first caller', async () => {
+    let resolveResponse;
+    const fetchImpl = vi.fn(
+      (_url, { signal } = {}) =>
+        new Promise((resolve, reject) => {
+          resolveResponse = resolve;
+          signal?.addEventListener(
+            'abort',
+            () => {
+              const error = new Error('request aborted');
+              error.name = 'AbortError';
+              reject(error);
+            },
+            { once: true },
+          );
+        }),
+    );
+    const firstController = new AbortController();
+    const secondController = new AbortController();
+    const first = searchHereDestinations('coffee', center, {
+      apiKey,
+      fetchImpl,
+      signal: firstController.signal,
+      now: () => fetchedAt,
+    });
+    const second = searchHereDestinations('coffee', center, {
+      apiKey,
+      fetchImpl,
+      signal: secondController.signal,
+      now: () => fetchedAt,
+    });
+
+    await vi.waitFor(() => expect(fetchImpl).toHaveBeenCalledTimes(1));
+    secondController.abort();
+    resolveResponse(hereResponse());
+
+    await expect(second).resolves.toEqual({ ok: false, reason: 'aborted' });
+    expect((await first).source).toBe('network');
+    expect(fetchImpl).toHaveBeenCalledTimes(1);
+  });
+
+  it('lets the first deduplicated caller abort without cancelling a later caller', async () => {
+    let resolveResponse;
+    const fetchImpl = vi.fn(
+      (_url, { signal } = {}) =>
+        new Promise((resolve, reject) => {
+          resolveResponse = resolve;
+          signal?.addEventListener(
+            'abort',
+            () => {
+              const error = new Error('request aborted');
+              error.name = 'AbortError';
+              reject(error);
+            },
+            { once: true },
+          );
+        }),
+    );
+    const firstController = new AbortController();
+    const secondController = new AbortController();
+    const first = searchHereDestinations('coffee', center, {
+      apiKey,
+      fetchImpl,
+      signal: firstController.signal,
+      now: () => fetchedAt,
+    });
+    const second = searchHereDestinations('coffee', center, {
+      apiKey,
+      fetchImpl,
+      signal: secondController.signal,
+      now: () => fetchedAt,
+    });
+
+    await vi.waitFor(() => expect(fetchImpl).toHaveBeenCalledTimes(1));
+    firstController.abort();
+
+    await expect(first).resolves.toEqual({ ok: false, reason: 'aborted' });
+    resolveResponse(hereResponse());
+    expect((await second).source).toBe('network');
     expect(fetchImpl).toHaveBeenCalledTimes(1);
   });
 });

@@ -65,16 +65,13 @@ async function fetchHereDestinations({
   query,
   center,
   apiKey,
-  signal,
   fetchImpl,
   now,
   key,
 }) {
   let response;
   try {
-    response = await fetchImpl(buildHereSearchUrl(query, center, apiKey), {
-      signal,
-    });
+    response = await fetchImpl(buildHereSearchUrl(query, center, apiKey));
   } catch (error) {
     return { ok: false, reason: failureReason(error) };
   }
@@ -102,13 +99,17 @@ async function fetchHereDestinations({
   const expiresAt = cacheUntilFromHeaders(response.headers, fetchedAt);
 
   if (expiresAt !== null && expiresAt > fetchedAt) {
-    await providerResponseStore.put({
-      key,
-      data: { candidates },
-      fetchedAt,
-      expiresAt,
-      staleUntil: expiresAt,
-    });
+    try {
+      await providerResponseStore.put({
+        key,
+        data: { candidates },
+        fetchedAt,
+        expiresAt,
+        staleUntil: expiresAt,
+      });
+    } catch {
+      // Persistent caching is best-effort; the network result remains usable.
+    }
   }
 
   return {
@@ -118,6 +119,23 @@ async function fetchHereDestinations({
     fetchedAt,
     expiresAt,
   };
+}
+
+function settleForCaller(request, signal) {
+  if (!signal) return request;
+  if (signal.aborted) {
+    return Promise.resolve({ ok: false, reason: 'aborted' });
+  }
+
+  let onAbort;
+  const aborted = new Promise((resolve) => {
+    onAbort = () => resolve({ ok: false, reason: 'aborted' });
+    signal.addEventListener('abort', onAbort, { once: true });
+  });
+
+  return Promise.race([request, aborted]).finally(() => {
+    signal.removeEventListener('abort', onAbort);
+  });
 }
 
 export async function searchHereDestinations(
@@ -137,36 +155,49 @@ export async function searchHereDestinations(
   let key;
   try {
     key = cacheKey(normalizedQuery, center);
-    const currentTime = now();
-    const cached = await providerResponseStore.get(key);
-
-    if (
-      cached?.expiresAt > currentTime &&
-      Array.isArray(cached.data?.candidates)
-    ) {
-      return {
-        ok: true,
-        candidates: cached.data.candidates,
-        source: 'cache',
-        fetchedAt: cached.fetchedAt,
-        expiresAt: cached.expiresAt,
-      };
-    }
-
-    if (cached) await providerResponseStore.delete(key);
   } catch (error) {
     return { ok: false, reason: failureReason(error) };
   }
 
-  return dedupeRequest(key, () =>
+  const currentTime = now();
+  let cached;
+  try {
+    cached = await providerResponseStore.get(key);
+  } catch {
+    // Persistent caching is best-effort; continue with the network.
+  }
+
+  if (
+    cached?.expiresAt > currentTime &&
+    Array.isArray(cached.data?.candidates)
+  ) {
+    return {
+      ok: true,
+      candidates: cached.data.candidates,
+      source: 'cache',
+      fetchedAt: cached.fetchedAt,
+      expiresAt: cached.expiresAt,
+    };
+  }
+
+  if (cached) {
+    try {
+      await providerResponseStore.delete(key);
+    } catch {
+      // Persistent caching is best-effort; continue with the network.
+    }
+  }
+
+  const request = dedupeRequest(key, () =>
     fetchHereDestinations({
       query: normalizedQuery,
       center,
       apiKey,
-      signal,
       fetchImpl,
       now,
       key,
     }),
   ).catch((error) => ({ ok: false, reason: failureReason(error) }));
+
+  return settleForCaller(request, signal);
 }
