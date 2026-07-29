@@ -87,4 +87,60 @@ describe('useTransitAlerts', () => {
 
     hook.unmount();
   });
+
+  it('ignores a pending request and poller from the previous agency', async () => {
+    const regionalFixture = structuredClone(alertFixture);
+    regionalFixture.Entities = [regionalFixture.Entities[0]];
+    regionalFixture.Entities[0].Id = 'rg-current';
+    regionalFixture.Entities[0].Alert.InformedEntities[0].AgencyId = 'RG';
+    let resolveSf;
+    let firstSfRequest = true;
+    globalThis.fetch = vi.fn((url) => {
+      const agency = url.searchParams.get('agency');
+      if (agency === 'SF' && firstSfRequest) {
+        firstSfRequest = false;
+        return new Promise((resolve) => {
+          resolveSf = resolve;
+        });
+      }
+      return Promise.resolve(
+        agency === 'RG'
+          ? {
+              ok: true,
+              status: 200,
+              text: vi
+                .fn()
+                .mockResolvedValue(JSON.stringify(regionalFixture)),
+            }
+          : alertResponse(),
+      );
+    });
+    const hook = renderHook(
+      ({ agency }) => useTransitAlerts(agency),
+      { initialProps: { agency: 'SF' } },
+    );
+    await waitForHook(() => expect(globalThis.fetch).toHaveBeenCalledTimes(1));
+
+    hook.rerender({ agency: 'RG' });
+    await waitForHook(() =>
+      expect(hook.result.current.alerts[0]?.id).toBe('rg-current'),
+    );
+    resolveSf(alertResponse());
+    await act(async () => {
+      await vi.waitFor(async () =>
+        expect(await providerResponseStore.get('511:alerts:SF')).toBeDefined(),
+      );
+    });
+
+    expect(hook.result.current.alerts[0]?.id).toBe('rg-current');
+    await act(async () => {
+      await vi.advanceTimersByTimeAsync(10 * 60_000);
+    });
+    await waitForHook(() => expect(globalThis.fetch).toHaveBeenCalledTimes(3));
+    expect(
+      globalThis.fetch.mock.calls[2][0].searchParams.get('agency'),
+    ).toBe('RG');
+
+    hook.unmount();
+  });
 });

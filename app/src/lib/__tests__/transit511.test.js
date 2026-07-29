@@ -90,6 +90,7 @@ describe('511 requests', () => {
   });
 
   afterEach(() => {
+    vi.useRealTimers();
     vi.restoreAllMocks();
   });
 
@@ -185,6 +186,161 @@ describe('511 requests', () => {
     await expect(
       fetchServiceAlerts('SF', { apiKey, fetchImpl }),
     ).resolves.toEqual({ ok: false, reason: 'invalid-response' });
+  });
+
+  it('times out a hung provider request without a caller signal', async () => {
+    vi.useFakeTimers();
+    const fetchImpl = vi.fn(
+      (_url, { signal }) =>
+        new Promise((_resolve, reject) => {
+          signal.addEventListener(
+            'abort',
+            () => {
+              const error = new Error('internal timeout');
+              error.name = 'AbortError';
+              reject(error);
+            },
+            { once: true },
+          );
+        }),
+    );
+
+    const request = fetchStopDepartures('15794', 'SF', {
+      apiKey,
+      fetchImpl,
+    });
+    await vi.waitFor(() => expect(fetchImpl).toHaveBeenCalledTimes(1));
+    await vi.advanceTimersByTimeAsync(10_000);
+
+    await expect(request).resolves.toEqual({ ok: false, reason: 'timeout' });
+    vi.useRealTimers();
+  });
+
+  it('isolates caller cancellation from a shared timed request', async () => {
+    let resolveResponse;
+    const fetchImpl = vi.fn(
+      () =>
+        new Promise((resolve) => {
+          resolveResponse = resolve;
+        }),
+    );
+    const controller = new AbortController();
+    const first = fetchStopDepartures('15794', 'SF', {
+      apiKey,
+      fetchImpl,
+      signal: controller.signal,
+      now: () => alertNow,
+    });
+    const second = fetchStopDepartures('15794', 'SF', {
+      apiKey,
+      fetchImpl,
+      now: () => alertNow,
+    });
+    await vi.waitFor(() => expect(fetchImpl).toHaveBeenCalledTimes(1));
+
+    controller.abort();
+    await expect(first).resolves.toEqual({ ok: false, reason: 'timeout' });
+    resolveResponse(transitResponse(stopPayload));
+
+    await expect(second).resolves.toMatchObject({
+      ok: true,
+      source: 'network',
+    });
+    expect(fetchImpl).toHaveBeenCalledTimes(1);
+  });
+
+  it.each([
+    [
+      'departures',
+      () =>
+        fetchStopDepartures('15794', 'SF', {
+          apiKey,
+          fetchImpl: vi
+            .fn()
+            .mockResolvedValue(
+              transitResponse({ ServiceDelivery: {} }),
+            ),
+        }),
+      '511:departures:SF:15794',
+    ],
+    [
+      'alerts',
+      () =>
+        fetchServiceAlerts('SF', {
+          apiKey,
+          fetchImpl: vi
+            .fn()
+            .mockResolvedValue(
+              transitResponse({ Header: {}, Entities: null }),
+            ),
+        }),
+      '511:alerts:SF',
+    ],
+  ])(
+    'rejects structurally malformed %s without caching',
+    async (_name, request, key) => {
+      await expect(request()).resolves.toEqual({
+        ok: false,
+        reason: 'invalid-response',
+      });
+      expect(await providerResponseStore.get(key)).toBeUndefined();
+    },
+  );
+
+  it('keeps cached departures stale when a refresh has malformed structure', async () => {
+    let currentTime = alertNow;
+    const fetchImpl = vi
+      .fn()
+      .mockResolvedValueOnce(transitResponse(stopPayload))
+      .mockResolvedValueOnce(
+        transitResponse({ ServiceDelivery: { StopMonitoringDelivery: {} } }),
+      );
+    const options = { apiKey, fetchImpl, now: () => currentTime };
+
+    await fetchStopDepartures('15794', 'SF', options);
+    currentTime += 5 * 60_000;
+    const result = await fetchStopDepartures('15794', 'SF', options);
+    const cached = await providerResponseStore.get(
+      '511:departures:SF:15794',
+    );
+
+    expect(result).toMatchObject({
+      ok: true,
+      minutesList: [0, 6],
+      source: 'stale',
+      reason: 'invalid-response',
+    });
+    expect(cached).toMatchObject({
+      data: { minutesList: [0, 6] },
+      fetchedAt: alertNow,
+    });
+  });
+
+  it('keeps cached alerts stale when a refresh has malformed structure', async () => {
+    let currentTime = alertNow;
+    const fetchImpl = vi
+      .fn()
+      .mockResolvedValueOnce(transitResponse(alertFixture))
+      .mockResolvedValueOnce(
+        transitResponse({ Header: alertFixture.Header, Entities: {} }),
+      );
+    const options = { apiKey, fetchImpl, now: () => currentTime };
+
+    await fetchServiceAlerts('SF', options);
+    currentTime += 10 * 60_000;
+    const result = await fetchServiceAlerts('SF', options);
+    const cached = await providerResponseStore.get('511:alerts:SF');
+
+    expect(result).toMatchObject({
+      ok: true,
+      alerts: normalizeServiceAlerts(alertFixture, alertNow),
+      source: 'stale',
+      reason: 'invalid-response',
+    });
+    expect(cached).toMatchObject({
+      data: { alerts: normalizeServiceAlerts(alertFixture, alertNow) },
+      fetchedAt: alertNow,
+    });
   });
 
   it('deduplicates and caches departures without persisting the API key', async () => {

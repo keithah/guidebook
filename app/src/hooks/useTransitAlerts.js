@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { fetchServiceAlerts } from '../lib/transit511.js';
 
 const REFRESH_MS = 10 * 60_000;
@@ -26,7 +26,6 @@ function stateForResult(result) {
 }
 
 export function useTransitAlerts(agency = 'SF') {
-  const mounted = useRef(false);
   const [state, setState] = useState({
     alerts: [],
     status: 'loading',
@@ -36,16 +35,17 @@ export function useTransitAlerts(agency = 'SF') {
 
   const refresh = useCallback(async () => {
     const result = await fetchServiceAlerts(agency);
-    if (mounted.current) setState(stateForResult(result));
+    setState(stateForResult(result));
     return result;
   }, [agency]);
 
   useEffect(() => {
-    mounted.current = true;
+    let cancelled = false;
     let timer;
     const load = async () => {
-      const result = await refresh();
-      if (!mounted.current) return;
+      const result = await fetchServiceAlerts(agency);
+      if (cancelled) return;
+      setState(stateForResult(result));
       const delay =
         result.ok &&
         result.source !== 'stale' &&
@@ -56,10 +56,10 @@ export function useTransitAlerts(agency = 'SF') {
     };
     load();
     return () => {
-      mounted.current = false;
+      cancelled = true;
       clearTimeout(timer);
     };
-  }, [refresh]);
+  }, [agency]);
 
   return { ...state, refresh };
 }

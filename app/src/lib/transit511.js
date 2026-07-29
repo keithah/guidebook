@@ -8,6 +8,7 @@ const DEPARTURE_FRESH_MS = 5 * 60_000;
 const DEPARTURE_STALE_MS = 30 * 60_000;
 const ALERT_FRESH_MS = 10 * 60_000;
 const ALERT_STALE_MS = 60 * 60_000;
+const REQUEST_TIMEOUT_MS = 10_000;
 
 function asTime(value) {
   if (value instanceof Date) return value.getTime();
@@ -153,57 +154,92 @@ function buildUrl(base, apiKey, parameters) {
 async function request511({
   url,
   fetchImpl,
-  signal,
   normalize,
+  validate,
   dataField,
   key,
   freshMs,
   staleMs,
   now,
 }) {
-  let response;
-  try {
-    response = await fetchImpl(url, { signal });
-  } catch (error) {
-    return { ok: false, reason: failureReason(error) };
-  }
+  const controller = new AbortController();
+  let timedOut = false;
+  let timeout;
+  const timeoutResult = new Promise((resolve) => {
+    timeout = setTimeout(() => {
+      timedOut = true;
+      controller.abort();
+      resolve({ ok: false, reason: 'timeout' });
+    }, REQUEST_TIMEOUT_MS);
+  });
+  const operation = (async () => {
+    let response;
+    try {
+      response = await fetchImpl(url, { signal: controller.signal });
+    } catch (error) {
+      return { ok: false, reason: failureReason(error) };
+    }
 
-  const httpFailure = responseFailure(response);
-  if (httpFailure) return { ok: false, reason: httpFailure };
+    if (timedOut) return { ok: false, reason: 'timeout' };
+    const httpFailure = responseFailure(response);
+    if (httpFailure) return { ok: false, reason: httpFailure };
 
-  let payload;
-  try {
-    payload = await readJson(response);
-  } catch (error) {
+    let payload;
+    try {
+      payload = await readJson(response);
+    } catch (error) {
+      return {
+        ok: false,
+        reason:
+          error?.name === 'AbortError' ? 'timeout' : 'invalid-response',
+      };
+    }
+    if (timedOut) return { ok: false, reason: 'timeout' };
+    if (!validate(payload)) return { ok: false, reason: 'invalid-response' };
+
+    const fetchedAt = now();
+    const data = normalize(payload, fetchedAt);
+    const expiresAt = fetchedAt + freshMs;
+    try {
+      await providerResponseStore.put({
+        key,
+        data: { [dataField]: data },
+        fetchedAt,
+        expiresAt,
+        staleUntil: fetchedAt + staleMs,
+      });
+    } catch {
+      // Persistent caching is best-effort; the network result remains usable.
+    }
+
     return {
-      ok: false,
-      reason:
-        error?.name === 'AbortError' ? 'timeout' : 'invalid-response',
-    };
-  }
-
-  const fetchedAt = now();
-  const data = normalize(payload, fetchedAt);
-  const expiresAt = fetchedAt + freshMs;
-  try {
-    await providerResponseStore.put({
-      key,
-      data: { [dataField]: data },
+      ok: true,
+      [dataField]: data,
+      source: 'network',
       fetchedAt,
       expiresAt,
-      staleUntil: fetchedAt + staleMs,
-    });
-  } catch {
-    // Persistent caching is best-effort; the network result remains usable.
+    };
+  })();
+
+  return Promise.race([operation, timeoutResult]).finally(() => {
+    clearTimeout(timeout);
+  });
+}
+
+function settleForCaller(request, signal) {
+  if (!signal) return request;
+  if (signal.aborted) {
+    return Promise.resolve({ ok: false, reason: 'timeout' });
   }
 
-  return {
-    ok: true,
-    [dataField]: data,
-    source: 'network',
-    fetchedAt,
-    expiresAt,
-  };
+  let onAbort;
+  const aborted = new Promise((resolve) => {
+    onAbort = () => resolve({ ok: false, reason: 'timeout' });
+    signal.addEventListener('abort', onAbort, { once: true });
+  });
+  return Promise.race([request, aborted]).finally(() => {
+    signal.removeEventListener('abort', onAbort);
+  });
 }
 
 async function cached511Request({
@@ -213,6 +249,7 @@ async function cached511Request({
   fetchImpl,
   signal,
   normalize,
+  validate,
   freshMs,
   staleMs,
   now,
@@ -245,12 +282,12 @@ async function cached511Request({
     }
   }
 
-  const result = await dedupeRequest(key, () =>
+  const request = dedupeRequest(key, () =>
     request511({
       url,
       fetchImpl,
-      signal,
       normalize,
+      validate,
       dataField,
       key,
       freshMs,
@@ -258,6 +295,7 @@ async function cached511Request({
       now,
     }),
   ).catch((error) => ({ ok: false, reason: failureReason(error) }));
+  const result = await settleForCaller(request, signal);
 
   if (
     !result.ok &&
@@ -307,6 +345,12 @@ export async function fetchStopDepartures(
     fetchImpl,
     signal,
     normalize: normalizeStopDepartures,
+    validate: (payload) =>
+      payload?.ServiceDelivery?.StopMonitoringDelivery !== null &&
+      typeof payload?.ServiceDelivery?.StopMonitoringDelivery === 'object' &&
+      Array.isArray(
+        payload.ServiceDelivery.StopMonitoringDelivery.MonitoredStopVisit,
+      ),
     freshMs: DEPARTURE_FRESH_MS,
     staleMs: DEPARTURE_STALE_MS,
     now,
@@ -337,6 +381,10 @@ export async function fetchServiceAlerts(
     signal,
     normalize: (payload, currentTime) =>
       normalizeServiceAlerts(payload, currentTime, normalizedAgency),
+    validate: (payload) =>
+      payload?.Header !== null &&
+      typeof payload?.Header === 'object' &&
+      Array.isArray(payload?.Entities),
     freshMs: ALERT_FRESH_MS,
     staleMs: ALERT_STALE_MS,
     now,
