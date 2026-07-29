@@ -29,6 +29,14 @@ describe('cacheUntilFromHeaders', () => {
     expect(cacheUntilFromHeaders(headers, 1_000)).toBeNull();
   });
 
+  it('refuses parameterized no-cache directives', () => {
+    const headers = new Headers({
+      'cache-control': 'no-cache="set-cookie", max-age=120',
+    });
+
+    expect(cacheUntilFromHeaders(headers, 1_000)).toBeNull();
+  });
+
   it('uses a future Expires header when Cache-Control is absent', () => {
     const headers = new Headers({ expires: 'Thu, 01 Jan 1970 00:02:01 GMT' });
 

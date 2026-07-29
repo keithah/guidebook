@@ -5,8 +5,14 @@ export function cacheUntilFromHeaders(headers, nowMs) {
     const directives = cacheControl
       .split(',')
       .map((directive) => directive.trim().toLowerCase());
+    const directiveNames = directives.map(
+      (directive) => directive.split('=', 1)[0],
+    );
 
-    if (directives.includes('no-store') || directives.includes('no-cache')) {
+    if (
+      directiveNames.includes('no-store') ||
+      directiveNames.includes('no-cache')
+    ) {
       return null;
     }
 
