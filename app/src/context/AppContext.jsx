@@ -21,6 +21,11 @@ export function useApp() {
 
 const TABS = ['home', 'arrive', 'cottage', 'around', 'explore', 'help'];
 
+function readStaySnapshotFromLocation() {
+  const hash = window.location.hash;
+  return { hash, stay: readStayFromLocation({ hash }) };
+}
+
 /**
  * Provide application-wide state and actions through `AppContext`.
  * @returns {JSX.Element} The context provider containing the application children.
@@ -29,17 +34,22 @@ export function AppProvider({ children }) {
   const scrollRef = useRef(null);
 
   // ---- Guest identity: /sfcottage#<hash> ----------------------------------
-  const [stay, setStay] = useState(() => readStayFromLocation());
+  const [staySnapshot, setStaySnapshot] = useState(readStaySnapshotFromLocation);
+  const staySnapshotRef = useRef(staySnapshot);
   useEffect(() => {
-    const onHashChange = () => setStay(readStayFromLocation());
+    const onHashChange = () => {
+      const nextStaySnapshot = readStaySnapshotFromLocation();
+      staySnapshotRef.current = nextStaySnapshot;
+      setStaySnapshot(nextStaySnapshot);
+    };
     window.addEventListener('hashchange', onHashChange);
     return () => window.removeEventListener('hashchange', onHashChange);
   }, []);
+  const { hash: stayHash, stay } = staySnapshot;
   const stayLocationOverride = useMemo(
     () => normalizeStayLocationOverride(stay),
     [stay],
   );
-  const stayHash = window.location.hash;
   const activeStayLocationHashRef = useRef(null);
 
   const isGuest = !!stay;
@@ -154,9 +164,23 @@ export function AppProvider({ children }) {
   const [coords, setCoords] = useState(null);
   const [locating, setLocating] = useState(false);
   const [locateError, setLocateError] = useState(null);
+  const [locationConsentGranted, setLocationConsentGranted] = useState(false);
+  const locationAttemptRef = useRef(0);
   const [backOpen, setBackOpen] = useState(false);
 
   useEffect(() => {
+    if (
+      locationConsentGranted &&
+      stayLocationOverride &&
+      activeStayLocationHashRef.current !== stayHash
+    ) {
+      activeStayLocationHashRef.current = stayHash;
+      setCoords(stayLocationOverride);
+      setLocated(true);
+      setLocateError(null);
+      return;
+    }
+
     if (
       coords?.source === 'stay-override' &&
       activeStayLocationHashRef.current !== stayHash
@@ -165,28 +189,42 @@ export function AppProvider({ children }) {
       setCoords(null);
       setLocated(false);
     }
-  }, [coords, stayHash]);
+  }, [coords, locationConsentGranted, stayHash, stayLocationOverride]);
 
   const allowLocation = useCallback(async () => {
+    const attempt = ++locationAttemptRef.current;
+    const attemptStayHash = stayHash;
+    const isStale = () =>
+      locationAttemptRef.current !== attempt ||
+      staySnapshotRef.current.hash !== attemptStayHash;
     setLocating(true);
     setLocateError(null);
     try {
       const pos = stayLocationOverride ?? (await getCurrentPosition());
+      if (isStale()) return;
       activeStayLocationHashRef.current =
         pos.source === 'stay-override' ? stayHash : null;
       setCoords(pos);
       setLocated(true);
     } catch (err) {
+      if (isStale()) return;
       activeStayLocationHashRef.current = null;
       setLocateError(err.message || 'Could not get your location.');
       setCoords({ lat: property.address.lat, lng: property.address.lng });
       setLocated(true);
     } finally {
-      setLocating(false);
+      if (locationAttemptRef.current === attempt) {
+        setLocationConsentGranted(true);
+        setLocating(false);
+      }
     }
   }, [stayHash, stayLocationOverride]);
   const useCottageAsLocation = useCallback(() => {
+    locationAttemptRef.current += 1;
     activeStayLocationHashRef.current = null;
+    setLocationConsentGranted(false);
+    setLocating(false);
+    setLocateError(null);
     setCoords({ lat: property.address.lat, lng: property.address.lng });
     setLocated(true);
   }, []);
