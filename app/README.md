@@ -129,7 +129,28 @@ Property copy lives in `src/data/properties/sfcottage.json`. Fields with a
 `_todo` sibling are stand-ins that must be replaced before real guest use.
 
 Guest links use `/sfcottage#<hash>`, where the hash is base64url-encoded JSON
-containing `{ guestName, checkin, checkout, code }`. `src/lib/stayHash.js`
-decodes it and derives the stay phase. Until the upstream link-creation pipeline
-exists, generic mode exposes a development preview control on the home screen.
-Use `?phase=before|during|checkout` to override the derived phase while testing.
+with this shape:
+
+```js
+{
+  guestName,
+  checkin,
+  checkout,
+  code,
+  fakeLocation: {
+    label: '1620 Howard St, San Francisco',
+    lat: 37.77154,
+    lng: -122.41761
+  }
+}
+```
+
+`fakeLocation` is optional and intended for preview/testing links. A valid
+override applies only after the guest selects **Allow location**; an invalid
+override is ignored. The payload stays in the URL fragment. Base64url encoding
+is not encryption, so do not put secrets in the payload.
+
+`src/lib/stayHash.js` decodes the hash and derives the stay phase. Until the
+upstream link-creation pipeline exists, generic mode exposes a development
+preview control on the home screen. Use `?phase=before|during|checkout` to
+override the derived phase while testing.
