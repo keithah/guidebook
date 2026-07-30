@@ -9,10 +9,13 @@ import {
 import { searchHereDestinations } from '../../lib/hereSearch.js';
 import { useTransitAlerts } from '../../hooks/useTransitAlerts.js';
 import { AppProvider } from '../../context/AppContext.jsx';
+import { encodeStay } from '../../lib/stayHash.js';
 import Nearby from './Nearby.jsx';
 
 vi.mock('../nearby/NeighborhoodMap.jsx', () => ({
-  default: () => <div aria-label="Neighborhood map" />,
+  default: ({ locationLabel }) => (
+    <div aria-label="Neighborhood map" data-location-label={locationLabel ?? ''} />
+  ),
 }));
 
 vi.mock('../../lib/hereSearch.js', async (importOriginal) => {
@@ -111,6 +114,36 @@ describe('Nearby', () => {
       updatedAt: Date.parse('2026-07-28T18:58:00.000Z'),
       error: null,
     });
+  });
+
+  it('shows and propagates the active stay location label', async () => {
+    window.location.hash = encodeStay({
+      guestName: 'Jamie',
+      checkin: '2026-07-30',
+      checkout: '2026-08-03',
+      fakeLocation: {
+        label: '1620 Howard St, San Francisco',
+        lat: 37.77154,
+        lng: -122.41761,
+      },
+    });
+    render(
+      <AppProvider>
+        <Nearby />
+      </AppProvider>,
+    );
+
+    fireEvent.click(screen.getByRole('button', { name: 'Allow location' }));
+
+    expect(
+      await screen.findByText(
+        'Using location: 1620 Howard St, San Francisco',
+      ),
+    ).toBeVisible();
+    expect(screen.getByLabelText('Neighborhood map')).toHaveAttribute(
+      'data-location-label',
+      '1620 Howard St, San Francisco',
+    );
   });
 
   it('searches explicitly, routes only after selection, and expands every route section', async () => {
