@@ -21,14 +21,11 @@ const now = Date.parse('2026-07-28T19:00:00.000Z');
 const generalAlert = {
   id: 'sf-system-notice',
   agency: 'SF',
-  affectedLines: [],
   severity: 'OTHER_EFFECT',
   header: 'Systemwide fare machines update',
   description: 'Some fare machines may take longer to respond.',
-  activePeriod: {
-    start: '2026-07-28T18:00:00.000Z',
-    end: '2026-07-28T22:00:00.000Z',
-  },
+  activePeriods: [],
+  informedEntities: [],
   url: 'https://example.test/system-notice',
   updatedAt: '2026-07-28T18:55:00.000Z',
 };
@@ -100,8 +97,10 @@ describe('TripOptions', () => {
     );
   });
 
-  it('shows only alerts affecting the expanded trip', () => {
-    const alerts = normalizeServiceAlerts(alertFixture, now, 'SF');
+  it('shows warnings only on affected trip cards while collapsed and expanded', () => {
+    const alerts = normalizeServiceAlerts(alertFixture, now, 'SF').map(
+      (alert) => ({ ...alert, activePeriods: [] }),
+    );
 
     render(
       <TripOptions
@@ -111,10 +110,13 @@ describe('TripOptions', () => {
       />,
     );
 
+    expect(screen.getByText('K Ingleside delay')).toBeVisible();
+    expect(screen.queryByText('43 Masonic reroute')).not.toBeInTheDocument();
+
     fireEvent.click(
       screen.getAllByRole('button', { name: /view full itinerary/i })[0],
     );
-    expect(screen.getByText('K Ingleside delay')).toBeVisible();
+    expect(screen.getAllByText('K Ingleside delay')).toHaveLength(2);
     expect(screen.queryByText('43 Masonic reroute')).not.toBeInTheDocument();
   });
 
@@ -160,8 +162,7 @@ describe('TripOptions', () => {
     expect(screen.getAllByTestId('itinerary-section')).toHaveLength(3);
   });
 
-  it('resets expansion and line scope when a new route result arrives', () => {
-    const onExpandedLineIdsChange = vi.fn();
+  it('resets expansion when a new route result arrives', () => {
     const firstResult = { ok: true, trips, source: 'network', fetchedAt };
     const replacementResult = {
       ok: true,
@@ -176,7 +177,6 @@ describe('TripOptions', () => {
       <TripOptions
         result={firstResult}
         alerts={[]}
-        onExpandedLineIdsChange={onExpandedLineIdsChange}
       />,
     );
     fireEvent.click(
@@ -190,7 +190,6 @@ describe('TripOptions', () => {
       <TripOptions
         result={replacementResult}
         alerts={[]}
-        onExpandedLineIdsChange={onExpandedLineIdsChange}
       />,
     );
 
@@ -199,7 +198,6 @@ describe('TripOptions', () => {
       .forEach((toggle) =>
         expect(toggle).toHaveAttribute('aria-expanded', 'false'),
       );
-    expect(onExpandedLineIdsChange).toHaveBeenLastCalledWith([]);
   });
 
   it('uses unique controlled-region ids across multiple trip lists', () => {

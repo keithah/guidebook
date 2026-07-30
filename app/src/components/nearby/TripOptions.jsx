@@ -1,5 +1,6 @@
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { colors } from '../../theme.js';
+import { warningsForTrip } from '../../lib/tripWarnings.js';
 import LiveStatus from './LiveStatus.jsx';
 import TripCard from './TripCard.jsx';
 
@@ -15,23 +16,17 @@ const FAILURE_MESSAGES = {
  * @param {Object|null} result - Transit search result data.
  * @param {Array} [alerts=[]] - Alerts to display on trip cards.
  * @param {Function} [externalUrlForTrip] - Creates an external URL for a trip.
- * @param {Function} [onExpandedLineIdsChange] - Receives the line IDs of the expanded trip, or an empty array when collapsed.
  * @return {JSX.Element|null} The transit options content, or `null` when no result is provided.
  */
 export default function TripOptions({
   result,
   alerts = [],
   externalUrlForTrip,
-  onExpandedLineIdsChange,
 }) {
   const [expansion, setExpansion] = useState({ result, tripId: null });
   const expandedTripId = expansion.result === result ? expansion.tripId : null;
-  const expandedLinesCallbackRef = useRef(onExpandedLineIdsChange);
-  expandedLinesCallbackRef.current = onExpandedLineIdsChange;
-
   useEffect(() => {
     setExpansion({ result, tripId: null });
-    expandedLinesCallbackRef.current?.([]);
   }, [result]);
 
   if (!result) return null;
@@ -80,20 +75,20 @@ export default function TripOptions({
         {trips.map((trip, index) => {
           const tripKey = trip.id ?? `rank-${index}`;
           const expanded = expandedTripId === tripKey;
+          const warnings = warningsForTrip(trip, alerts);
           return (
             <TripCard
               key={tripKey}
               trip={trip}
               index={index}
               expanded={expanded}
-              onToggle={(lineIds) => {
+              onToggle={() => {
                 setExpansion({
                   result,
                   tripId: expanded ? null : tripKey,
                 });
-                onExpandedLineIdsChange?.(expanded ? [] : lineIds);
               }}
-              alerts={alerts}
+              warnings={warnings}
               externalUrl={externalUrlForTrip?.(trip)}
             />
           );

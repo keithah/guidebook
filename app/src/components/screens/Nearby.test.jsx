@@ -102,16 +102,46 @@ describe('Nearby', () => {
         {
           id: 'k-alert',
           agency: 'SF',
-          affectedLines: ['K'],
+          activePeriods: [],
+          informedEntities: [
+            {
+              agencyId: 'SF',
+              routeId: 'K',
+              stopId: '17217',
+              directionId: '',
+            },
+          ],
           header: 'K service delay',
           description: 'Allow extra travel time.',
+          severity: 'SIGNIFICANT_DELAYS',
+          url: '',
         },
         {
           id: 'general-alert',
           agency: 'SF',
-          affectedLines: [],
+          activePeriods: [],
+          informedEntities: [],
           header: 'Systemwide service notice',
           description: 'Leave a little extra time.',
+          severity: 'OTHER_EFFECT',
+          url: '',
+        },
+        {
+          id: 'route-43-alert',
+          agency: 'SF',
+          activePeriods: [],
+          informedEntities: [
+            {
+              agencyId: 'SF',
+              routeId: '43',
+              stopId: '',
+              directionId: '',
+            },
+          ],
+          header: '43 Masonic reroute',
+          description: 'Use a temporary stop.',
+          severity: 'DETOUR',
+          url: '',
         },
       ],
       status: 'live',
@@ -279,8 +309,9 @@ describe('Nearby', () => {
     expect(screen.getByText('First time on Muni or BART?')).toBeVisible();
   });
 
-  it('keeps route alerts visible with collapsed trips and labels curated departure fallbacks', async () => {
+  it('shows only route-relevant warnings on collapsed trips and never a global alert surface', async () => {
     renderNearby();
+    expect(useTransitAlerts).toHaveBeenCalledWith('SF', { enabled: false });
     const input = screen.getByRole('searchbox', { name: /destination/i });
     fireEvent.change(input, { target: { value: 'Union Square' } });
     fireEvent.click(screen.getByRole('button', { name: 'Go' }));
@@ -289,17 +320,17 @@ describe('Nearby', () => {
     );
 
     await screen.findAllByRole('button', { name: /view full itinerary/i });
+    expect(useTransitAlerts).toHaveBeenLastCalledWith('SF', { enabled: true });
     expect(screen.getByText('K service delay')).toBeVisible();
-    expect(screen.getByText('Systemwide service notice')).toBeVisible();
-    expect(
-      screen.getAllByRole('status', { name: /live/i }).length,
-    ).toBeGreaterThan(0);
+    expect(screen.queryByText('Systemwide service notice')).not.toBeInTheDocument();
+    expect(screen.queryByText('43 Masonic reroute')).not.toBeInTheDocument();
+    expect(screen.queryByText('Current SF service alerts')).not.toBeInTheDocument();
     expect(screen.getAllByText(/curated schedule/i).length).toBeGreaterThan(0);
 
     fireEvent.click(
       screen.getAllByRole('button', { name: /view full itinerary/i })[0],
     );
-    expect(screen.getAllByText('K service delay')).toHaveLength(1);
+    expect(screen.getAllByText('K service delay')).toHaveLength(2);
 
     const ferryBuilding = {
       ...unionSquare,
@@ -378,16 +409,26 @@ describe('Nearby', () => {
     ).toBeVisible();
   });
 
-  it('shows last-known route alerts even when HERE routing fails', async () => {
+  it('disables route-alert fetching and renders no alert status when routing fails', async () => {
     fetchHereTransitRoutes.mockResolvedValue({ ok: false, reason: 'network' });
     useTransitAlerts.mockReturnValue({
       alerts: [
         {
           id: 'k-alert',
           agency: 'SF',
-          affectedLines: ['K'],
+          activePeriods: [],
+          informedEntities: [
+            {
+              agencyId: 'SF',
+              routeId: 'K',
+              stopId: '',
+              directionId: '',
+            },
+          ],
           header: 'K service delay',
           description: 'Allow extra travel time.',
+          severity: 'SIGNIFICANT_DELAYS',
+          url: '',
         },
       ],
       status: 'stale',
@@ -403,8 +444,9 @@ describe('Nearby', () => {
     expect(
       await screen.findByText(/transit directions need a connection/i),
     ).toBeVisible();
-    expect(screen.getByText('K service delay')).toBeVisible();
-    expect(screen.getByRole('status', { name: /last known/i })).toBeVisible();
-    expect(screen.getByText(/live alert update is unavailable/i)).toBeVisible();
+    expect(useTransitAlerts).toHaveBeenLastCalledWith('SF', { enabled: false });
+    expect(screen.queryByText('K service delay')).not.toBeInTheDocument();
+    expect(screen.queryByText('Current SF service alerts')).not.toBeInTheDocument();
+    expect(screen.queryByText(/live alert update is unavailable/i)).not.toBeInTheDocument();
   });
 });

@@ -51,11 +51,25 @@ describe('511 normalization', () => {
   });
 
   it('normalizes current capitalized GTFS-realtime alerts and prefers English', () => {
-    expect(normalizeServiceAlerts(alertFixture, alertNow)).toEqual([
+    expect(normalizeServiceAlerts(alertFixture, alertNow, 'SF')).toEqual([
       expect.objectContaining({
         id: 'sf-k-delay',
         agency: 'SF',
-        affectedLines: ['K'],
+        activePeriods: [
+          {
+            start: '2026-07-28T18:00:00.000Z',
+            end: '2026-07-28T21:00:00.000Z',
+          },
+          expect.objectContaining({ start: expect.any(String) }),
+        ],
+        informedEntities: expect.arrayContaining([
+          {
+            agencyId: 'SF',
+            routeId: 'K',
+            stopId: '17217',
+            directionId: '1',
+          },
+        ]),
         severity: 'SIGNIFICANT_DELAYS',
         header: 'K Ingleside delay',
         description: 'Allow extra travel time on the K line.',
@@ -65,12 +79,19 @@ describe('511 normalization', () => {
       expect.objectContaining({
         id: 'sf-43-reroute',
         agency: 'SF',
-        affectedLines: ['43'],
+        informedEntities: [
+          {
+            agencyId: 'SF',
+            routeId: '43',
+            stopId: '',
+            directionId: '',
+          },
+        ],
       }),
     ]);
   });
 
-  it('filters alerts without a currently active period', () => {
+  it('preserves alerts whose periods are outside the normalization time', () => {
     const payload = structuredClone(alertFixture);
     payload.Entities[1].Alert.ActivePeriods = [
       { Start: '1785250800', End: '1785254400' },
@@ -78,7 +99,7 @@ describe('511 normalization', () => {
 
     expect(
       normalizeServiceAlerts(payload, alertNow).map((alert) => alert.id),
-    ).toEqual(['sf-k-delay']);
+    ).toEqual(['sf-k-delay', 'sf-43-reroute']);
   });
 });
 

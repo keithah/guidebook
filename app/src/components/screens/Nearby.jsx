@@ -1,4 +1,3 @@
-import { useEffect, useState } from 'react';
 import { useApp } from '../../context/AppContext.jsx';
 import { colors, fonts, screenPad, card, backLink } from '../../theme.js';
 import MuniLogo from '../MuniLogo.jsx';
@@ -6,7 +5,6 @@ import LineBadge from '../LineBadge.jsx';
 import NeighborhoodMap from '../nearby/NeighborhoodMap.jsx';
 import DestinationSearch from '../nearby/DestinationSearch.jsx';
 import LiveStatus from '../nearby/LiveStatus.jsx';
-import TransitAlerts from '../nearby/TransitAlerts.jsx';
 import TripOptions from '../nearby/TripOptions.jsx';
 import { distanceMiles, stopHeadsToward } from '../../lib/geocode.js';
 import { useHereTripPlanner } from '../../hooks/useHereTripPlanner.js';
@@ -64,13 +62,10 @@ export default function Nearby() {
   const { times: liveTimes, meta: departureMeta } = useLiveDepartures(
     property.transit.nearbyStops,
   );
-  const {
-    alerts,
-    status: alertStatus,
-    updatedAt: alertsUpdatedAt,
-    error: alertError,
-  } = useTransitAlerts('SF');
-  const [expandedAlertLineIds, setExpandedAlertLineIds] = useState([]);
+  const alertsEnabled = Boolean(
+    planner.routeResult?.ok && planner.routeResult.trips?.length,
+  );
+  const { alerts } = useTransitAlerts('SF', { enabled: alertsEnabled });
   const selectedPosition = planner.selectedDestination?.position ?? null;
   const nearBase =
     showMe && distanceMiles(coords, cottage) < 60
@@ -104,10 +99,6 @@ export default function Nearby() {
   ]
     .filter(Boolean)
     .join(':');
-
-  useEffect(() => {
-    setExpandedAlertLineIds([]);
-  }, [tripKey]);
 
   const chooseCottage = () => {
     planner.setQuery(property.address.street);
@@ -292,7 +283,6 @@ export default function Nearby() {
               externalUrlForTrip={() =>
                 selectedPosition ? mapsUrl(origin, selectedPosition) : undefined
               }
-              onExpandedLineIdsChange={setExpandedAlertLineIds}
             />
             {planner.routeResult && !planner.routeResult.ok && (
               <button
@@ -448,14 +438,6 @@ export default function Nearby() {
               </div>
             )}
           </div>
-
-          <TransitAlerts
-            alerts={alerts}
-            status={alertStatus}
-            updatedAt={alertsUpdatedAt}
-            error={alertError}
-            excludeLineIds={expandedAlertLineIds}
-          />
 
           <section aria-label="Nearby departures">
             <div

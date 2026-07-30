@@ -3,23 +3,7 @@ import { card, colors, fonts } from '../../theme.js';
 import ItinerarySteps from './ItinerarySteps.jsx';
 import JourneyTimeline from './JourneyTimeline.jsx';
 import { formatDuration, RouteTime } from './itineraryFormat.jsx';
-import TransitAlerts from './TransitAlerts.jsx';
-
-/**
- * Extracts unique identifiers for the transit lines in a trip.
- * @param {Object} trip - The trip whose transit sections provide the line identifiers.
- * @return {string[]} The unique truthy short names or first name tokens for transit lines.
- */
-function lineIdsFor(trip) {
-  const sectionIds = (trip.sections ?? [])
-    .filter((section) => section.type === 'transit')
-    .map(
-      (section) =>
-        section.transport?.shortName ??
-        section.transport?.name?.split(/\s+/)[0],
-    );
-  return [...new Set(sectionIds.filter(Boolean))];
-}
+import TripWarnings from './TripWarnings.jsx';
 
 /**
  * Builds a human-readable label for a transit option.
@@ -40,8 +24,8 @@ function optionLabel(trip) {
  * @param {Object} trip - The transit trip to display.
  * @param {number} index - The trip's position in the results.
  * @param {boolean} expanded - Whether the full itinerary is visible.
- * @param {Function} onToggle - Called with the trip's line identifiers when the itinerary toggle is activated.
- * @param {Array} alerts - Transit alerts associated with the trip.
+ * @param {Function} onToggle - Called when the itinerary toggle is activated.
+ * @param {Array} warnings - Warnings matched to the trip.
  * @param {string} [externalUrl] - Optional URL for opening the trip in a maps application.
  */
 export default function TripCard({
@@ -49,11 +33,10 @@ export default function TripCard({
   index,
   expanded,
   onToggle,
-  alerts,
+  warnings,
   externalUrl,
 }) {
   const itineraryId = useId();
-  const lineIds = lineIdsFor(trip);
   const transfers = Number.isFinite(trip.transferCount)
     ? trip.transferCount
     : 0;
@@ -148,12 +131,14 @@ export default function TripCard({
         </span>
       </div>
 
+      <TripWarnings warnings={warnings} compact />
+
       <button
         type="button"
         aria-expanded={expanded}
         aria-controls={itineraryId}
         aria-label={toggleLabel}
-        onClick={() => onToggle(lineIds)}
+        onClick={() => onToggle()}
         style={{
           width: '100%',
           marginTop: 12,
@@ -174,7 +159,7 @@ export default function TripCard({
       <div id={itineraryId} hidden={!expanded}>
         {expanded && (
           <>
-            <TransitAlerts alerts={alerts} lineIds={lineIds} />
+            <TripWarnings warnings={warnings} />
             <ItinerarySteps trip={trip} />
             {externalUrl && (
               <a

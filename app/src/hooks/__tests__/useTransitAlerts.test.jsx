@@ -45,6 +45,39 @@ describe('useTransitAlerts', () => {
     globalThis.fetch = originalFetch;
   });
 
+  it('does not fetch or poll while disabled and aborts when disabled', async () => {
+    let requestSignal;
+    globalThis.fetch = vi.fn((_url, { signal }) => {
+      requestSignal = signal;
+      return new Promise(() => {});
+    });
+    const hook = renderHook(
+      ({ enabled }) => useTransitAlerts('SF', { enabled }),
+      { initialProps: { enabled: false } },
+    );
+
+    expect(globalThis.fetch).not.toHaveBeenCalled();
+    expect(hook.result.current).toMatchObject({ alerts: [], status: 'idle' });
+
+    hook.rerender({ enabled: true });
+    await waitForHook(() => expect(globalThis.fetch).toHaveBeenCalledTimes(1));
+    expect(requestSignal.aborted).toBe(false);
+
+    hook.rerender({ enabled: false });
+    expect(hook.result.current).toMatchObject({
+      alerts: [],
+      status: 'idle',
+      updatedAt: null,
+      error: null,
+    });
+
+    await act(async () => {
+      await vi.advanceTimersByTimeAsync(20 * 60_000);
+    });
+    expect(globalThis.fetch).toHaveBeenCalledTimes(1);
+    hook.unmount();
+  });
+
   it('shares a ten-minute alert cache and exposes refresh metadata', async () => {
     globalThis.fetch = vi.fn().mockResolvedValue(alertResponse());
     const first = renderHook(() => useTransitAlerts('SF'));

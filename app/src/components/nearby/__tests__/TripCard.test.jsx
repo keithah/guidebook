@@ -11,14 +11,6 @@ vi.mock('../ItinerarySteps.jsx', async (importOriginal) => {
   };
 });
 
-vi.mock('../TransitAlerts.jsx', () => ({
-  default: ({ lineIds, alerts }) => (
-    <div data-testid="transit-alerts-stub">
-      {(lineIds ?? []).join(',')}|{(alerts ?? []).length}
-    </div>
-  ),
-}));
-
 import TripCard from '../TripCard.jsx';
 
 const transitTrip = {
@@ -62,7 +54,7 @@ function renderCard(overrides = {}) {
     index: 0,
     expanded: false,
     onToggle: vi.fn(),
-    alerts: [],
+    warnings: [],
     externalUrl: undefined,
     ...overrides,
   };
@@ -137,7 +129,7 @@ describe('TripCard', () => {
     expect(screen.getAllByText('Time pending')).toHaveLength(2);
   });
 
-  it('toggles with deduplicated line ids derived from transit sections', () => {
+  it('toggles without exposing transit line identifiers', () => {
     const props = renderCard();
     const toggle = screen.getByRole('button', {
       name: 'View full itinerary for K Ingleside and 38R Geary Rapid',
@@ -145,7 +137,7 @@ describe('TripCard', () => {
     expect(toggle).toHaveAttribute('aria-expanded', 'false');
 
     fireEvent.click(toggle);
-    expect(props.onToggle).toHaveBeenCalledWith(['K', '38R']);
+    expect(props.onToggle).toHaveBeenCalledWith();
   });
 
   it('hides the itinerary panel and its contents until expanded', () => {
@@ -155,12 +147,11 @@ describe('TripCard', () => {
         index={0}
         expanded={false}
         onToggle={vi.fn()}
-        alerts={[]}
+        warnings={[]}
       />,
     );
 
     expect(screen.queryByTestId('itinerary-steps-stub')).not.toBeInTheDocument();
-    expect(screen.queryByTestId('transit-alerts-stub')).not.toBeInTheDocument();
     const panel = screen.getByRole('button', {
       name: /view full itinerary/i,
     }).nextElementSibling;
@@ -172,7 +163,7 @@ describe('TripCard', () => {
         index={0}
         expanded
         onToggle={vi.fn()}
-        alerts={[]}
+        warnings={[]}
       />,
     );
 
@@ -183,7 +174,6 @@ describe('TripCard', () => {
     expect(screen.getByTestId('itinerary-steps-stub')).toHaveTextContent(
       'trip-transit',
     );
-    expect(screen.getByTestId('transit-alerts-stub')).toBeInTheDocument();
     expect(panel).not.toHaveAttribute('hidden');
   });
 
@@ -194,7 +184,7 @@ describe('TripCard', () => {
         index={0}
         expanded
         onToggle={vi.fn()}
-        alerts={[]}
+        warnings={[]}
       />,
     );
     expect(
@@ -207,7 +197,7 @@ describe('TripCard', () => {
         index={0}
         expanded
         onToggle={vi.fn()}
-        alerts={[]}
+        warnings={[]}
         externalUrl="https://example.test/directions"
       />,
     );
@@ -217,11 +207,48 @@ describe('TripCard', () => {
     );
   });
 
-  it('passes the trip alerts and active line ids through to TransitAlerts', () => {
-    const alerts = [{ id: 'k-alert' }];
-    renderCard({ expanded: true, alerts });
-    expect(screen.getByTestId('transit-alerts-stub')).toHaveTextContent(
-      'K,38R',
+  it('shows compact warnings before the toggle and detailed warnings above the itinerary', () => {
+    const warnings = [
+      {
+        id: 'k-alert',
+        header: 'K service delay',
+        description: 'Allow extra travel time.',
+        severity: 'SIGNIFICANT_DELAYS',
+        source: '511',
+        url: 'https://example.test/k-alert',
+      },
+    ];
+    const { rerender } = render(
+      <TripCard
+        trip={transitTrip}
+        index={0}
+        expanded={false}
+        onToggle={vi.fn()}
+        warnings={warnings}
+      />,
     );
+    const toggle = screen.getByRole('button', { name: /view full itinerary/i });
+    expect(screen.getByText('K service delay')).toBeVisible();
+    expect(
+      screen.getByRole('region', { name: 'Warnings for this trip' }),
+    ).toBe(toggle.previousElementSibling);
+    expect(screen.queryByText('Allow extra travel time.')).not.toBeInTheDocument();
+
+    rerender(
+      <TripCard
+        trip={transitTrip}
+        index={0}
+        expanded
+        onToggle={vi.fn()}
+        warnings={warnings}
+      />,
+    );
+
+    expect(screen.getAllByText('K service delay')).toHaveLength(2);
+    expect(screen.getByText('Allow extra travel time.')).toBeVisible();
+    const itinerary = screen.getByTestId('itinerary-steps-stub');
+    expect(
+      screen.getAllByRole('region', { name: 'Warnings for this trip' })[1],
+    ).toBe(itinerary.previousElementSibling);
   });
 });

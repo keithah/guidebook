@@ -12,12 +12,24 @@
           {
             "Start": "1785261600",
             "End": "1785272400"
+          },
+          {
+            "Start": "1785348000",
+            "End": "1785358800"
           }
         ],
         "InformedEntities": [
           {
             "AgencyId": "SF",
-            "RouteId": "K"
+            "RouteId": "K",
+            "StopId": "17217",
+            "DirectionId": "1"
+          },
+          {
+            "AgencyId": "SF",
+            "RouteId": "K",
+            "StopId": "99999",
+            "DirectionId": "1"
           }
         ],
         "Cause": "TECHNICAL_PROBLEM",
