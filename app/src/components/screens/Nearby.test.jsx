@@ -13,8 +13,12 @@ import { encodeStay } from '../../lib/stayHash.js';
 import Nearby from './Nearby.jsx';
 
 vi.mock('../nearby/NeighborhoodMap.jsx', () => ({
-  default: ({ locationLabel }) => (
-    <div aria-label="Neighborhood map" data-location-label={locationLabel ?? ''} />
+  default: ({ locationLabel, showMe }) => (
+    <div
+      aria-label="Neighborhood map"
+      data-location-label={locationLabel ?? ''}
+      data-show-me={showMe}
+    />
   ),
 }));
 
@@ -143,6 +147,40 @@ describe('Nearby', () => {
     expect(screen.getByLabelText('Neighborhood map')).toHaveAttribute(
       'data-location-label',
       '1620 Howard St, San Francisco',
+    );
+  });
+
+  it('shows the labeled user marker when a stay override matches the cottage coordinates', async () => {
+    window.location.hash = encodeStay({
+      guestName: 'Jamie',
+      checkin: '2026-07-30',
+      checkout: '2026-08-03',
+      fakeLocation: {
+        label: '251 Harold Ave, San Francisco',
+        lat: 37.7226,
+        lng: -122.4547,
+      },
+    });
+    render(
+      <AppProvider>
+        <Nearby />
+      </AppProvider>,
+    );
+
+    fireEvent.click(screen.getByRole('button', { name: 'Allow location' }));
+
+    expect(
+      await screen.findByText(
+        'Using location: 251 Harold Ave, San Francisco',
+      ),
+    ).toBeVisible();
+    expect(screen.getByLabelText('Neighborhood map')).toHaveAttribute(
+      'data-location-label',
+      '251 Harold Ave, San Francisco',
+    );
+    expect(screen.getByLabelText('Neighborhood map')).toHaveAttribute(
+      'data-show-me',
+      'true',
     );
   });
 

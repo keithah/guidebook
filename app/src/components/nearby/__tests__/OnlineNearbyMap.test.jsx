@@ -156,11 +156,11 @@ describe('OnlineNearbyMap', () => {
     );
   });
 
-  it('adds an optional stay location label to the user marker popup', () => {
+  it('adds a stay location label when the user and cottage positions match', () => {
     useMap.mockReturnValue({ fitBounds: vi.fn() });
     render(
       <OnlineNearbyMap
-        center={center}
+        center={cottage}
         cottage={cottage}
         stops={[]}
         showMe

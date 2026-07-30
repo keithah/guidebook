@@ -52,7 +52,10 @@ export default function Nearby() {
   const cottage = { lat: property.address.lat, lng: property.address.lng };
   const origin = coords ?? cottage;
   const showMe = Boolean(
-    coords && (coords.lat !== cottage.lat || coords.lng !== cottage.lng),
+    coords &&
+      (coords.source === 'stay-override' ||
+        coords.lat !== cottage.lat ||
+        coords.lng !== cottage.lng),
   );
   const locationLabel =
     coords?.source === 'stay-override' ? coords.label : null;
