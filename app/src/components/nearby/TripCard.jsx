@@ -1,7 +1,7 @@
 import { useId } from 'react';
-import LineBadge from '../LineBadge.jsx';
 import { card, colors, fonts } from '../../theme.js';
 import ItinerarySteps from './ItinerarySteps.jsx';
+import JourneyTimeline from './JourneyTimeline.jsx';
 import { formatDuration, RouteTime } from './itineraryFormat.jsx';
 import TransitAlerts from './TransitAlerts.jsx';
 
@@ -32,48 +32,6 @@ function optionLabel(trip) {
     lines.join(' and ') ||
     trip.sections?.find((section) => section.type === 'unknown')?.label ||
     'transit option'
-  );
-}
-
-/**
- * Displays the transit lines and destinations for a trip.
- * @param {Object} trip - The trip containing transit sections to display.
- */
-function TripLines({ trip }) {
-  const transitSections = (trip.sections ?? []).filter(
-    (section) => section.type === 'transit',
-  );
-  if (transitSections.length === 0) {
-    return (
-      <div style={{ color: colors.mutedText, fontSize: 13 }}>
-        {trip.sections?.[0]?.label || 'Transit option'}
-      </div>
-    );
-  }
-
-  return (
-    <div style={{ display: 'flex', flexWrap: 'wrap', gap: 9, marginTop: 11 }}>
-      {transitSections.map((section, index) => {
-        const line =
-          section.transport?.shortName ??
-          section.transport?.name?.split(/\s+/)[0] ??
-          '?';
-        return (
-          <div
-            key={section.id || `${line}-${index}`}
-            style={{ display: 'flex', alignItems: 'center', gap: 7 }}
-          >
-            <LineBadge line={line} size={24} fontSize="10px" />
-            <span style={{ color: colors.tealText, fontSize: 12 }}>
-              {section.transport?.name || line}
-              {section.transport?.headsign
-                ? ` toward ${section.transport.headsign}`
-                : ''}
-            </span>
-          </div>
-        );
-      })}
-    </div>
   );
 }
 
@@ -165,7 +123,7 @@ export default function TripCard({
         </div>
       </div>
 
-      <TripLines trip={trip} />
+      <JourneyTimeline sections={trip.sections ?? []} />
 
       <div
         style={{

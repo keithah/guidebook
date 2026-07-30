@@ -28,6 +28,7 @@ describe('ItinerarySteps', () => {
         name: /k ingleside toward embarcadero/i,
       }),
     ).toBeVisible();
+    expect(screen.getByLabelText('Muni K train')).toBeVisible();
     expect(
       screen.getByRole('heading', { name: /walk to union square/i }),
     ).toBeVisible();

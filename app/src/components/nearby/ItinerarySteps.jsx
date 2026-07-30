@@ -1,20 +1,6 @@
-import LineBadge from '../LineBadge.jsx';
 import { colors, fonts } from '../../theme.js';
 import { formatDuration, RouteTime } from './itineraryFormat.jsx';
-
-/**
- * Derive a display identifier for a transit line.
- * @param {Object} section - The itinerary section containing transport details.
- * @returns {string} The transport short name, first name token, mode, or `?` when unavailable.
- */
-function lineIdFor(section) {
-  return (
-    section.transport?.shortName ??
-    section.transport?.name?.split(/\s+/)[0] ??
-    section.transport?.mode ??
-    '?'
-  );
-}
+import TransitIdentity from './TransitIdentity.jsx';
 
 /**
  * Create a display heading for an itinerary section.
@@ -189,7 +175,7 @@ function KnownSection({ section }) {
     <>
       <div style={{ display: 'flex', alignItems: 'flex-start', gap: 10 }}>
         {isTransit ? (
-          <LineBadge line={lineIdFor(section)} size={26} fontSize="11px" />
+          <TransitIdentity section={section} />
         ) : (
           <span
             aria-hidden="true"
