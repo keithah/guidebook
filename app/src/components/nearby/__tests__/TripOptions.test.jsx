@@ -83,18 +83,21 @@ describe('TripOptions', () => {
     fireEvent.click(toggles[0]);
     expect(toggles[0]).toHaveAttribute('aria-expanded', 'true');
     expect(screen.getAllByTestId('itinerary-section')).toHaveLength(3);
-    expect(screen.getByRole('link', { name: /open in maps/i })).toHaveAttribute(
-      'href',
-      'https://example.test/directions/route-k',
-    );
+    expect(
+      screen.getByRole('link', {
+        name: /open transit directions in google maps/i,
+      }),
+    ).toHaveAttribute('href', 'https://example.test/directions/route-k');
 
     fireEvent.click(toggles[1]);
     expect(toggles[0]).toHaveAttribute('aria-expanded', 'false');
     expect(toggles[1]).toHaveAttribute('aria-expanded', 'true');
     expect(screen.getAllByTestId('itinerary-section')).toHaveLength(5);
-    expect(screen.getAllByRole('link', { name: /open in maps/i })).toHaveLength(
-      1,
-    );
+    expect(
+      screen.getAllByRole('link', {
+        name: /open transit directions in google maps/i,
+      }),
+    ).toHaveLength(1);
   });
 
   it('shows warnings only on affected trip cards while collapsed and expanded', () => {

@@ -188,7 +188,9 @@ describe('TripCard', () => {
       />,
     );
     expect(
-      screen.queryByRole('link', { name: /open in maps/i }),
+      screen.queryByRole('link', {
+        name: /open transit directions in google maps/i,
+      }),
     ).not.toBeInTheDocument();
 
     rerender(
@@ -201,10 +203,11 @@ describe('TripCard', () => {
         externalUrl="https://example.test/directions"
       />,
     );
-    expect(screen.getByRole('link', { name: /open in maps/i })).toHaveAttribute(
-      'href',
-      'https://example.test/directions',
-    );
+    expect(
+      screen.getByRole('link', {
+        name: /open transit directions in google maps/i,
+      }),
+    ).toHaveAttribute('href', 'https://example.test/directions');
   });
 
   it('shows compact warnings before the toggle and detailed warnings above the itinerary', () => {

@@ -177,7 +177,7 @@ export default function TripCard({
                   fontWeight: 600,
                 }}
               >
-                Open in maps ↗
+                Open transit directions in Google Maps ↗
               </a>
             )}
           </>
