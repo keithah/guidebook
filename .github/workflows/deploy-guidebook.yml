@@ -39,6 +39,7 @@ jobs:
         # key + real stop codes (see app/README.md) — until then the app
         # falls back to the static transit times baked into the property data.
         env:
+          VITE_HERE_API_KEY: ${{ secrets.VITE_HERE_API_KEY }}
           VITE_API_511_KEY: ${{ secrets.VITE_API_511_KEY }}
         run: npm run build
 
