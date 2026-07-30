@@ -194,27 +194,20 @@ export function AppProvider({ children }) {
   const allowLocation = useCallback(async () => {
     const attempt = ++locationAttemptRef.current;
     const attemptStayHash = stayHash;
+    const isStale = () =>
+      locationAttemptRef.current !== attempt ||
+      staySnapshotRef.current.hash !== attemptStayHash;
     setLocating(true);
     setLocateError(null);
     try {
       const pos = stayLocationOverride ?? (await getCurrentPosition());
-      if (
-        locationAttemptRef.current !== attempt ||
-        staySnapshotRef.current.hash !== attemptStayHash
-      ) {
-        return;
-      }
+      if (isStale()) return;
       activeStayLocationHashRef.current =
         pos.source === 'stay-override' ? stayHash : null;
       setCoords(pos);
       setLocated(true);
     } catch (err) {
-      if (
-        locationAttemptRef.current !== attempt ||
-        staySnapshotRef.current.hash !== attemptStayHash
-      ) {
-        return;
-      }
+      if (isStale()) return;
       activeStayLocationHashRef.current = null;
       setLocateError(err.message || 'Could not get your location.');
       setCoords({ lat: property.address.lat, lng: property.address.lng });
