@@ -155,6 +155,7 @@ export function AppProvider({ children }) {
   const [locating, setLocating] = useState(false);
   const [locateError, setLocateError] = useState(null);
   const [locationConsentGranted, setLocationConsentGranted] = useState(false);
+  const locationAttemptRef = useRef(0);
   const [backOpen, setBackOpen] = useState(false);
 
   useEffect(() => {
@@ -180,27 +181,34 @@ export function AppProvider({ children }) {
   }, [coords, locationConsentGranted, stayHash, stayLocationOverride]);
 
   const allowLocation = useCallback(async () => {
+    const attempt = ++locationAttemptRef.current;
     setLocating(true);
     setLocateError(null);
     try {
       const pos = stayLocationOverride ?? (await getCurrentPosition());
+      if (locationAttemptRef.current !== attempt) return;
       activeStayLocationHashRef.current =
         pos.source === 'stay-override' ? stayHash : null;
       setCoords(pos);
       setLocated(true);
     } catch (err) {
+      if (locationAttemptRef.current !== attempt) return;
       activeStayLocationHashRef.current = null;
       setLocateError(err.message || 'Could not get your location.');
       setCoords({ lat: property.address.lat, lng: property.address.lng });
       setLocated(true);
     } finally {
-      setLocationConsentGranted(true);
-      setLocating(false);
+      if (locationAttemptRef.current === attempt) {
+        setLocationConsentGranted(true);
+        setLocating(false);
+      }
     }
   }, [stayHash, stayLocationOverride]);
   const useCottageAsLocation = useCallback(() => {
+    locationAttemptRef.current += 1;
     activeStayLocationHashRef.current = null;
     setLocationConsentGranted(false);
+    setLocating(false);
     setCoords({ lat: property.address.lat, lng: property.address.lng });
     setLocated(true);
   }, []);

@@ -78,6 +78,9 @@ describe('AppContext', () => {
     getCurrentPosition.mockResolvedValue({ lat: 1, lng: 2 });
     renderProvider();
 
+    expect(latestContext.coords).toBeNull();
+    expect(latestContext.located).toBe(false);
+
     await act(async () => latestContext.allowLocation());
 
     expect(getCurrentPosition).not.toHaveBeenCalled();
@@ -127,6 +130,27 @@ describe('AppContext', () => {
     expect(getCurrentPosition).not.toHaveBeenCalled();
   });
 
+  it('clears an active stay location override when its replacement is invalid', async () => {
+    window.location.hash = encodeStay(howardStay);
+    renderProvider();
+
+    await act(async () => latestContext.allowLocation());
+    await changeStayHash({
+      guestName: 'Morgan',
+      checkin: '2026-08-04',
+      checkout: '2026-08-08',
+      fakeLocation: {
+        label: 'Ferry Building, San Francisco',
+        lat: '37.7955',
+        lng: -122.3937,
+      },
+    });
+
+    expect(latestContext.coords).toBeNull();
+    expect(latestContext.located).toBe(false);
+    expect(getCurrentPosition).not.toHaveBeenCalled();
+  });
+
   it('replaces consented browser coordinates when a valid stay location hash arrives', async () => {
     getCurrentPosition.mockResolvedValue({ lat: 46.8797, lng: -110.3626 });
     renderProvider();
@@ -154,6 +178,39 @@ describe('AppContext', () => {
     };
 
     act(() => latestContext.useCottageAsLocation());
+    await changeStayHash(howardStay);
+
+    expect(latestContext.coords).toEqual(cottageCoords);
+    expect(latestContext.located).toBe(true);
+  });
+
+  it('ignores pending browser geolocation after cottage selection', async () => {
+    let resolvePosition;
+    getCurrentPosition.mockReturnValue(
+      new Promise((resolve) => {
+        resolvePosition = resolve;
+      }),
+    );
+    renderProvider();
+    const cottageCoords = {
+      lat: latestContext.property.address.lat,
+      lng: latestContext.property.address.lng,
+    };
+    let locationPromise;
+
+    act(() => {
+      locationPromise = latestContext.allowLocation();
+    });
+    act(() => latestContext.useCottageAsLocation());
+    await act(async () => {
+      resolvePosition({ lat: 46.8797, lng: -110.3626 });
+      await locationPromise;
+    });
+
+    expect(latestContext.coords).toEqual(cottageCoords);
+    expect(latestContext.located).toBe(true);
+    expect(latestContext.locating).toBe(false);
+
     await changeStayHash(howardStay);
 
     expect(latestContext.coords).toEqual(cottageCoords);
