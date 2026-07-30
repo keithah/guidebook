@@ -31,6 +31,16 @@ const howardStay = {
     lng: -122.41761,
   },
 };
+const ferryStay = {
+  guestName: 'Morgan',
+  checkin: '2026-08-04',
+  checkout: '2026-08-08',
+  fakeLocation: {
+    label: 'Ferry Building, San Francisco',
+    lat: 37.7955,
+    lng: -122.3937,
+  },
+};
 
 function Capture() {
   latestContext = useApp();
@@ -130,6 +140,27 @@ describe('AppContext', () => {
     expect(getCurrentPosition).not.toHaveBeenCalled();
   });
 
+  it('keeps a valid replacement hash coherent across an unrelated render', async () => {
+    window.history.replaceState(null, '', `#${encodeStay(howardStay)}`);
+    renderProvider();
+
+    await act(async () => latestContext.allowLocation());
+    window.history.replaceState(null, '', `#${encodeStay(ferryStay)}`);
+    act(() => latestContext.setQuery('force unrelated render'));
+    await act(async () => {
+      window.dispatchEvent(new HashChangeEvent('hashchange'));
+    });
+
+    expect(latestContext.coords).toEqual({
+      label: 'Ferry Building, San Francisco',
+      lat: 37.7955,
+      lng: -122.3937,
+      source: 'stay-override',
+    });
+    expect(latestContext.located).toBe(true);
+    expect(getCurrentPosition).not.toHaveBeenCalled();
+  });
+
   it('clears an active stay location override when its replacement is invalid', async () => {
     window.location.hash = encodeStay(howardStay);
     renderProvider();
@@ -144,6 +175,29 @@ describe('AppContext', () => {
         lat: '37.7955',
         lng: -122.3937,
       },
+    });
+
+    expect(latestContext.coords).toBeNull();
+    expect(latestContext.located).toBe(false);
+    expect(getCurrentPosition).not.toHaveBeenCalled();
+  });
+
+  it('clears an invalid replacement after an unrelated render before hashchange', async () => {
+    window.history.replaceState(null, '', `#${encodeStay(howardStay)}`);
+    renderProvider();
+
+    await act(async () => latestContext.allowLocation());
+    window.history.replaceState(
+      null,
+      '',
+      `#${encodeStay({
+        ...ferryStay,
+        fakeLocation: { ...ferryStay.fakeLocation, lat: '37.7955' },
+      })}`,
+    );
+    act(() => latestContext.setQuery('force unrelated render'));
+    await act(async () => {
+      window.dispatchEvent(new HashChangeEvent('hashchange'));
     });
 
     expect(latestContext.coords).toBeNull();
@@ -235,6 +289,30 @@ describe('AppContext', () => {
 
     expect(getCurrentPosition).toHaveBeenCalledTimes(1);
     expect(latestContext.coords).toEqual({ lat: 37.78, lng: -122.42 });
+  });
+
+  it('clears a geolocation error when a valid stay override activates', async () => {
+    getCurrentPosition.mockRejectedValue(new Error('Location blocked.'));
+    renderProvider();
+
+    await act(async () => latestContext.allowLocation());
+    expect(latestContext.locateError).toBe('Location blocked.');
+
+    await changeStayHash(howardStay);
+
+    expect(latestContext.coords).toEqual({
+      label: '1620 Howard St, San Francisco',
+      lat: 37.77154,
+      lng: -122.41761,
+      source: 'stay-override',
+    });
+    expect(latestContext.locateError).toBeNull();
+
+    await changeStayHash(null);
+
+    expect(latestContext.coords).toBeNull();
+    expect(latestContext.located).toBe(false);
+    expect(latestContext.locateError).toBeNull();
   });
 
   it('no longer exposes dest/setDest now that destination search owns that state', () => {

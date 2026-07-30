@@ -21,6 +21,11 @@ export function useApp() {
 
 const TABS = ['home', 'arrive', 'cottage', 'around', 'explore', 'help'];
 
+function readStaySnapshotFromLocation() {
+  const hash = window.location.hash;
+  return { hash, stay: readStayFromLocation({ hash }) };
+}
+
 /**
  * Provide application-wide state and actions through `AppContext`.
  * @returns {JSX.Element} The context provider containing the application children.
@@ -29,17 +34,17 @@ export function AppProvider({ children }) {
   const scrollRef = useRef(null);
 
   // ---- Guest identity: /sfcottage#<hash> ----------------------------------
-  const [stay, setStay] = useState(() => readStayFromLocation());
+  const [staySnapshot, setStaySnapshot] = useState(readStaySnapshotFromLocation);
   useEffect(() => {
-    const onHashChange = () => setStay(readStayFromLocation());
+    const onHashChange = () => setStaySnapshot(readStaySnapshotFromLocation());
     window.addEventListener('hashchange', onHashChange);
     return () => window.removeEventListener('hashchange', onHashChange);
   }, []);
+  const { hash: stayHash, stay } = staySnapshot;
   const stayLocationOverride = useMemo(
     () => normalizeStayLocationOverride(stay),
     [stay],
   );
-  const stayHash = window.location.hash;
   const activeStayLocationHashRef = useRef(null);
 
   const isGuest = !!stay;
@@ -167,6 +172,7 @@ export function AppProvider({ children }) {
       activeStayLocationHashRef.current = stayHash;
       setCoords(stayLocationOverride);
       setLocated(true);
+      setLocateError(null);
       return;
     }
 
