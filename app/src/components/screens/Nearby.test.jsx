@@ -518,6 +518,18 @@ describe('Nearby', () => {
     expect(screen.queryByRole('region', { name: 'Transit options' })).not.toBeInTheDocument();
     expect(screen.queryByRole('region', { name: 'Rideshare options' })).not.toBeInTheDocument();
     expect(useTransitAlerts).toHaveBeenLastCalledWith('SF', { enabled: false });
+    const walkingMapsLink = screen.getByRole('link', {
+      name: /open walking directions in google maps/i,
+    });
+    const walkingMapsUrl = new URL(walkingMapsLink.href);
+    expect(walkingMapsUrl.searchParams.get('api')).toBe('1');
+    expect(walkingMapsUrl.searchParams.get('origin')).toBe(
+      '37.7226,-122.4547',
+    );
+    expect(walkingMapsUrl.searchParams.get('destination')).toBe(
+      '37.7879,-122.4075',
+    );
+    expect(walkingMapsUrl.searchParams.get('travelmode')).toBe('walking');
 
     fireEvent.click(within(selector).getByRole('button', { name: 'Rideshare' }));
     expect(screen.getByRole('region', { name: 'Rideshare options' })).toBeVisible();
