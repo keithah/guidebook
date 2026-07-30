@@ -9,7 +9,7 @@ When the app already has browser-derived coordinates and a guest opens a valid s
 - A valid `fakeLocation` remains inactive until the guest has allowed location in the current app session.
 - If location is already allowed and a hash change introduces a valid `fakeLocation`, the app immediately replaces the current coordinates with that override.
 - Activating the override must not call browser geolocation, reload the page, or reset unrelated application state.
-- The override remains associated with the hash that activated it. Removing or replacing that hash clears stale override-owned coordinates using the existing transition behavior.
+- The override remains associated with the hash that activated it. Removing it or replacing it with an invalid override clears stale override-owned coordinates; replacing it with another valid override activates the replacement immediately after consent.
 - Hashes without a valid override preserve existing browser or cottage coordinates.
 
 ## Implementation boundary
