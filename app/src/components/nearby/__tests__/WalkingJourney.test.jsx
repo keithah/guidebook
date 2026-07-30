@@ -20,6 +20,22 @@ const walkingRoute = {
     { type: 'arrive', instruction: 'Your destination is on the right.' },
   ],
   notices: [{ code: 'private-road', title: 'Part of this route may be private.' }],
+  sections: [
+    {
+      id: 'walk-section-1',
+      departureTime: '2026-07-30T10:15:00',
+      arrivalTime: '2026-07-30T10:25:00',
+      departure: { name: '1620 Howard Street' },
+      arrival: { name: 'Market Street' },
+    },
+    {
+      id: 'walk-section-2',
+      departureTime: '2026-07-30T10:25:00',
+      arrivalTime: '2026-07-30T10:37:00',
+      departure: { name: 'Market Street' },
+      arrival: { name: 'Union Square' },
+    },
+  ],
 };
 
 afterEach(cleanup);
@@ -43,6 +59,13 @@ describe('WalkingJourney', () => {
       walkingRoute.actions.length,
     );
     expect(within(region).getByText(/walk 1\.2 mi/i)).toBeVisible();
+    const endpoints = within(region).getByRole('group', {
+      name: 'Walking endpoints',
+    });
+    expect(within(endpoints).getByText('1620 Howard Street')).toBeVisible();
+    expect(within(endpoints).getByText('10:15 AM')).toBeVisible();
+    expect(within(endpoints).getByText('Union Square')).toBeVisible();
+    expect(within(endpoints).getByText('10:37 AM')).toBeVisible();
     expect(
       within(region).getByText('Turn left onto South Van Ness Avenue.'),
     ).toBeVisible();
@@ -115,5 +138,30 @@ describe('WalkingJourney', () => {
     expect(screen.queryByRole('listitem')).not.toBeInTheDocument();
     expect(screen.getByText('Turn-by-turn steps are unavailable.')).toBeVisible();
     expect(screen.getByRole('status', { name: /cached/i })).toBeVisible();
+  });
+
+  it('uses safe endpoint fallbacks when places and times are unavailable', () => {
+    render(
+      <WalkingJourney
+        result={{
+          ok: true,
+          route: {
+            ...walkingRoute,
+            sections: [
+              { id: 'first', departure: null, departureTime: null },
+              { id: 'last', arrival: null, arrivalTime: 'not-a-time' },
+            ],
+          },
+          source: 'cache',
+          fetchedAt,
+        }}
+        externalUrl={externalUrl}
+      />,
+    );
+
+    const endpoints = screen.getByRole('group', { name: 'Walking endpoints' });
+    expect(within(endpoints).getByText('Starting point')).toBeVisible();
+    expect(within(endpoints).getByText('Destination')).toBeVisible();
+    expect(within(endpoints).getAllByText('Time unavailable')).toHaveLength(2);
   });
 });

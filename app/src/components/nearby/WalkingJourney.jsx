@@ -1,7 +1,7 @@
 import { card, colors, fonts } from '../../theme.js';
 import JourneyIcon from './JourneyIcon.jsx';
 import LiveStatus from './LiveStatus.jsx';
-import { formatDuration } from './itineraryFormat.jsx';
+import { formatDuration, RouteTime } from './itineraryFormat.jsx';
 
 const METERS_PER_MILE = 1_609.344;
 const FAILURE_MESSAGES = {
@@ -56,6 +56,43 @@ function ExternalDirections({ externalUrl }) {
   );
 }
 
+function Endpoint({ label, place, time, fallbackPlace }) {
+  const placeName =
+    typeof place?.name === 'string' && place.name.trim()
+      ? place.name.trim()
+      : fallbackPlace;
+
+  return (
+    <div style={{ minWidth: 0 }}>
+      <div
+        style={{
+          color: colors.muted,
+          fontSize: 10,
+          fontWeight: 700,
+          letterSpacing: '.12em',
+          textTransform: 'uppercase',
+        }}
+      >
+        {label}
+      </div>
+      <div
+        style={{
+          marginTop: 3,
+          overflowWrap: 'anywhere',
+          color: colors.ink,
+          fontSize: 13,
+          fontWeight: 600,
+        }}
+      >
+        {placeName}
+      </div>
+      <div style={{ marginTop: 2, color: colors.mutedText, fontSize: 12 }}>
+        <RouteTime value={time} fallback={<span>Time unavailable</span>} />
+      </div>
+    </div>
+  );
+}
+
 /**
  * Render complete HERE walking directions and a Google Maps fallback.
  * @param {Object} props - Walking panel properties.
@@ -68,6 +105,9 @@ export default function WalkingJourney({ result, onRetry, externalUrl }) {
   const route = result?.ok ? result.route : null;
   const actions = Array.isArray(route?.actions) ? route.actions : [];
   const notices = Array.isArray(route?.notices) ? route.notices : [];
+  const sections = Array.isArray(route?.sections) ? route.sections : [];
+  const firstSection = sections[0];
+  const lastSection = sections.at(-1);
 
   return (
     <section aria-label="Walking directions" style={{ ...card, padding: 15 }}>
@@ -149,6 +189,33 @@ export default function WalkingJourney({ result, onRetry, externalUrl }) {
           >
             Walk {formatMiles(route.lengthMeters)} ·{' '}
             {formatDuration(route.durationSeconds)}
+          </div>
+
+          <div
+            role="group"
+            aria-label="Walking endpoints"
+            style={{
+              display: 'grid',
+              gridTemplateColumns: 'repeat(2, minmax(0, 1fr))',
+              gap: 12,
+              marginTop: 13,
+              borderTop: `1px solid ${colors.borderSoft}`,
+              borderBottom: `1px solid ${colors.borderSoft}`,
+              padding: '11px 0',
+            }}
+          >
+            <Endpoint
+              label="Depart"
+              place={firstSection?.departure}
+              time={firstSection?.departureTime}
+              fallbackPlace="Starting point"
+            />
+            <Endpoint
+              label="Arrive"
+              place={lastSection?.arrival}
+              time={lastSection?.arrivalTime}
+              fallbackPlace="Destination"
+            />
           </div>
 
           {actions.length > 0 ? (

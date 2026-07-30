@@ -38,7 +38,7 @@ export default function TransitIdentity({ section, compact = false }) {
         aria-hidden="true"
         style={{
           background: identity.color,
-          color: '#fff',
+          color: identity.foreground,
           borderRadius: 999,
           padding: '2px 6px',
           fontWeight: 700,

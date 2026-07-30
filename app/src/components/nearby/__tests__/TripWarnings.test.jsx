@@ -1,4 +1,4 @@
-import { cleanup, render, screen } from '@testing-library/react';
+import { cleanup, render, screen, within } from '@testing-library/react';
 import { afterEach, describe, expect, it } from 'vitest';
 
 import TripWarnings from '../TripWarnings.jsx';
@@ -42,6 +42,18 @@ describe('TripWarnings', () => {
       screen.queryByText('Allow extra travel time on the K line.'),
     ).not.toBeInTheDocument();
     expect(screen.queryByRole('link')).not.toBeInTheDocument();
+
+    const highImpact = screen.getByRole('listitem', {
+      name: 'High impact: K Ingleside delay',
+    });
+    const serviceChange = screen.getByRole('listitem', {
+      name: 'Service change: Boarding platform changed',
+    });
+    expect(within(highImpact).getByText('High impact')).toBeVisible();
+    expect(within(serviceChange).getByText('Service change')).toBeVisible();
+    expect(highImpact).not.toHaveStyle({
+      background: serviceChange.style.background,
+    });
   });
 
   it('renders warning descriptions, sources, and safe links in expanded mode', () => {
@@ -57,5 +69,7 @@ describe('TripWarnings', () => {
     expect(
       screen.getByRole('link', { name: 'Read K Ingleside delay warning' }),
     ).toHaveAttribute('rel', 'noreferrer');
+    expect(screen.getByText('High impact')).toBeVisible();
+    expect(screen.getByText('Service change')).toBeVisible();
   });
 });

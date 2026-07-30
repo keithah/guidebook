@@ -35,6 +35,16 @@ export default function RideshareOptions({ rides = [] }) {
       </div>
       <div
         style={{
+          marginTop: 3,
+          color: colors.mutedText,
+          fontSize: 11,
+          lineHeight: 1.4,
+        }}
+      >
+        Opening a provider may require a connection and its app or website.
+      </div>
+      <div
+        style={{
           display: 'grid',
           gridTemplateColumns: 'repeat(3, minmax(0, 1fr))',
           gap: 8,

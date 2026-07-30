@@ -88,4 +88,47 @@ describe('JourneyTimeline', () => {
 
     expect(screen.getByText('Ferry transfer')).toBeVisible();
   });
+
+  it('applies the classified contrast-safe foreground to line labels', () => {
+    render(
+      <JourneyTimeline
+        sections={[
+          {
+            id: 'bart-yellow',
+            type: 'transit',
+            agency: { id: 'BART' },
+            transport: {
+              mode: 'train',
+              shortName: 'Yellow',
+              textColor: '#FFFFFF',
+            },
+          },
+          {
+            id: 'muni-k',
+            type: 'transit',
+            agency: { id: 'SFMTA' },
+            transport: {
+              mode: 'lightRail',
+              shortName: 'K',
+              color: '#005B95',
+              textColor: '#000000',
+            },
+          },
+        ]}
+      />,
+    );
+
+    const yellowIdentity = screen.getByRole('img', {
+      name: 'BART Yellow train',
+    });
+    const muniIdentity = screen.getByRole('img', { name: 'Muni K train' });
+    expect(within(yellowIdentity).getByText('Yellow')).toHaveStyle({
+      background: '#F9DF3A',
+      color: '#000000',
+    });
+    expect(within(muniIdentity).getByText('K')).toHaveStyle({
+      background: '#005B95',
+      color: '#FFFFFF',
+    });
+  });
 });

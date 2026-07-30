@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react';
+import { useState } from 'react';
 import { useApp } from '../../context/AppContext.jsx';
 import { colors, fonts, screenPad, card, backLink } from '../../theme.js';
 import MuniLogo from '../MuniLogo.jsx';
@@ -54,7 +54,10 @@ export default function Nearby() {
     coords?.source === 'stay-override' ? coords.label : null;
   const planner = useHereTripPlanner({ origin });
   const saved = useSavedDestinations();
-  const [activeMode, setActiveMode] = useState('transit');
+  const [modeSelection, setModeSelection] = useState({
+    journeyKey: '',
+    mode: 'transit',
+  });
   const { times: liveTimes, meta: departureMeta } = useLiveDepartures(
     property.transit.nearbyStops,
   );
@@ -62,12 +65,11 @@ export default function Nearby() {
   const journeyKey = selectedPosition
     ? `${origin.lat},${origin.lng}:${selectedPosition.lat},${selectedPosition.lng}`
     : '';
-  const previousJourneyKey = useRef(journeyKey);
-  useEffect(() => {
-    if (previousJourneyKey.current === journeyKey) return;
-    previousJourneyKey.current = journeyKey;
-    setActiveMode('transit');
-  }, [journeyKey]);
+  const activeMode =
+    modeSelection.journeyKey === journeyKey
+      ? modeSelection.mode
+      : 'transit';
+  const selectMode = (mode) => setModeSelection({ journeyKey, mode });
   const walking = useWalkingRoute({
     origin,
     destination: selectedPosition,
@@ -294,7 +296,7 @@ export default function Nearby() {
           )}
 
           {selectedPosition && (
-            <TripModeSelector value={activeMode} onChange={setActiveMode} />
+            <TripModeSelector value={activeMode} onChange={selectMode} />
           )}
 
           {selectedPosition && activeMode === 'transit' && (

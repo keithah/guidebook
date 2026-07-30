@@ -54,6 +54,47 @@ describe('classifyTransitLeg', () => {
       vehicle: 'transit', lineLabel: '101',
     });
   });
+
+  it('keeps line labels readable and accepts only contrast-safe provider text colors', () => {
+    const yellow = classifyTransitLeg(section(
+      { id: 'BART' },
+      { mode: 'train', shortName: 'Yellow' },
+    ));
+    const dark = classifyTransitLeg(section(
+      { id: 'SFMTA' },
+      { mode: 'lightRail', shortName: 'K', color: '#005B95' },
+    ));
+    const safeProvider = classifyTransitLeg(section(
+      { id: 'BART' },
+      {
+        mode: 'train',
+        shortName: 'Yellow',
+        textColor: '#14201D',
+      },
+    ));
+    const unsafeProvider = classifyTransitLeg(section(
+      { id: 'BART' },
+      {
+        mode: 'train',
+        shortName: 'Yellow',
+        textColor: 'url(javascript:bad)',
+      },
+    ));
+    const lowContrastProvider = classifyTransitLeg(section(
+      { id: 'BART' },
+      {
+        mode: 'train',
+        shortName: 'Yellow',
+        textColor: '#F9DF3A',
+      },
+    ));
+
+    expect(yellow).toMatchObject({ color: '#F9DF3A', foreground: '#000000' });
+    expect(dark).toMatchObject({ color: '#005B95', foreground: '#FFFFFF' });
+    expect(safeProvider.foreground).toBe('#14201D');
+    expect(unsafeProvider.foreground).toBe('#000000');
+    expect(lowContrastProvider.foreground).toBe('#000000');
+  });
 });
 
 describe('safeTransitColor', () => {

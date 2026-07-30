@@ -1,9 +1,9 @@
 import {
+  act,
   cleanup,
   fireEvent,
   render,
   screen,
-  waitFor,
   within,
 } from '@testing-library/react';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
@@ -267,8 +267,9 @@ describe('Nearby', () => {
       expect(toggle).toHaveAttribute('aria-expanded', 'false'),
     );
 
+    await act(async () => {});
     fireEvent.click(toggles[0]);
-    expect(screen.getAllByTestId('itinerary-section')).toHaveLength(
+    expect(await screen.findAllByTestId('itinerary-section')).toHaveLength(
       trips[0].sections.length,
     );
     const mapsLink = screen.getByRole('link', {
@@ -555,7 +556,25 @@ describe('Nearby', () => {
     expect(screen.queryByText('Loading walking directions…')).not.toBeInTheDocument();
   });
 
-  it('resets the mode to Transit when the destination changes', async () => {
+  it('couples Walk selection to the destination journey before requesting another route', async () => {
+    useWalkingRoute.mockImplementation(({ destination }) => ({
+      routeResult: {
+        ...walkingResult,
+        route: {
+          ...walkingResult.route,
+          actions: [
+            {
+              type: 'arrive',
+              instruction:
+                destination?.lng === -122.3937
+                  ? 'Walk to Ferry Building.'
+                  : 'Walk to Union Square.',
+            },
+          ],
+        },
+      },
+      retryWalking: vi.fn(),
+    }));
     renderNearby();
     const input = screen.getByRole('searchbox', { name: /destination/i });
     fireEvent.change(input, { target: { value: 'Union Square' } });
@@ -565,6 +584,8 @@ describe('Nearby', () => {
     );
     const selector = screen.getByRole('group', { name: 'Travel mode' });
     fireEvent.click(within(selector).getByRole('button', { name: 'Walk' }));
+    expect(screen.getByText('Walk to Union Square.')).toBeVisible();
+    useWalkingRoute.mockClear();
 
     const ferryBuilding = {
       ...unionSquare,
@@ -584,15 +605,49 @@ describe('Nearby', () => {
       await screen.findByRole('button', { name: /choose ferry building/i }),
     );
 
-    await waitFor(() =>
-      expect(
-        screen.getByRole('button', { name: 'Transit' }),
-      ).toHaveAttribute('aria-pressed', 'true'),
+    expect(screen.getByRole('button', { name: 'Transit' })).toHaveAttribute(
+      'aria-pressed',
+      'true',
     );
-    expect(await screen.findByRole('region', { name: 'Transit options' })).toBeVisible();
+    expect(
+      screen.queryByRole('region', { name: 'Walking directions' }),
+    ).not.toBeInTheDocument();
+    expect(
+      useWalkingRoute.mock.calls.filter(
+        ([options]) =>
+          options.destination?.lng === -122.3937 && options.enabled,
+      ),
+    ).toHaveLength(0);
+
+    fireEvent.click(screen.getByRole('button', { name: 'Walk' }));
+    expect(screen.getByText('Walk to Ferry Building.')).toBeVisible();
+    expect(useWalkingRoute).toHaveBeenLastCalledWith(
+      expect.objectContaining({
+        destination: ferryBuilding.position,
+        enabled: true,
+      }),
+    );
   });
 
-  it('resets the mode to Transit when the origin changes', async () => {
+  it('couples Walk selection to the origin journey before requesting another route', async () => {
+    useWalkingRoute.mockImplementation(({ origin: currentOrigin }) => ({
+      routeResult: {
+        ...walkingResult,
+        route: {
+          ...walkingResult.route,
+          actions: [
+            {
+              type: 'depart',
+              instruction:
+                currentOrigin?.lng === -122.3937
+                  ? 'Leave from Ferry Building.'
+                  : 'Leave from Howard Street.',
+            },
+          ],
+        },
+      },
+      retryWalking: vi.fn(),
+    }));
     window.location.hash = encodeStay({
       guestName: 'Jamie',
       checkin: '2026-07-30',
@@ -615,6 +670,8 @@ describe('Nearby', () => {
     );
     await screen.findByRole('region', { name: 'Transit options' });
     fireEvent.click(screen.getByRole('button', { name: 'Walk' }));
+    expect(screen.getByText('Leave from Howard Street.')).toBeVisible();
+    useWalkingRoute.mockClear();
 
     window.location.hash = encodeStay({
       guestName: 'Jamie',
@@ -629,10 +686,29 @@ describe('Nearby', () => {
     window.dispatchEvent(new HashChangeEvent('hashchange'));
 
     await screen.findByText('Using location: Ferry Building, San Francisco');
-    await waitFor(() =>
-      expect(
-        screen.getByRole('button', { name: 'Transit' }),
-      ).toHaveAttribute('aria-pressed', 'true'),
+    expect(screen.getByRole('button', { name: 'Transit' })).toHaveAttribute(
+      'aria-pressed',
+      'true',
+    );
+    expect(
+      screen.queryByRole('region', { name: 'Walking directions' }),
+    ).not.toBeInTheDocument();
+    expect(
+      useWalkingRoute.mock.calls.filter(
+        ([options]) => options.origin?.lng === -122.3937 && options.enabled,
+      ),
+    ).toHaveLength(0);
+
+    fireEvent.click(screen.getByRole('button', { name: 'Walk' }));
+    expect(screen.getByText('Leave from Ferry Building.')).toBeVisible();
+    expect(useWalkingRoute).toHaveBeenLastCalledWith(
+      expect.objectContaining({
+        origin: expect.objectContaining({
+          lat: 37.7955,
+          lng: -122.3937,
+        }),
+        enabled: true,
+      }),
     );
   });
 

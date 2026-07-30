@@ -33,6 +33,11 @@ describe('RideshareOptions', () => {
     const section = screen.getByRole('region', { name: 'Rideshare options' });
     expect(within(section).getByText('Approximate pickup waits')).toBeVisible();
     expect(within(section).getByText('Approximate—not live')).toBeVisible();
+    expect(
+      within(section).getByText(
+        'Opening a provider may require a connection and its app or website.',
+      ),
+    ).toBeVisible();
 
     for (const ride of rides) {
       expect(within(section).getByText(ride.name)).toBeVisible();

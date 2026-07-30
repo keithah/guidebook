@@ -22,7 +22,10 @@ function keyForJourney(origin, destination) {
  * @returns {{routeResult:Object|null,retryWalking:Function}} Walking route state and retry action.
  */
 export function useWalkingRoute({ origin, destination, enabled }) {
-  const [routeResult, setRouteResult] = useState(null);
+  const [publishedResult, setPublishedResult] = useState({
+    journeyKey: '',
+    result: null,
+  });
   const controllerRef = useRef(null);
   const successfulJourneyKeyRef = useRef('');
   const journeyKey = keyForJourney(origin, destination);
@@ -53,7 +56,7 @@ export function useWalkingRoute({ origin, destination, enabled }) {
     }
 
     successfulJourneyKeyRef.current = result.ok ? journeyKey : '';
-    setRouteResult(result);
+    setPublishedResult({ journeyKey, result });
     return result;
   }, [
     destinationLat,
@@ -68,7 +71,7 @@ export function useWalkingRoute({ origin, destination, enabled }) {
     previousJourneyKeyRef.current = journeyKey;
     controllerRef.current?.abort();
     successfulJourneyKeyRef.current = '';
-    setRouteResult(null);
+    setPublishedResult({ journeyKey: '', result: null });
   }, [journeyKey]);
 
   useEffect(() => {
@@ -91,6 +94,11 @@ export function useWalkingRoute({ origin, destination, enabled }) {
     if (!enabled || !journeyKey) return Promise.resolve(null);
     return requestWalking();
   }, [enabled, journeyKey, requestWalking]);
+
+  const routeResult =
+    publishedResult.journeyKey === journeyKey
+      ? publishedResult.result
+      : null;
 
   return { routeResult, retryWalking };
 }

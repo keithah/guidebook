@@ -190,6 +190,44 @@ describe('useWalkingRoute', () => {
     expect(fetchHereWalkingRoute).toHaveBeenCalledTimes(1);
   });
 
+  it('hides a successful result during the first render of a changed journey key', async () => {
+    fetchHereWalkingRoute.mockResolvedValue(successfulResult);
+    const renderSnapshots = [];
+    const hook = renderHook(
+      ({ enabled, currentDestination }) => {
+        const walking = useWalkingRoute({
+          origin,
+          destination: currentDestination,
+          enabled,
+        });
+        renderSnapshots.push({
+          destinationLng: currentDestination.lng,
+          routeResult: walking.routeResult,
+        });
+        return walking;
+      },
+      {
+        initialProps: { enabled: true, currentDestination: destination },
+      },
+    );
+    await waitForHook(() =>
+      expect(hook.result.current.routeResult).toEqual(successfulResult),
+    );
+
+    renderSnapshots.length = 0;
+    hook.rerender({ enabled: false, currentDestination: otherDestination });
+
+    const changedJourneyRenders = renderSnapshots.filter(
+      (snapshot) => snapshot.destinationLng === otherDestination.lng,
+    );
+    expect(changedJourneyRenders.length).toBeGreaterThan(0);
+    changedJourneyRenders.forEach((snapshot) =>
+      expect(snapshot.routeResult).toBeNull(),
+    );
+    expect(hook.result.current.routeResult).toBeNull();
+    expect(fetchHereWalkingRoute).toHaveBeenCalledTimes(1);
+  });
+
   it('aborts pending work when disabled without publishing an aborted result', async () => {
     const pending = deferred();
     fetchHereWalkingRoute.mockReturnValue(pending.promise);
