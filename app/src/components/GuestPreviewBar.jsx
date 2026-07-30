@@ -75,7 +75,7 @@ export default function GuestPreviewBar() {
           }}
         >
           <div style={{ fontWeight: 600, color: colors.ink }}>
-            Build a /sfcottage#&lt;hash&gt; guest link (stands in for the real per-stay injection pipeline)
+            Build a /guidebook/#&lt;hash&gt; guest link (stands in for the real per-stay injection pipeline)
           </div>
           <label>
             Guest name
