@@ -128,7 +128,7 @@ automated gate and production-preview smoke test pass.
 Property copy lives in `src/data/properties/sfcottage.json`. Fields with a
 `_todo` sibling are stand-ins that must be replaced before real guest use.
 
-Guest links use `/sfcottage#<hash>`, where the hash is base64url-encoded JSON
+Guest links use `/guidebook/#<hash>`, where the hash is base64url-encoded JSON
 with this shape:
 
 ```js
