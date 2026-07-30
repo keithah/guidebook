@@ -224,6 +224,7 @@ export function AppProvider({ children }) {
     activeStayLocationHashRef.current = null;
     setLocationConsentGranted(false);
     setLocating(false);
+    setLocateError(null);
     setCoords({ lat: property.address.lat, lng: property.address.lng });
     setLocated(true);
   }, []);

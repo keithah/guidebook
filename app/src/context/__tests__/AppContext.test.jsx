@@ -275,6 +275,32 @@ describe('AppContext', () => {
     expect(latestContext.located).toBe(true);
   });
 
+  it('clears a geolocation error when cottage location is selected', async () => {
+    getCurrentPosition.mockRejectedValue(new Error('Location blocked.'));
+    renderProvider();
+    const cottageCoords = {
+      lat: latestContext.property.address.lat,
+      lng: latestContext.property.address.lng,
+    };
+
+    await act(async () => latestContext.allowLocation());
+    expect(latestContext.locateError).toBe('Location blocked.');
+
+    act(() => latestContext.useCottageAsLocation());
+
+    expect(latestContext.coords).toEqual(cottageCoords);
+    expect(latestContext.located).toBe(true);
+    expect(latestContext.locating).toBe(false);
+    expect(latestContext.locateError).toBeNull();
+
+    await changeStayHash(howardStay);
+
+    expect(latestContext.coords).toEqual(cottageCoords);
+    expect(latestContext.located).toBe(true);
+    expect(latestContext.locateError).toBeNull();
+    expect(getCurrentPosition).toHaveBeenCalledTimes(1);
+  });
+
   it('ignores pending browser geolocation after cottage selection', async () => {
     let resolvePosition;
     getCurrentPosition.mockReturnValue(
