@@ -334,4 +334,45 @@ describe('OnlineNearbyMap', () => {
       { animate: false },
     );
   });
+
+  it('keeps destination bounds in control when the active center changes', () => {
+    const fitBounds = vi.fn();
+    const panTo = vi.fn();
+    useMap.mockReturnValue({ fitBounds, panTo });
+    const dest = { lat: 37.6188, lng: -122.3756, name: 'SFO' };
+    const howard = { lat: 37.77154, lng: -122.41761 };
+
+    const { rerender } = render(
+      <OnlineNearbyMap
+        center={center}
+        cottage={cottage}
+        stops={[]}
+        showMe
+        dest={dest}
+        onTileFailure={vi.fn()}
+      />,
+    );
+    fitBounds.mockClear();
+
+    rerender(
+      <OnlineNearbyMap
+        center={howard}
+        cottage={cottage}
+        stops={[]}
+        showMe
+        dest={dest}
+        onTileFailure={vi.fn()}
+      />,
+    );
+
+    expect(fitBounds).toHaveBeenCalledOnce();
+    expect(fitBounds).toHaveBeenCalledWith(
+      [
+        [37.77154, -122.41761],
+        [37.6188, -122.3756],
+      ],
+      { padding: [30, 30] },
+    );
+    expect(panTo).not.toHaveBeenCalled();
+  });
 });
