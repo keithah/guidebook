@@ -15,6 +15,7 @@ export default function TransitIdentity({ section, compact = false }) {
 
   return (
     <span
+      role="img"
       aria-label={identity.accessibleLabel}
       style={{ display: 'inline-flex', alignItems: 'center', gap: 5 }}
     >

@@ -91,9 +91,10 @@ describe('TripCard', () => {
 
   it('renders every route section in a journey timeline', () => {
     renderCard();
-    expect(
-      screen.getByRole('list', { name: 'Journey timeline' }),
-    ).toBeVisible();
+    const timeline = screen.getByRole('list', { name: 'Journey timeline' });
+    expect(timeline).toBeVisible();
+    expect(timeline).toHaveAttribute('role', 'list');
+    expect(timeline).toHaveAttribute('tabindex', '0');
     expect(screen.getByText('K Ingleside toward Embarcadero')).toBeVisible();
     expect(
       screen.getByText('38R Geary Rapid toward Transit Center'),

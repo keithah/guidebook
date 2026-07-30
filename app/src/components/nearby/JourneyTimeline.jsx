@@ -1,3 +1,4 @@
+import { useState } from 'react';
 import { colors } from '../../theme.js';
 import JourneyIcon from './JourneyIcon.jsx';
 import TransitIdentity from './TransitIdentity.jsx';
@@ -18,11 +19,16 @@ function transitDescription(section) {
  */
 export default function JourneyTimeline({ sections }) {
   const routeSections = Array.isArray(sections) ? sections : [];
+  const [isFocused, setIsFocused] = useState(false);
 
   return (
     <>
       <ol
+        role="list"
         aria-label="Journey timeline"
+        tabIndex={0}
+        onFocus={() => setIsFocused(true)}
+        onBlur={() => setIsFocused(false)}
         style={{
           display: 'flex',
           alignItems: 'center',
@@ -31,10 +37,16 @@ export default function JourneyTimeline({ sections }) {
           listStyle: 'none',
           margin: '11px 0 0',
           padding: 0,
+          borderRadius: 4,
+          outline: isFocused
+            ? `2px solid ${colors.teal}`
+            : '2px solid transparent',
+          outlineOffset: 2,
         }}
       >
         {routeSections.map((section, index) => (
           <li
+            role="listitem"
             key={section.id || `${section.type}-${index}`}
             style={{
               display: 'inline-flex',
