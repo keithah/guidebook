@@ -629,6 +629,122 @@ describe('Nearby', () => {
     );
   });
 
+  it('requires a fresh Walk selection after returning from another destination', async () => {
+    const ferryBuilding = {
+      ...unionSquare,
+      id: 'here:ferry-building-return-reset',
+      title: 'Ferry Building',
+      address: '1 Ferry Building, San Francisco, CA',
+      position: { lat: 37.7955, lng: -122.3937 },
+    };
+    searchHereDestinations.mockImplementation((query) =>
+      Promise.resolve({
+        ok: true,
+        candidates: [query === 'Ferry Building' ? ferryBuilding : unionSquare],
+        source: 'network',
+      }),
+    );
+    renderNearby();
+    const input = screen.getByRole('searchbox', { name: /destination/i });
+
+    fireEvent.change(input, { target: { value: 'Union Square' } });
+    fireEvent.click(screen.getByRole('button', { name: 'Go' }));
+    fireEvent.click(
+      await screen.findByRole('button', { name: /choose union square/i }),
+    );
+    fireEvent.click(screen.getByRole('button', { name: 'Walk' }));
+    expect(screen.getByText('Head west on Harold Avenue.')).toBeVisible();
+
+    fireEvent.change(input, { target: { value: 'Ferry Building' } });
+    fireEvent.click(screen.getByRole('button', { name: 'Go' }));
+    fireEvent.click(
+      await screen.findByRole('button', { name: /choose ferry building/i }),
+    );
+    expect(screen.getByRole('button', { name: 'Transit' })).toHaveAttribute(
+      'aria-pressed',
+      'true',
+    );
+    useWalkingRoute.mockClear();
+
+    fireEvent.change(input, { target: { value: 'Union Square' } });
+    fireEvent.click(screen.getByRole('button', { name: 'Go' }));
+    fireEvent.click(
+      await screen.findByRole('button', { name: /choose union square/i }),
+    );
+
+    expect(screen.getByRole('button', { name: 'Transit' })).toHaveAttribute(
+      'aria-pressed',
+      'true',
+    );
+    expect(
+      screen.queryByRole('region', { name: 'Walking directions' }),
+    ).not.toBeInTheDocument();
+    expect(
+      useWalkingRoute.mock.calls.filter(
+        ([options]) =>
+          options.destination?.lng === unionSquare.position.lng &&
+          options.enabled,
+      ),
+    ).toHaveLength(0);
+
+    fireEvent.click(screen.getByRole('button', { name: 'Walk' }));
+    expect(screen.getByRole('region', { name: 'Walking directions' })).toBeVisible();
+    expect(useWalkingRoute).toHaveBeenLastCalledWith(
+      expect.objectContaining({
+        destination: unionSquare.position,
+        enabled: true,
+      }),
+    );
+  });
+
+  it('requires a fresh Walk selection after clearing and reselecting a destination', async () => {
+    renderNearby();
+    const input = screen.getByRole('searchbox', { name: /destination/i });
+    fireEvent.change(input, { target: { value: 'Union Square' } });
+    fireEvent.click(screen.getByRole('button', { name: 'Go' }));
+    fireEvent.click(
+      await screen.findByRole('button', { name: /choose union square/i }),
+    );
+    fireEvent.click(screen.getByRole('button', { name: 'Walk' }));
+    expect(screen.getByText('Head west on Harold Avenue.')).toBeVisible();
+
+    fireEvent.click(screen.getByRole('button', { name: 'Clear destination' }));
+    expect(
+      screen.queryByRole('group', { name: 'Travel mode' }),
+    ).not.toBeInTheDocument();
+    useWalkingRoute.mockClear();
+
+    fireEvent.change(input, { target: { value: 'Union Square' } });
+    fireEvent.click(screen.getByRole('button', { name: 'Go' }));
+    fireEvent.click(
+      await screen.findByRole('button', { name: /choose union square/i }),
+    );
+
+    expect(screen.getByRole('button', { name: 'Transit' })).toHaveAttribute(
+      'aria-pressed',
+      'true',
+    );
+    expect(
+      screen.queryByRole('region', { name: 'Walking directions' }),
+    ).not.toBeInTheDocument();
+    expect(
+      useWalkingRoute.mock.calls.filter(
+        ([options]) =>
+          options.destination?.lng === unionSquare.position.lng &&
+          options.enabled,
+      ),
+    ).toHaveLength(0);
+
+    fireEvent.click(screen.getByRole('button', { name: 'Walk' }));
+    expect(screen.getByRole('region', { name: 'Walking directions' })).toBeVisible();
+    expect(useWalkingRoute).toHaveBeenLastCalledWith(
+      expect.objectContaining({
+        destination: unionSquare.position,
+        enabled: true,
+      }),
+    );
+  });
+
   it('couples Walk selection to the origin journey before requesting another route', async () => {
     useWalkingRoute.mockImplementation(({ origin: currentOrigin }) => ({
       routeResult: {

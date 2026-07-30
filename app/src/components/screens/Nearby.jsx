@@ -65,6 +65,9 @@ export default function Nearby() {
   const journeyKey = selectedPosition
     ? `${origin.lat},${origin.lng}:${selectedPosition.lat},${selectedPosition.lng}`
     : '';
+  if (modeSelection.journeyKey !== journeyKey) {
+    setModeSelection({ journeyKey, mode: 'transit' });
+  }
   const activeMode =
     modeSelection.journeyKey === journeyKey
       ? modeSelection.mode
