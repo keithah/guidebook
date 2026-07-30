@@ -1,6 +1,11 @@
 import { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState } from 'react';
 import property from '../data/properties/sfcottage.json';
-import { readStayFromLocation, computeStayPhase, encodeStay } from '../lib/stayHash.js';
+import {
+  readStayFromLocation,
+  computeStayPhase,
+  encodeStay,
+  normalizeStayLocationOverride,
+} from '../lib/stayHash.js';
 import { fetchCurrentWeather, fetchWeatherForDate, fetchForecastDays } from '../lib/weather.js';
 import { getCurrentPosition } from '../lib/geo.js';
 import { useLocalStorageState } from '../hooks/useLocalStorageState.js';
@@ -30,6 +35,10 @@ export function AppProvider({ children }) {
     window.addEventListener('hashchange', onHashChange);
     return () => window.removeEventListener('hashchange', onHashChange);
   }, []);
+  const stayLocationOverride = useMemo(
+    () => normalizeStayLocationOverride(stay),
+    [stay],
+  );
 
   const isGuest = !!stay;
   const isGeneric = !stay;
@@ -149,7 +158,7 @@ export function AppProvider({ children }) {
     setLocating(true);
     setLocateError(null);
     try {
-      const pos = await getCurrentPosition();
+      const pos = stayLocationOverride ?? (await getCurrentPosition());
       setCoords(pos);
       setLocated(true);
     } catch (err) {
@@ -159,7 +168,7 @@ export function AppProvider({ children }) {
     } finally {
       setLocating(false);
     }
-  }, []);
+  }, [stayLocationOverride]);
   const useCottageAsLocation = useCallback(() => {
     setCoords({ lat: property.address.lat, lng: property.address.lng });
     setLocated(true);
