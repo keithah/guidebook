@@ -21,6 +21,17 @@ import { encodeStay } from '../../lib/stayHash.js';
 import { AppProvider, useApp } from '../AppContext.jsx';
 
 let latestContext;
+const howardStay = {
+  guestName: 'Jamie',
+  checkin: '2026-07-30',
+  checkout: '2026-08-03',
+  fakeLocation: {
+    label: '1620 Howard St, San Francisco',
+    lat: 37.77154,
+    lng: -122.41761,
+  },
+};
+
 function Capture() {
   latestContext = useApp();
   return null;
@@ -32,6 +43,13 @@ function renderProvider() {
       <Capture />
     </AppProvider>,
   );
+}
+
+async function changeStayHash(stay) {
+  await act(async () => {
+    window.location.hash = stay ? encodeStay(stay) : '';
+    window.dispatchEvent(new HashChangeEvent('hashchange'));
+  });
 }
 
 beforeEach(() => {
@@ -69,6 +87,63 @@ describe('AppContext', () => {
       lng: -122.41761,
       source: 'stay-override',
     });
+    expect(latestContext.located).toBe(true);
+  });
+
+  it('clears an active stay location override when the stay hash is removed', async () => {
+    window.location.hash = encodeStay(howardStay);
+    renderProvider();
+
+    await act(async () => latestContext.allowLocation());
+    await changeStayHash(null);
+
+    expect(latestContext.coords).toBeNull();
+    expect(latestContext.located).toBe(false);
+  });
+
+  it('clears an active stay location override without activating a replacement hash', async () => {
+    window.location.hash = encodeStay(howardStay);
+    renderProvider();
+
+    await act(async () => latestContext.allowLocation());
+    await changeStayHash({
+      guestName: 'Morgan',
+      checkin: '2026-08-04',
+      checkout: '2026-08-08',
+      fakeLocation: {
+        label: 'Ferry Building, San Francisco',
+        lat: 37.7955,
+        lng: -122.3937,
+      },
+    });
+
+    expect(latestContext.coords).toBeNull();
+    expect(latestContext.located).toBe(false);
+    expect(getCurrentPosition).not.toHaveBeenCalled();
+  });
+
+  it('preserves browser coordinates when the stay hash changes', async () => {
+    getCurrentPosition.mockResolvedValue({ lat: 37.78, lng: -122.42 });
+    renderProvider();
+
+    await act(async () => latestContext.allowLocation());
+    await changeStayHash(howardStay);
+
+    expect(latestContext.coords).toEqual({ lat: 37.78, lng: -122.42 });
+    expect(latestContext.located).toBe(true);
+  });
+
+  it('preserves cottage coordinates when the stay hash changes', async () => {
+    renderProvider();
+    const cottageCoords = {
+      lat: latestContext.property.address.lat,
+      lng: latestContext.property.address.lng,
+    };
+
+    act(() => latestContext.useCottageAsLocation());
+    await changeStayHash(howardStay);
+
+    expect(latestContext.coords).toEqual(cottageCoords);
     expect(latestContext.located).toBe(true);
   });
 

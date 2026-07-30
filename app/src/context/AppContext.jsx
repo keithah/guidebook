@@ -39,6 +39,8 @@ export function AppProvider({ children }) {
     () => normalizeStayLocationOverride(stay),
     [stay],
   );
+  const stayHash = window.location.hash;
+  const activeStayLocationHashRef = useRef(null);
 
   const isGuest = !!stay;
   const isGeneric = !stay;
@@ -154,22 +156,37 @@ export function AppProvider({ children }) {
   const [locateError, setLocateError] = useState(null);
   const [backOpen, setBackOpen] = useState(false);
 
+  useEffect(() => {
+    if (
+      coords?.source === 'stay-override' &&
+      activeStayLocationHashRef.current !== stayHash
+    ) {
+      activeStayLocationHashRef.current = null;
+      setCoords(null);
+      setLocated(false);
+    }
+  }, [coords, stayHash]);
+
   const allowLocation = useCallback(async () => {
     setLocating(true);
     setLocateError(null);
     try {
       const pos = stayLocationOverride ?? (await getCurrentPosition());
+      activeStayLocationHashRef.current =
+        pos.source === 'stay-override' ? stayHash : null;
       setCoords(pos);
       setLocated(true);
     } catch (err) {
+      activeStayLocationHashRef.current = null;
       setLocateError(err.message || 'Could not get your location.');
       setCoords({ lat: property.address.lat, lng: property.address.lng });
       setLocated(true);
     } finally {
       setLocating(false);
     }
-  }, [stayLocationOverride]);
+  }, [stayHash, stayLocationOverride]);
   const useCottageAsLocation = useCallback(() => {
+    activeStayLocationHashRef.current = null;
     setCoords({ lat: property.address.lat, lng: property.address.lng });
     setLocated(true);
   }, []);
