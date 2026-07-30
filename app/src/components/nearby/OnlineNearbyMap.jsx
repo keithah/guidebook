@@ -1,4 +1,4 @@
-import { useEffect, useMemo } from 'react';
+import { useEffect, useMemo, useRef } from 'react';
 import { MapContainer, Marker, Popup, TileLayer, useMap } from 'react-leaflet';
 import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
@@ -83,6 +83,28 @@ function FitToDest({ center, dest }) {
 }
 
 /**
+ * Moves the map when the active center changes and no destination owns the view.
+ * @param {{ center: { lat: number, lng: number }, dest?: Object }} props - Map locations.
+ */
+function FollowCenter({ center, dest }) {
+  const map = useMap();
+  const previousCenter = useRef({ lat: center.lat, lng: center.lng });
+
+  useEffect(() => {
+    const changed =
+      previousCenter.current.lat !== center.lat ||
+      previousCenter.current.lng !== center.lng;
+    previousCenter.current = { lat: center.lat, lng: center.lng };
+
+    if (changed && !dest) {
+      map.panTo([center.lat, center.lng], { animate: false });
+    }
+  }, [map, center.lat, center.lng, dest]);
+
+  return null;
+}
+
+/**
  * Render an interactive map with location, stop, and optional destination markers.
  * @param {Object} props - Map configuration and marker data.
  * @param {Object} props.center - Current map center coordinates.
@@ -147,6 +169,7 @@ export default function OnlineNearbyMap({
           <Popup>{dest.name}</Popup>
         </Marker>
       )}
+      <FollowCenter center={center} dest={dest} />
       <FitToDest center={center} dest={dest} />
     </MapContainer>
   );

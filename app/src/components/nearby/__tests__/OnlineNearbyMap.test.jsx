@@ -299,4 +299,39 @@ describe('OnlineNearbyMap', () => {
       { padding: [30, 30] },
     );
   });
+
+  it('moves the viewport when the active center changes', () => {
+    const panTo = vi.fn();
+    useMap.mockReturnValue({ fitBounds: vi.fn(), panTo });
+    const montana = { lat: 46.8797, lng: -110.3626 };
+    const howard = { lat: 37.77154, lng: -122.41761 };
+
+    const { rerender } = render(
+      <OnlineNearbyMap
+        center={montana}
+        cottage={cottage}
+        stops={[]}
+        showMe
+        dest={null}
+        onTileFailure={vi.fn()}
+      />,
+    );
+    expect(panTo).not.toHaveBeenCalled();
+
+    rerender(
+      <OnlineNearbyMap
+        center={howard}
+        cottage={cottage}
+        stops={[]}
+        showMe
+        dest={null}
+        onTileFailure={vi.fn()}
+      />,
+    );
+    expect(panTo).toHaveBeenCalledOnce();
+    expect(panTo).toHaveBeenCalledWith(
+      [37.77154, -122.41761],
+      { animate: false },
+    );
+  });
 });
