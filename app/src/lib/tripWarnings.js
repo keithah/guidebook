@@ -87,7 +87,8 @@ function entityMatchesLeg(entity, alert, leg) {
   const alertRoute = comparable(entity?.routeId);
   if (!alertRoute || alertRoute !== routeFor(leg)) return false;
 
-  const alertAgency = canonicalAgency(entity?.agencyId, alert?.agency);
+  const entityAgency = String(entity?.agencyId ?? '').trim();
+  const alertAgency = canonicalAgency(entityAgency || alert?.agency);
   const legAgency = canonicalAgency(leg.agency?.id, leg.agency?.name);
   if (alertAgency && legAgency && alertAgency !== legAgency) return false;
   if (!periodsOverlapLeg(alert?.activePeriods, leg)) return false;

@@ -6,6 +6,29 @@ import { warningsForTrip } from '../tripWarnings.js';
 
 const alertNow = Date.parse('2026-07-28T19:00:00.000Z');
 const alerts = normalizeServiceAlerts(alertFixture, alertNow, 'SF');
+const mixedAgencyAlert = {
+  id: 'mixed-agency-alert',
+  agency: 'BART',
+  activePeriods: [],
+  informedEntities: [
+    {
+      agencyId: 'BART',
+      routeId: 'RED',
+      stopId: '',
+      directionId: '',
+    },
+    {
+      agencyId: 'SF',
+      routeId: 'K',
+      stopId: '',
+      directionId: '',
+    },
+  ],
+  header: 'Mixed operator service change',
+  description: 'Check the affected route.',
+  severity: 'MODIFIED_SERVICE',
+  url: '',
+};
 
 function transitTrip({
   agencyId = 'SFMTA',
@@ -149,6 +172,57 @@ describe('warningsForTrip', () => {
         [bartAlert],
       ).map((warning) => warning.header),
     ).toEqual(['Red Line delay']);
+  });
+
+  it('matches a later Muni entity without inheriting the first entity agency', () => {
+    expect(
+      warningsForTrip(transitTrip(), [mixedAgencyAlert]).map(
+        (warning) => warning.header,
+      ),
+    ).toEqual(['Mixed operator service change']);
+  });
+
+  it('does not reinterpret a Muni entity as BART on a shared route ID', () => {
+    expect(
+      warningsForTrip(
+        transitTrip({
+          agencyId: 'BART',
+          agencyName: 'Bay Area Rapid Transit',
+        }),
+        [mixedAgencyAlert],
+      ),
+    ).toEqual([]);
+  });
+
+  it('falls back to the alert agency when an entity has no agency', () => {
+    const fallbackAgencyAlert = {
+      id: 'fallback-agency-alert',
+      agency: 'BART',
+      activePeriods: [],
+      informedEntities: [
+        {
+          agencyId: '',
+          routeId: 'RED',
+          stopId: '',
+          directionId: '',
+        },
+      ],
+      header: 'Red Line service change',
+      description: 'Check the affected route.',
+      severity: 'MODIFIED_SERVICE',
+      url: '',
+    };
+
+    expect(
+      warningsForTrip(
+        transitTrip({
+          agencyId: 'BA',
+          agencyName: 'Bay Area Rapid Transit',
+          routeId: 'red',
+        }),
+        [fallbackAgencyAlert],
+      ).map((warning) => warning.header),
+    ).toEqual(['Red Line service change']);
   });
 
   it('does not overlap when an alert ends exactly as a leg begins', () => {
