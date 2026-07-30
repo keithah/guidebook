@@ -88,9 +88,9 @@ export function useWalkingRoute({ origin, destination, enabled }) {
   );
 
   const retryWalking = useCallback(() => {
-    if (!journeyKey) return Promise.resolve(null);
+    if (!enabled || !journeyKey) return Promise.resolve(null);
     return requestWalking();
-  }, [journeyKey, requestWalking]);
+  }, [enabled, journeyKey, requestWalking]);
 
   return { routeResult, retryWalking };
 }

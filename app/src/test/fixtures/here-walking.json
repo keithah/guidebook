@@ -22,7 +22,7 @@
               "location": { "lat": 37.7652, "lng": -122.4218 }
             }
           },
-          "travelSummary": { "duration": 420, "length": 600 },
+          "summary": { "duration": 420, "length": 600 },
           "polyline": "BFoz5xJ67i1B1B7PzIhaxL7Y",
           "actions": [
             {
@@ -68,7 +68,7 @@
               "location": { "lat": 37.7596, "lng": -122.4269 }
             }
           },
-          "travelSummary": { "duration": 300, "length": 450 },
+          "summary": { "duration": 300, "length": 450 },
           "polyline": "BG05xJk9i1B7PzIxaxL7YvH",
           "actions": [
             {

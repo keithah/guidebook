@@ -156,6 +156,21 @@ describe('useWalkingRoute', () => {
     ]);
   });
 
+  it('does not retry while walking mode is disabled', async () => {
+    const { result } = renderHook(() =>
+      useWalkingRoute({ origin, destination, enabled: false }),
+    );
+
+    let retryResult;
+    await act(async () => {
+      retryResult = await result.current.retryWalking();
+    });
+
+    expect(retryResult).toBeNull();
+    expect(result.current.routeResult).toBeNull();
+    expect(fetchHereWalkingRoute).not.toHaveBeenCalled();
+  });
+
   it('preserves a successful result while disabled and reuses it on re-enable', async () => {
     fetchHereWalkingRoute.mockResolvedValue(successfulResult);
     const hook = renderHook(
@@ -238,7 +253,31 @@ describe('useWalkingRoute', () => {
     hook.rerender({ enabled: false, currentDestination: otherDestination });
     expect(hook.result.current.routeResult).toBeNull();
 
+    expect(fetchHereWalkingRoute).toHaveBeenCalledTimes(1);
+  });
+
+  it('clears a successful result when its destination is removed while disabled', async () => {
+    fetchHereWalkingRoute.mockResolvedValue(successfulResult);
+    const hook = renderHook(
+      ({ enabled, currentDestination }) =>
+        useWalkingRoute({
+          origin,
+          destination: currentDestination,
+          enabled,
+        }),
+      {
+        initialProps: { enabled: true, currentDestination: destination },
+      },
+    );
+    await waitForHook(() =>
+      expect(hook.result.current.routeResult).toEqual(successfulResult),
+    );
+
+    hook.rerender({ enabled: false, currentDestination: destination });
+    expect(hook.result.current.routeResult).toEqual(successfulResult);
+
     hook.rerender({ enabled: false, currentDestination: null });
     expect(hook.result.current.routeResult).toBeNull();
+    expect(fetchHereWalkingRoute).toHaveBeenCalledTimes(1);
   });
 });

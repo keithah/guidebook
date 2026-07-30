@@ -137,11 +137,43 @@ function normalizeAction(action) {
 }
 
 /**
+ * Read the section summary returned by HERE Routing v8, with compatibility
+ * for previously stored transit-style payloads.
+ * @param {Object} section - HERE section payload.
+ * @returns {Object|undefined} Section duration and length summary.
+ */
+function sectionSummary(section) {
+  return section?.summary && typeof section.summary === 'object'
+    ? section.summary
+    : section?.travelSummary;
+}
+
+/**
+ * Determine whether a route section has the minimum walking data needed for
+ * safe normalization.
+ * @param {*} section - Candidate HERE section payload.
+ * @returns {boolean} Whether the section is a valid normalization candidate.
+ */
+function isValidWalkingSection(section) {
+  const summary = sectionSummary(section);
+  return Boolean(
+    section &&
+      typeof section === 'object' &&
+      typeof section.id === 'string' &&
+      section.id.length > 0 &&
+      typeof section.type === 'string' &&
+      Number.isFinite(summary?.duration) &&
+      Number.isFinite(summary?.length),
+  );
+}
+
+/**
  * Normalize one pedestrian route section.
  * @param {Object} section - HERE section payload.
  * @returns {Object} Normalized walking section.
  */
 function normalizeSection(section) {
+  const summary = sectionSummary(section);
   const actions = Array.isArray(section.actions)
     ? section.actions.map(normalizeAction)
     : [];
@@ -154,12 +186,8 @@ function normalizeSection(section) {
     type: typeof section.type === 'string' ? section.type : 'unknown',
     departureTime: section.departure?.time ?? null,
     arrivalTime: section.arrival?.time ?? null,
-    durationSeconds: Number.isFinite(section.travelSummary?.duration)
-      ? section.travelSummary.duration
-      : 0,
-    lengthMeters: Number.isFinite(section.travelSummary?.length)
-      ? section.travelSummary.length
-      : 0,
+    durationSeconds: summary.duration,
+    lengthMeters: summary.length,
     departure: normalizePlace(section.departure?.place),
     arrival: normalizePlace(section.arrival?.place),
     ...(typeof section.polyline === 'string'
@@ -182,7 +210,8 @@ export function normalizeHereWalking(payload) {
       typeof route?.id === 'string' &&
       route.id.length > 0 &&
       Array.isArray(route.sections) &&
-      route.sections.length > 0,
+      route.sections.length > 0 &&
+      route.sections.every(isValidWalkingSection),
   );
   if (!sourceRoute) return null;
 

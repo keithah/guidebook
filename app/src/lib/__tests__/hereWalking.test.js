@@ -114,8 +114,41 @@ describe('normalizeHereWalking', () => {
     [{ routes: null }],
     [{ routes: [] }],
     [{ routes: [{ id: 'empty', sections: [] }] }],
+    [{ routes: [{ id: 'null-section', sections: [null] }] }],
+    [{ routes: [{ id: 'empty-section', sections: [{}] }] }],
+    [
+      {
+        routes: [
+          {
+            id: 'malformed-summary',
+            sections: [
+              {
+                id: 'bad-section',
+                type: 'pedestrian',
+                summary: { duration: '420', length: null },
+              },
+            ],
+          },
+        ],
+      },
+    ],
   ])('returns null when no valid walking route exists', (payload) => {
     expect(normalizeHereWalking(payload)).toBeNull();
+  });
+
+  it('skips malformed route candidates and normalizes the next valid route', () => {
+    const payload = {
+      routes: [
+        { id: 'malformed', sections: [null] },
+        walkingFixture.routes[0],
+      ],
+    };
+
+    expect(normalizeHereWalking(payload)).toMatchObject({
+      id: 'walking-route-mission-dolores',
+      durationSeconds: 720,
+      lengthMeters: 1_050,
+    });
   });
 });
 
@@ -251,6 +284,21 @@ describe('fetchHereWalkingRoute', () => {
     ).resolves.toEqual({ ok: false, reason: 'no-route' });
   });
 
+  it('returns no-route rather than throwing for malformed route sections', async () => {
+    const fetchImpl = vi.fn().mockResolvedValue(
+      hereResponse({
+        routes: [
+          { id: 'null-section', sections: [null] },
+          { id: 'empty-section', sections: [{}] },
+        ],
+      }),
+    );
+
+    await expect(
+      fetchHereWalkingRoute(origin, destination, { apiKey, fetchImpl }),
+    ).resolves.toEqual({ ok: false, reason: 'no-route' });
+  });
+
   it('aborts a hung provider fetch at its deadline', async () => {
     vi.useFakeTimers();
     vi.spyOn(providerResponseStore, 'get').mockResolvedValue(undefined);
@@ -302,6 +350,29 @@ describe('fetchHereWalkingRoute', () => {
       staleUntil: 70_000,
     });
     expect(put.mock.calls[0][0].key).not.toContain(apiKey);
+  });
+
+  it.each([
+    ['marked no-store', { 'cache-control': 'no-store' }],
+    ['missing positive cache headers', undefined],
+  ])('does not persist a response %s', async (_label, headers) => {
+    const put = vi.spyOn(providerResponseStore, 'put');
+    const fetchImpl = vi
+      .fn()
+      .mockResolvedValue(hereResponse(walkingFixture, { headers }));
+
+    await expect(
+      fetchHereWalkingRoute(origin, destination, {
+        apiKey,
+        fetchImpl,
+        now: () => fetchedAt,
+      }),
+    ).resolves.toMatchObject({
+      ok: true,
+      source: 'network',
+      expiresAt: null,
+    });
+    expect(put).not.toHaveBeenCalled();
   });
 
   it('returns the network result when cache reads and writes fail', async () => {
