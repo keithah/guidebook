@@ -156,6 +156,28 @@ describe('OnlineNearbyMap', () => {
     );
   });
 
+  it('adds a stay location label when the user and cottage positions match', () => {
+    useMap.mockReturnValue({ fitBounds: vi.fn() });
+    render(
+      <OnlineNearbyMap
+        center={cottage}
+        cottage={cottage}
+        stops={[]}
+        showMe
+        locationLabel="1620 Howard St, San Francisco"
+        dest={null}
+        onTileFailure={vi.fn()}
+      />,
+    );
+
+    const meMarker = getMarkers().find(
+      (marker) => marker.getAttribute('data-icon-class') === 'sfc-me-pin',
+    );
+    expect(within(meMarker).getByTestId('popup')).toHaveTextContent(
+      'You are here · 1620 Howard St, San Francisco',
+    );
+  });
+
   it('renders a marker per stop with a colored line pin and name/sub popup', () => {
     useMap.mockReturnValue({ fitBounds: vi.fn() });
     render(

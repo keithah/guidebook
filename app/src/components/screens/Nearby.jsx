@@ -52,8 +52,13 @@ export default function Nearby() {
   const cottage = { lat: property.address.lat, lng: property.address.lng };
   const origin = coords ?? cottage;
   const showMe = Boolean(
-    coords && (coords.lat !== cottage.lat || coords.lng !== cottage.lng),
+    coords &&
+      (coords.source === 'stay-override' ||
+        coords.lat !== cottage.lat ||
+        coords.lng !== cottage.lng),
   );
+  const locationLabel =
+    coords?.source === 'stay-override' ? coords.label : null;
   const planner = useHereTripPlanner({ origin });
   const saved = useSavedDestinations();
   const { times: liveTimes, meta: departureMeta } = useLiveDepartures(
@@ -222,6 +227,11 @@ export default function Nearby() {
 
       {located && coords && (
         <>
+          {locationLabel && (
+            <div role="status" style={{ color: colors.muted, fontSize: 12 }}>
+              Using location: {locationLabel}
+            </div>
+          )}
           <div
             style={{
               height: 220,
@@ -235,6 +245,7 @@ export default function Nearby() {
               cottage={cottage}
               stops={property.transit.nearbyStops}
               showMe={showMe}
+              locationLabel={locationLabel}
               dest={
                 planner.selectedDestination
                   ? {

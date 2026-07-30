@@ -7,7 +7,7 @@
 // base64url(JSON) shape decoded here.
 //
 // Payload shape:
-//   { guestName: string, checkin: 'YYYY-MM-DD', checkout: 'YYYY-MM-DD', code?: string, notes?: string[] }
+//   { guestName: string, checkin: 'YYYY-MM-DD', checkout: 'YYYY-MM-DD', code?: string, notes?: string[], fakeLocation?: { label: string, lat: number, lng: number } }
 
 function base64UrlEncode(str) {
   const b64 = btoa(unescape(encodeURIComponent(str)));
@@ -36,6 +36,29 @@ export function decodeStayHash(hash) {
   } catch {
     return null;
   }
+}
+
+export function normalizeStayLocationOverride(stay) {
+  const candidate = stay?.fakeLocation;
+  if (!candidate || typeof candidate.label !== 'string') return null;
+
+  const label = candidate.label.trim();
+  const { lat, lng } = candidate;
+  if (
+    !label ||
+    typeof lat !== 'number' ||
+    !Number.isFinite(lat) ||
+    lat < -90 ||
+    lat > 90 ||
+    typeof lng !== 'number' ||
+    !Number.isFinite(lng) ||
+    lng < -180 ||
+    lng > 180
+  ) {
+    return null;
+  }
+
+  return { label, lat, lng, source: 'stay-override' };
 }
 
 // Date-only comparison — a guest arriving or leaving today is 'during' for
