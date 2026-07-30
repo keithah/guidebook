@@ -35,8 +35,13 @@ export function AppProvider({ children }) {
 
   // ---- Guest identity: /sfcottage#<hash> ----------------------------------
   const [staySnapshot, setStaySnapshot] = useState(readStaySnapshotFromLocation);
+  const staySnapshotRef = useRef(staySnapshot);
   useEffect(() => {
-    const onHashChange = () => setStaySnapshot(readStaySnapshotFromLocation());
+    const onHashChange = () => {
+      const nextStaySnapshot = readStaySnapshotFromLocation();
+      staySnapshotRef.current = nextStaySnapshot;
+      setStaySnapshot(nextStaySnapshot);
+    };
     window.addEventListener('hashchange', onHashChange);
     return () => window.removeEventListener('hashchange', onHashChange);
   }, []);
@@ -188,17 +193,28 @@ export function AppProvider({ children }) {
 
   const allowLocation = useCallback(async () => {
     const attempt = ++locationAttemptRef.current;
+    const attemptStayHash = stayHash;
     setLocating(true);
     setLocateError(null);
     try {
       const pos = stayLocationOverride ?? (await getCurrentPosition());
-      if (locationAttemptRef.current !== attempt) return;
+      if (
+        locationAttemptRef.current !== attempt ||
+        staySnapshotRef.current.hash !== attemptStayHash
+      ) {
+        return;
+      }
       activeStayLocationHashRef.current =
         pos.source === 'stay-override' ? stayHash : null;
       setCoords(pos);
       setLocated(true);
     } catch (err) {
-      if (locationAttemptRef.current !== attempt) return;
+      if (
+        locationAttemptRef.current !== attempt ||
+        staySnapshotRef.current.hash !== attemptStayHash
+      ) {
+        return;
+      }
       activeStayLocationHashRef.current = null;
       setLocateError(err.message || 'Could not get your location.');
       setCoords({ lat: property.address.lat, lng: property.address.lng });

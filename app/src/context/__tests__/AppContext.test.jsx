@@ -42,15 +42,16 @@ const ferryStay = {
   },
 };
 
-function Capture() {
+function Capture({ onContext }) {
   latestContext = useApp();
+  onContext?.(latestContext);
   return null;
 }
 
-function renderProvider() {
+function renderProvider(onContext) {
   render(
     <AppProvider>
-      <Capture />
+      <Capture onContext={onContext} />
     </AppProvider>,
   );
 }
@@ -58,6 +59,14 @@ function renderProvider() {
 async function changeStayHash(stay) {
   await act(async () => {
     window.location.hash = stay ? encodeStay(stay) : '';
+    window.dispatchEvent(new HashChangeEvent('hashchange'));
+  });
+}
+
+async function replaceHashAfterUnrelatedRender(stay) {
+  window.history.replaceState(null, '', stay ? `#${encodeStay(stay)}` : '');
+  act(() => latestContext.setQuery('force unrelated render'));
+  await act(async () => {
     window.dispatchEvent(new HashChangeEvent('hashchange'));
   });
 }
@@ -145,11 +154,7 @@ describe('AppContext', () => {
     renderProvider();
 
     await act(async () => latestContext.allowLocation());
-    window.history.replaceState(null, '', `#${encodeStay(ferryStay)}`);
-    act(() => latestContext.setQuery('force unrelated render'));
-    await act(async () => {
-      window.dispatchEvent(new HashChangeEvent('hashchange'));
-    });
+    await replaceHashAfterUnrelatedRender(ferryStay);
 
     expect(latestContext.coords).toEqual({
       label: 'Ferry Building, San Francisco',
@@ -187,17 +192,9 @@ describe('AppContext', () => {
     renderProvider();
 
     await act(async () => latestContext.allowLocation());
-    window.history.replaceState(
-      null,
-      '',
-      `#${encodeStay({
-        ...ferryStay,
-        fakeLocation: { ...ferryStay.fakeLocation, lat: '37.7955' },
-      })}`,
-    );
-    act(() => latestContext.setQuery('force unrelated render'));
-    await act(async () => {
-      window.dispatchEvent(new HashChangeEvent('hashchange'));
+    await replaceHashAfterUnrelatedRender({
+      ...ferryStay,
+      fakeLocation: { ...ferryStay.fakeLocation, lat: '37.7955' },
     });
 
     expect(latestContext.coords).toBeNull();
@@ -221,6 +218,46 @@ describe('AppContext', () => {
       source: 'stay-override',
     });
     expect(latestContext.located).toBe(true);
+    expect(getCurrentPosition).toHaveBeenCalledTimes(1);
+  });
+
+  it('never exposes pending browser coordinates after a valid stay hash arrives', async () => {
+    let resolvePosition;
+    getCurrentPosition.mockReturnValue(
+      new Promise((resolve) => {
+        resolvePosition = resolve;
+      }),
+    );
+    const coordsAfterHashChange = [];
+    let hashChanged = false;
+    renderProvider((context) => {
+      if (hashChanged) coordsAfterHashChange.push(context.coords);
+    });
+    let locationPromise;
+
+    act(() => {
+      locationPromise = latestContext.allowLocation();
+    });
+    hashChanged = true;
+    await changeStayHash(howardStay);
+    await act(async () => {
+      resolvePosition({ lat: 46.8797, lng: -110.3626 });
+      await locationPromise;
+    });
+
+    expect(coordsAfterHashChange).not.toContainEqual({
+      lat: 46.8797,
+      lng: -110.3626,
+    });
+    expect(latestContext.coords).toEqual({
+      label: '1620 Howard St, San Francisco',
+      lat: 37.77154,
+      lng: -122.41761,
+      source: 'stay-override',
+    });
+    expect(latestContext.located).toBe(true);
+    expect(latestContext.locating).toBe(false);
+    expect(latestContext.locateError).toBeNull();
     expect(getCurrentPosition).toHaveBeenCalledTimes(1);
   });
 
