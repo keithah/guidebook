@@ -154,9 +154,21 @@ export function AppProvider({ children }) {
   const [coords, setCoords] = useState(null);
   const [locating, setLocating] = useState(false);
   const [locateError, setLocateError] = useState(null);
+  const [locationConsentGranted, setLocationConsentGranted] = useState(false);
   const [backOpen, setBackOpen] = useState(false);
 
   useEffect(() => {
+    if (
+      locationConsentGranted &&
+      stayLocationOverride &&
+      activeStayLocationHashRef.current !== stayHash
+    ) {
+      activeStayLocationHashRef.current = stayHash;
+      setCoords(stayLocationOverride);
+      setLocated(true);
+      return;
+    }
+
     if (
       coords?.source === 'stay-override' &&
       activeStayLocationHashRef.current !== stayHash
@@ -165,7 +177,7 @@ export function AppProvider({ children }) {
       setCoords(null);
       setLocated(false);
     }
-  }, [coords, stayHash]);
+  }, [coords, locationConsentGranted, stayHash, stayLocationOverride]);
 
   const allowLocation = useCallback(async () => {
     setLocating(true);
@@ -182,11 +194,13 @@ export function AppProvider({ children }) {
       setCoords({ lat: property.address.lat, lng: property.address.lng });
       setLocated(true);
     } finally {
+      setLocationConsentGranted(true);
       setLocating(false);
     }
   }, [stayHash, stayLocationOverride]);
   const useCottageAsLocation = useCallback(() => {
     activeStayLocationHashRef.current = null;
+    setLocationConsentGranted(false);
     setCoords({ lat: property.address.lat, lng: property.address.lng });
     setLocated(true);
   }, []);
