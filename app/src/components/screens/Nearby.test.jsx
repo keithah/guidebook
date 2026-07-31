@@ -287,10 +287,8 @@ describe('Nearby', () => {
     expect(map).toHaveAttribute(
       'data-center',
       JSON.stringify({
-        label: '1620 Howard St, San Francisco',
         lat: 37.77154,
         lng: -122.41761,
-        source: 'stay-override',
       }),
     );
     expect(map).toHaveAttribute('data-show-me', 'true');
@@ -779,7 +777,7 @@ describe('Nearby', () => {
       ...unionSquare,
       id: 'here:saved-address',
       title: 'Saved address',
-      resultType: 'addressBlock',
+      resultType: 'address',
       categories: [],
     };
     const savedPoi = {

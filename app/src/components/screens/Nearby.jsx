@@ -25,6 +25,10 @@ const BACK_HOME_ICON = {
   ride: { glyph: '→', style: { background: colors.sage, color: colors.teal } },
 };
 
+function isUsableSavedDestination(candidate) {
+  return candidate?.resultType === 'address' || isAddressDestination(candidate);
+}
+
 /**
  * Render the nearby transit, trip-planning, and rideshare interface.
  * @returns {JSX.Element} The nearby transportation page.
@@ -250,7 +254,7 @@ export default function Nearby() {
             selectedDestination={planner.selectedDestination}
             searchStatus={planner.searchStatus}
             savedDestinations={saved.savedDestinations.filter(
-              isAddressDestination,
+              isUsableSavedDestination,
             )}
             isSaved={saved.isSaved}
             onToggleSaved={saved.toggleSaved}
@@ -452,7 +456,7 @@ export default function Nearby() {
             }}
           >
             <NeighborhoodMap
-              center={origin}
+              center={{ lat: origin.lat, lng: origin.lng }}
               cottage={cottage}
               stops={mapStops}
               showMe={showMe}
