@@ -111,8 +111,14 @@ function directionFor(leg) {
  * @returns {string} Comparable route identifier.
  */
 function routeFor(leg) {
-  return comparable(
-    leg.transport?.shortName ?? leg.transport?.routeId ?? leg.transport?.name,
+  return (
+    [
+      leg.transport?.shortName,
+      leg.transport?.routeId,
+      leg.transport?.name,
+    ]
+      .map(comparable)
+      .find(Boolean) ?? ''
   );
 }
 

@@ -102,6 +102,21 @@ describe('warningsForTrip', () => {
     expect(warningsForTrip(exactNameTrip, alerts)).toEqual([]);
   });
 
+  it.each([
+    ['empty', '', ''],
+    ['whitespace-only', '   ', '\t'],
+  ])(
+    'falls back from %s route identifiers to an exact transport name',
+    (_label, shortName, routeId) => {
+      const trip = transitTrip();
+      trip.sections[0].transport = { shortName, routeId, name: 'K' };
+
+      expect(
+        warningsForTrip(trip, alerts).map((warning) => warning.header),
+      ).toContain('K Ingleside delay');
+    },
+  );
+
   it('excludes a matching route outside every active period', () => {
     expect(
       warningsForTrip(
