@@ -2,7 +2,7 @@
 
 **Date:** 2026-07-30
 
-**Status:** Approved in conversation; awaiting written-spec review
+**Status:** Approved
 
 **Scope:** Nearby-page hierarchy, deterministic destination shortcuts, location-aware departure boards, restrained route warnings, and official BART identity
 
