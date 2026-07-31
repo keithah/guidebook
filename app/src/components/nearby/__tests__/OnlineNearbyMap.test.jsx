@@ -209,6 +209,42 @@ describe('OnlineNearbyMap', () => {
     expect(unknownMarker.getAttribute('data-icon-html')).toContain('#5A6B65');
   });
 
+  it('escapes provider-controlled line labels before passing icon HTML to Leaflet', () => {
+    useMap.mockReturnValue({ fitBounds: vi.fn() });
+    const hostileLine = `<img src="x&y" onerror='alert(1)'>`;
+    render(
+      <OnlineNearbyMap
+        center={center}
+        cottage={cottage}
+        stops={[
+          {
+            name: 'Hostile label stop',
+            sub: 'Provider supplied',
+            lat: 37.74,
+            lng: -122.41,
+            line: hostileLine,
+          },
+        ]}
+        showMe={false}
+        dest={null}
+        onTileFailure={vi.fn()}
+      />,
+    );
+
+    const stopMarker = getMarkers().find(
+      (marker) => marker.getAttribute('data-icon-class') === 'sfc-line-pin',
+    );
+    const iconHtml = stopMarker.getAttribute('data-icon-html');
+    expect(iconHtml).toContain(
+      '&lt;img src=&quot;x&amp;y&quot; onerror=&#39;alert(1)&#39;&gt;',
+    );
+    expect(iconHtml).not.toContain('<img src=');
+    const iconTemplate = document.createElement('template');
+    iconTemplate.innerHTML = iconHtml;
+    expect(iconTemplate.content.querySelector('img')).toBeNull();
+    expect(iconTemplate.content.querySelector('[onerror]')).toBeNull();
+  });
+
   it('renders a destination marker only when dest is supplied', () => {
     useMap.mockReturnValue({ fitBounds: vi.fn() });
     const dest = { lat: 37.6188, lng: -122.3756, name: 'SFO' };

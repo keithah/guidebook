@@ -429,6 +429,9 @@ async function fetchNearby({
     didTimeout,
   });
   if (!stationResult.ok) return stationResult;
+  if (!Array.isArray(stationResult.payload?.stations)) {
+    return { ok: false, reason: 'invalid-response' };
+  }
 
   const normalizedStations = normalizeHereStations(
     stationResult.payload,
@@ -458,6 +461,9 @@ async function fetchNearby({
     didTimeout,
   });
   if (!departureResult.ok) return departureResult;
+  if (!Array.isArray(departureResult.payload?.boards)) {
+    return { ok: false, reason: 'invalid-response' };
+  }
 
   const stations = joinNearbyStations(
     normalizedStations,

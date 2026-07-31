@@ -324,6 +324,32 @@ describe('fetchHereNearbyTransit', () => {
     });
   });
 
+  it('does not persist an empty station result when no-store prohibits caching', async () => {
+    const put = vi.spyOn(providerResponseStore, 'put');
+    const fetchImpl = vi.fn().mockResolvedValue(
+      hereResponse(
+        { stations: [] },
+        { headers: { 'cache-control': 'no-store' } },
+      ),
+    );
+
+    await expect(
+      fetchHereNearbyTransit(origin, {
+        apiKey,
+        fetchImpl,
+        now: () => fetchedAt,
+      }),
+    ).resolves.toEqual({
+      ok: true,
+      stations: [],
+      source: 'network',
+      fetchedAt,
+      expiresAt: null,
+    });
+    expect(fetchImpl).toHaveBeenCalledTimes(1);
+    expect(put).not.toHaveBeenCalled();
+  });
+
   it.each([
     ['', origin, 'missing-api-key'],
     [apiKey, { lat: Number.NaN, lng: origin.lng }, 'invalid-request'],
@@ -401,6 +427,26 @@ describe('fetchHereNearbyTransit', () => {
     ).resolves.toEqual({ ok: false, reason });
   });
 
+  it.each([
+    ['AbortError', 'aborted'],
+    ['TypeError', 'network'],
+  ])(
+    'maps a rejected %s departure fetch after a successful station fetch to %s',
+    async (name, reason) => {
+      const error = new Error('synthetic departure failure');
+      error.name = name;
+      const fetchImpl = vi
+        .fn()
+        .mockResolvedValueOnce(hereResponse(stationFixture))
+        .mockRejectedValueOnce(error);
+
+      await expect(
+        fetchHereNearbyTransit(origin, { apiKey, fetchImpl }),
+      ).resolves.toEqual({ ok: false, reason });
+      expect(fetchImpl).toHaveBeenCalledTimes(2);
+    },
+  );
+
   it('maps malformed JSON from either response to invalid-response', async () => {
     const stationResponse = hereResponse(stationFixture);
     stationResponse.json.mockRejectedValue(new SyntaxError('broken stations'));
@@ -425,6 +471,53 @@ describe('fetchHereNearbyTransit', () => {
           .mockResolvedValueOnce(departureResponse),
       }),
     ).resolves.toEqual({ ok: false, reason: 'invalid-response' });
+  });
+
+  it('rejects a cacheable HTTP-200 station body without a stations array', async () => {
+    const put = vi.spyOn(providerResponseStore, 'put');
+    const fetchImpl = vi.fn().mockResolvedValue(
+      hereResponse(
+        { stations: null },
+        { headers: { 'cache-control': 'max-age=60' } },
+      ),
+    );
+
+    await expect(
+      fetchHereNearbyTransit(origin, {
+        apiKey,
+        fetchImpl,
+        now: () => fetchedAt,
+      }),
+    ).resolves.toEqual({ ok: false, reason: 'invalid-response' });
+    expect(fetchImpl).toHaveBeenCalledTimes(1);
+    expect(put).not.toHaveBeenCalled();
+  });
+
+  it('rejects a cacheable HTTP-200 departure body without a boards array', async () => {
+    const put = vi.spyOn(providerResponseStore, 'put');
+    const fetchImpl = vi
+      .fn()
+      .mockResolvedValueOnce(
+        hereResponse(stationFixture, {
+          headers: { 'cache-control': 'max-age=60' },
+        }),
+      )
+      .mockResolvedValueOnce(
+        hereResponse(
+          { boards: {} },
+          { headers: { 'cache-control': 'max-age=60' } },
+        ),
+      );
+
+    await expect(
+      fetchHereNearbyTransit(origin, {
+        apiKey,
+        fetchImpl,
+        now: () => fetchedAt,
+      }),
+    ).resolves.toEqual({ ok: false, reason: 'invalid-response' });
+    expect(fetchImpl).toHaveBeenCalledTimes(2);
+    expect(put).not.toHaveBeenCalled();
   });
 
   it('times out the whole two-request loader and aborts its active fetch', async () => {

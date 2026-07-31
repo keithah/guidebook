@@ -132,10 +132,11 @@ describe('useNearbyTransit', () => {
   });
 
   it.each(['disable', 'unmount'])(
-    'aborts pending work and clears its poll timer on %s',
+    'aborts pending work and ignores late settlement without a timer on %s',
     async (action) => {
       vi.useFakeTimers();
-      fetchHereNearbyTransit.mockResolvedValue(successfulResult);
+      const pendingRequest = deferred();
+      fetchHereNearbyTransit.mockReturnValue(pendingRequest.promise);
       const hook = renderHook(
         ({ enabled }) => useNearbyTransit({ origin: howard, enabled }),
         { initialProps: { enabled: true } },
@@ -143,12 +144,18 @@ describe('useNearbyTransit', () => {
       await act(async () => {});
       expect(fetchHereNearbyTransit).toHaveBeenCalledTimes(1);
       const signal = fetchHereNearbyTransit.mock.calls[0][1].signal;
-      expect(vi.getTimerCount()).toBe(1);
+      expect(vi.getTimerCount()).toBe(0);
 
       if (action === 'disable') hook.rerender({ enabled: false });
       else hook.unmount();
 
       expect(signal.aborted).toBe(true);
+      expect(vi.getTimerCount()).toBe(0);
+      pendingRequest.resolve(successfulResult);
+      await act(async () => {
+        await pendingRequest.promise;
+      });
+      expect(hook.result.current.result).toBeNull();
       expect(vi.getTimerCount()).toBe(0);
       await vi.advanceTimersByTimeAsync(300_000);
       expect(fetchHereNearbyTransit).toHaveBeenCalledTimes(1);
