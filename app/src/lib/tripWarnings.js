@@ -285,8 +285,24 @@ function deduplicateWarnings(warnings) {
   return warnings.reduce((deduplicated, warning) => {
     const id = comparable(warning.id);
     const textKey = `${comparable(warning.header)}\u0000${comparable(warning.description)}`;
-    const existing = (id && byId.get(id)) || byText.get(textKey);
+    const idMatch = id ? byId.get(id) : undefined;
+    const textMatch = byText.get(textKey);
+    const existing = idMatch || textMatch;
     if (existing) {
+      if (idMatch && textMatch && idMatch !== textMatch) {
+        existing.sectionIds = [...new Set([
+          ...(existing.sectionIds ?? []),
+          ...(textMatch.sectionIds ?? []),
+        ])];
+        for (const [key, match] of byId) {
+          if (match === textMatch) byId.set(key, existing);
+        }
+        for (const [key, match] of byText) {
+          if (match === textMatch) byText.set(key, existing);
+        }
+        const duplicateIndex = deduplicated.indexOf(textMatch);
+        if (duplicateIndex !== -1) deduplicated.splice(duplicateIndex, 1);
+      }
       existing.sectionIds = [...new Set([
         ...(existing.sectionIds ?? []),
         ...(warning.sectionIds ?? []),

@@ -431,6 +431,76 @@ describe('warningsForTrip', () => {
     ]);
   });
 
+  it('merges distinct ID and text duplicate groups when a warning bridges them', () => {
+    const trip = transitTrip({
+      incidents: [
+        {
+          id: 'bridging-warning',
+          summary: 'First warning copy',
+          description: 'First warning details.',
+        },
+      ],
+    });
+    trip.sections.push(
+      {
+        ...trip.sections[0],
+        id: 'second-k-section',
+        incidents: [
+          {
+            id: 'text-group-warning',
+            summary: 'Shared warning copy',
+            description: 'Shared warning details.',
+          },
+        ],
+      },
+      {
+        ...trip.sections[0],
+        id: 'section-43',
+        transport: { shortName: '43', name: '43 service' },
+        incidents: [],
+      },
+      {
+        ...trip.sections[0],
+        id: 'section-44',
+        transport: { shortName: '44', name: '44 service' },
+        incidents: [],
+      },
+    );
+    const bridgeAlert = {
+      id: 'bridging-warning',
+      agency: 'SF',
+      activePeriods: [],
+      informedEntities: [
+        { agencyId: 'SF', routeId: '43', stopId: '', directionId: '' },
+      ],
+      header: 'Shared warning copy',
+      description: 'Shared warning details.',
+      severity: 'MODIFIED_SERVICE',
+      url: '',
+    };
+    const removedAliasAlert = {
+      ...bridgeAlert,
+      id: 'text-group-warning',
+      informedEntities: [
+        { agencyId: 'SF', routeId: '44', stopId: '', directionId: '' },
+      ],
+      header: 'Later warning copy',
+      description: 'Later warning details.',
+    };
+
+    expect(warningsForTrip(trip, [bridgeAlert, removedAliasAlert])).toEqual([
+      expect.objectContaining({
+        id: 'bridging-warning',
+        sectionIds: [
+          'section-K',
+          'second-k-section',
+          'section-43',
+          'section-44',
+        ],
+      }),
+    ]);
+  });
+
   it('merges section associations while deduplicating normalized copy', () => {
     const incident = {
       summary: 'Boarding change',
