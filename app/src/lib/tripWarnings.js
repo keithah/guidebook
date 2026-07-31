@@ -275,6 +275,25 @@ function alertWarnings(trip, alerts) {
 }
 
 /**
+ * Redirect duplicate indexes from a removed warning group to its survivor.
+ * @param {Map<string, object>} byId - Warning groups indexed by provider ID.
+ * @param {Map<string, object>} byText - Warning groups indexed by normalized copy.
+ * @param {object[]} deduplicated - Ordered surviving warning groups.
+ * @param {object} from - Duplicate group being removed.
+ * @param {object} to - Surviving duplicate group.
+ */
+function redirectDuplicateGroup(byId, byText, deduplicated, from, to) {
+  for (const [key, match] of byId) {
+    if (match === from) byId.set(key, to);
+  }
+  for (const [key, match] of byText) {
+    if (match === from) byText.set(key, to);
+  }
+  const duplicateIndex = deduplicated.indexOf(from);
+  if (duplicateIndex !== -1) deduplicated.splice(duplicateIndex, 1);
+}
+
+/**
  * Remove warnings with duplicate IDs or normalized copy.
  * @param {Array<Object>} warnings - Candidate warnings.
  * @returns {Array<Object>} Deduplicated warnings.
@@ -294,14 +313,13 @@ function deduplicateWarnings(warnings) {
           ...(existing.sectionIds ?? []),
           ...(textMatch.sectionIds ?? []),
         ])];
-        for (const [key, match] of byId) {
-          if (match === textMatch) byId.set(key, existing);
-        }
-        for (const [key, match] of byText) {
-          if (match === textMatch) byText.set(key, existing);
-        }
-        const duplicateIndex = deduplicated.indexOf(textMatch);
-        if (duplicateIndex !== -1) deduplicated.splice(duplicateIndex, 1);
+        redirectDuplicateGroup(
+          byId,
+          byText,
+          deduplicated,
+          textMatch,
+          existing,
+        );
       }
       existing.sectionIds = [...new Set([
         ...(existing.sectionIds ?? []),

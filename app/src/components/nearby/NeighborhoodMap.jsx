@@ -168,6 +168,7 @@ function OfflineNeighborhoodMap({ onRetry }) {
 export default function NeighborhoodMap(props) {
   const [isOnline, setIsOnline] = useState(() => navigator.onLine);
   const [tileFailureCount, setTileFailureCount] = useState(0);
+  const center = { lat: props.center.lat, lng: props.center.lng };
 
   useEffect(() => {
     const handleOffline = () => setIsOnline(false);
@@ -196,6 +197,7 @@ export default function NeighborhoodMap(props) {
   return (
     <OnlineNearbyMap
       {...props}
+      center={center}
       onTileFailure={() => setTileFailureCount((count) => count + 1)}
     />
   );

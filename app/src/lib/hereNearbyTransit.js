@@ -453,7 +453,8 @@ async function fetchNearby({
     };
   }
 
-  const ids = normalizedStations.flatMap((station) => station.memberIds);
+  const nearbyStations = normalizedStations.slice(0, MAX_STATIONS);
+  const ids = nearbyStations.flatMap((station) => station.memberIds);
   const departureResult = await fetchJson({
     url: buildHereDeparturesUrl(ids, apiKey),
     fetchImpl,
@@ -466,7 +467,7 @@ async function fetchNearby({
   }
 
   const stations = joinNearbyStations(
-    normalizedStations,
+    nearbyStations,
     normalizeHereDepartureBoards(departureResult.payload),
   );
   const fetchedAt = now();

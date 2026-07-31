@@ -11,7 +11,7 @@ const HERE_GEOCODE_URL = 'https://geocode.search.hereapi.com/v1/geocode';
 const CANDIDATE_LIMIT = 5;
 const REQUEST_TIMEOUT_MS = 10_000;
 const ADDRESS_RESULT_TYPES = new Set([
-  'address',
+  'addressBlock',
   'houseNumber',
   'street',
   'intersection',

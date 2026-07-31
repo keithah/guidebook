@@ -313,6 +313,60 @@ describe('Nearby', () => {
     ]);
   });
 
+  it('builds safe map stops when station services or transports are absent', () => {
+    useNearbyTransit.mockReturnValue({
+      result: {
+        ...howardNearbyResult,
+        stations: [
+          {
+            ...howardNearbyResult.stations[0],
+            id: 'no-services',
+            name: 'No Services Station',
+            services: undefined,
+          },
+          {
+            ...howardNearbyResult.stations[1],
+            id: 'no-transport',
+            name: 'No Transport Station',
+            services: [
+              {
+                key: 'missing-transport',
+                agency: null,
+                transport: null,
+                headsign: '',
+                departures: [],
+              },
+            ],
+          },
+        ],
+      },
+      refresh: refreshNearby,
+    });
+
+    renderNearby();
+
+    expect(
+      JSON.parse(
+        screen.getByLabelText('Neighborhood map').getAttribute('data-stops'),
+      ),
+    ).toEqual([
+      {
+        name: 'No Services Station',
+        sub: '',
+        line: 'TRANSIT',
+        lat: 37.77315,
+        lng: -122.41859,
+      },
+      {
+        name: 'No Transport Station',
+        sub: '',
+        line: 'TRANSIT',
+        lat: 37.76487,
+        lng: -122.41948,
+      },
+    ]);
+  });
+
   it('shows the labeled user marker when a stay override matches the cottage coordinates', async () => {
     window.location.hash = encodeStay({
       guestName: 'Jamie',
@@ -456,6 +510,7 @@ describe('Nearby', () => {
   });
 
   it('passes no map stops and renders only an unavailable board on provider failure', () => {
+    refreshNearby.mockClear();
     useNearbyTransit.mockReturnValue({
       result: { ok: false, reason: 'network' },
       refresh: refreshNearby,
@@ -474,6 +529,8 @@ describe('Nearby', () => {
     expect(
       within(board).queryByText(/Ocean|Plymouth|Balboa|Curated/i),
     ).not.toBeInTheDocument();
+    fireEvent.click(within(board).getByRole('button', { name: 'Retry' }));
+    expect(refreshNearby).toHaveBeenCalledTimes(1);
   });
 
   it('does not expose the earlier location result after active coordinates change', async () => {
@@ -722,7 +779,7 @@ describe('Nearby', () => {
       ...unionSquare,
       id: 'here:saved-address',
       title: 'Saved address',
-      resultType: 'address',
+      resultType: 'addressBlock',
       categories: [],
     };
     const savedPoi = {

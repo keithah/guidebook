@@ -53,8 +53,35 @@ describe('normalizeHereCandidates', () => {
     expect(candidates[1].distanceMeters).toBeNull();
   });
 
+  it('normalizes an address-block result as an address destination', () => {
+    expect(
+      normalizeHereCandidates({
+        items: [
+          {
+            id: 'here:af:addressBlock:mission',
+            title: 'Mission District',
+            address: { label: 'Mission District, San Francisco, CA' },
+            position: { lat: 37.75993, lng: -122.41808 },
+            resultType: 'addressBlock',
+          },
+        ],
+      }),
+    ).toEqual([
+      {
+        id: 'here:af:addressBlock:mission',
+        title: 'Mission District',
+        address: 'Mission District, San Francisco, CA',
+        position: { lat: 37.75993, lng: -122.41808 },
+        resultType: 'addressBlock',
+        categories: [],
+        distanceMeters: null,
+      },
+    ]);
+  });
+
   it.each([
-    ['address', true],
+    ['address', false],
+    ['addressBlock', true],
     ['houseNumber', true],
     ['street', true],
     ['intersection', true],

@@ -73,13 +73,14 @@ describe('HERE nearby transit normalization', () => {
       'civic-center',
       'sixth-nearest',
     ]);
-    expect(stations.map(({ id }) => id)).not.toEqual(
-      expect.arrayContaining([
-        'invalid-location',
-        'invalid-name',
-        'invalid-transport',
-      ]),
-    );
+    const stationIds = stations.map(({ id }) => id);
+    for (const droppedId of [
+      'invalid-location',
+      'invalid-name',
+      'invalid-transport',
+    ]) {
+      expect(stationIds).not.toContain(droppedId);
+    }
     expect(stations[1].distanceMeters).toBeCloseTo(180, -1);
     expect(stations[1].distanceMeters).not.toBeCloseTo(145, -1);
   });
@@ -270,7 +271,7 @@ describe('fetchHereNearbyTransit', () => {
     vi.restoreAllMocks();
   });
 
-  it('fetches stations then every normalized member ID and returns joined data', async () => {
+  it('fetches departure boards for the nearest five normalized stations', async () => {
     const fetchImpl = successfulFetch({
       stations: { headers: { 'cache-control': 'no-store' } },
       departures: { headers: { 'cache-control': 'no-store' } },
@@ -289,10 +290,16 @@ describe('fetchHereNearbyTransit', () => {
       fetchedAt,
       expiresAt: null,
     });
-    expect(result.stations).toHaveLength(5);
+    expect(result.stations.map(({ id }) => id)).toEqual([
+      'empty-board',
+      '3516_3408',
+      'same-name-east',
+      'same-name-west',
+      'civic-center',
+    ]);
     expect(fetchImpl).toHaveBeenCalledTimes(2);
     expect(fetchImpl.mock.calls[1][0].searchParams.get('ids')).toBe(
-      'empty-board,3516_3408,same-name-east,same-name-west,platform-a,platform-b,sixth-nearest',
+      'empty-board,3516_3408,same-name-east,same-name-west,platform-a,platform-b',
     );
   });
 

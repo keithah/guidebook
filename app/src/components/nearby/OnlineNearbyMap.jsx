@@ -6,21 +6,6 @@ import bartLogoUrl from '../../assets/bart-logo.svg';
 import { lineColors, lineLabel } from '../../theme.js';
 
 /**
- * Escape provider-controlled display text before interpolating Leaflet HTML.
- * @param {*} value - Text to display inside an HTML-backed Leaflet icon.
- * @returns {string} HTML-safe display text.
- */
-function escapeHtml(value) {
-  return String(value ?? '').replace(/[&<>"']/g, (character) => ({
-    '&': '&amp;',
-    '<': '&lt;',
-    '>': '&gt;',
-    '"': '&quot;',
-    "'": '&#39;',
-  })[character]);
-}
-
-/**
  * Creates a circular map icon labeled with a transit line.
  * @param {string} line - The transit line identifier used to determine the icon color and label.
  * @param {number} [size=30] - The icon diameter in pixels.
@@ -28,14 +13,41 @@ function escapeHtml(value) {
  */
 function lineDivIcon(line, size = 30) {
   const bg = lineColors[line] || '#5A6B65';
-  const label = line === 'BART' ? '' : lineLabel(line);
+  const label = line === 'BART' ? '' : String(lineLabel(line) ?? '');
   const fontSize = label.length > 1 ? Math.round(size * 0.36) : Math.round(size * 0.5);
-  const contents = line === 'BART'
-    ? `<img src="${bartLogoUrl}" alt="" style="display:block;width:auto;height:${size * 0.48}px;">`
-    : escapeHtml(label);
+  const contents = document.createElement('div');
+  Object.assign(contents.style, {
+    width: `${size}px`,
+    height: `${size}px`,
+    borderRadius: '50%',
+    background: bg,
+    color: '#fff',
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    fontFamily: "'Instrument Sans', sans-serif",
+    fontSize: `${fontSize}px`,
+    lineHeight: '1',
+    fontWeight: '700',
+    boxShadow: '0 2px 6px rgba(20,32,29,.35)',
+    border: '2px solid #fff',
+  });
+  if (line === 'BART') {
+    const image = document.createElement('img');
+    image.src = bartLogoUrl;
+    image.alt = '';
+    Object.assign(image.style, {
+      display: 'block',
+      width: 'auto',
+      height: `${size * 0.48}px`,
+    });
+    contents.append(image);
+  } else {
+    contents.textContent = label;
+  }
   return L.divIcon({
     className: 'sfc-line-pin',
-    html: `<div style="width:${size}px;height:${size}px;border-radius:50%;background:${bg};color:#fff;display:flex;align-items:center;justify-content:center;font:${fontSize}px/1 'Instrument Sans',sans-serif;font-weight:700;box-shadow:0 2px 6px rgba(20,32,29,.35);border:2px solid #fff;">${contents}</div>`,
+    html: contents,
     iconSize: [size, size],
     iconAnchor: [size / 2, size / 2],
   });

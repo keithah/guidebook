@@ -32,7 +32,7 @@ vi.mock('react-leaflet', () => ({
       data-testid="marker"
       data-position={JSON.stringify(position)}
       data-icon-class={icon?.className}
-      data-icon-html={icon?.html}
+      data-icon-html={icon?.html?.outerHTML ?? icon?.html}
       data-title={title}
     >
       {children}
@@ -42,6 +42,7 @@ vi.mock('react-leaflet', () => ({
   useMap: vi.fn(),
 }));
 
+import L from 'leaflet';
 import { useMap } from 'react-leaflet';
 import OnlineNearbyMap from '../OnlineNearbyMap.jsx';
 
@@ -60,6 +61,7 @@ function getMarkers() {
 
 afterEach(() => {
   cleanup();
+  vi.mocked(L.divIcon).mockClear();
   vi.mocked(useMap).mockReset();
 });
 
@@ -186,7 +188,10 @@ describe('OnlineNearbyMap', () => {
       'data-position',
       JSON.stringify([stops[0].lat, stops[0].lng]),
     );
-    expect(kMarker.getAttribute('data-icon-html')).toContain('#569BBE'); // K line color
+    const lineIcons = vi.mocked(L.divIcon).mock.calls
+      .map(([options]) => options)
+      .filter(({ className }) => className === 'sfc-line-pin');
+    expect(lineIcons[0].html).toHaveStyle({ background: '#569BBE' });
     expect(within(kMarker).getByTestId('popup')).toHaveTextContent(
       'Church St & 22nd',
     );
@@ -194,19 +199,21 @@ describe('OnlineNearbyMap', () => {
       'Muni K, inbound',
     );
 
-    const bartMarker = stopMarkers[1];
-    expect(bartMarker.getAttribute('data-icon-html')).toContain('#0077C0');
-    expect(bartMarker.getAttribute('data-icon-html')).toContain('bart-logo.svg');
-    expect(bartMarker.getAttribute('data-icon-html')).not.toContain(
-      ['>', 'ba', '<'].join(''),
+    expect(lineIcons[1].html).toHaveStyle({ background: '#0077C0' });
+    expect(lineIcons[1].html.querySelector('img')).toHaveAttribute(
+      'src',
+      expect.stringMatching(/bart-logo\.svg$/),
     );
+    expect(lineIcons[1].html.textContent).toBe('');
 
     const busMarker = stopMarkers[2];
-    expect(busMarker.getAttribute('data-icon-html')).toContain('>29<');
+    expect(busMarker).toBeVisible();
+    expect(lineIcons[2].html.textContent).toBe('29');
 
     // Unknown lines fall back to the default gray pin color.
     const unknownMarker = stopMarkers[3];
-    expect(unknownMarker.getAttribute('data-icon-html')).toContain('#5A6B65');
+    expect(unknownMarker).toBeVisible();
+    expect(lineIcons[3].html).toHaveStyle({ background: '#5A6B65' });
   });
 
   it('escapes provider-controlled line labels before passing icon HTML to Leaflet', () => {
@@ -231,18 +238,13 @@ describe('OnlineNearbyMap', () => {
       />,
     );
 
-    const stopMarker = getMarkers().find(
-      (marker) => marker.getAttribute('data-icon-class') === 'sfc-line-pin',
-    );
-    const iconHtml = stopMarker.getAttribute('data-icon-html');
-    expect(iconHtml).toContain(
-      '&lt;img src=&quot;x&amp;y&quot; onerror=&#39;alert(1)&#39;&gt;',
-    );
-    expect(iconHtml).not.toContain('<img src=');
-    const iconTemplate = document.createElement('template');
-    iconTemplate.innerHTML = iconHtml;
-    expect(iconTemplate.content.querySelector('img')).toBeNull();
-    expect(iconTemplate.content.querySelector('[onerror]')).toBeNull();
+    const icon = vi.mocked(L.divIcon).mock.calls
+      .map(([options]) => options)
+      .find(({ className }) => className === 'sfc-line-pin');
+    expect(icon.html).toBeInstanceOf(HTMLElement);
+    expect(icon.html.textContent).toBe(hostileLine);
+    expect(icon.html.querySelector('img')).toBeNull();
+    expect(icon.html.querySelector('[onerror]')).toBeNull();
   });
 
   it('renders a destination marker only when dest is supplied', () => {

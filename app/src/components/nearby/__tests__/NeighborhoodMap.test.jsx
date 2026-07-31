@@ -10,8 +10,11 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import NeighborhoodMap from '../NeighborhoodMap.jsx';
 
 vi.mock('../OnlineNearbyMap.jsx', () => ({
-  default: ({ onTileFailure }) => (
-    <section aria-label="Live neighborhood map">
+  default: ({ center, onTileFailure }) => (
+    <section
+      aria-label="Live neighborhood map"
+      data-center={JSON.stringify(center)}
+    >
       <button type="button" onClick={onTileFailure}>
         Simulate tile failure
       </button>
@@ -66,6 +69,27 @@ describe('NeighborhoodMap', () => {
     expect(
       screen.getByRole('region', { name: 'Live neighborhood map' }),
     ).toBeVisible();
+  });
+
+  it('passes only coordinates from the active location to the live map', () => {
+    render(
+      <NeighborhoodMap
+        {...mapProps}
+        center={{
+          lat: 37.77154,
+          lng: -122.41761,
+          label: '1620 Howard St, San Francisco',
+          source: 'stay-override',
+        }}
+      />,
+    );
+
+    expect(
+      screen.getByRole('region', { name: 'Live neighborhood map' }),
+    ).toHaveAttribute(
+      'data-center',
+      JSON.stringify({ lat: 37.77154, lng: -122.41761 }),
+    );
   });
 
   it('falls back only after repeated tile failures without changing browser connectivity', () => {

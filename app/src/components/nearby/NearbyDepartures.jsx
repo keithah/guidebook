@@ -165,11 +165,13 @@ export default function NearbyDepartures({ result, onRetry }) {
             >
               {station.name}
             </h3>
-            <span
-              style={{ color: colors.mutedText, fontSize: 12, whiteSpace: 'nowrap' }}
-            >
-              {(station.distanceMeters / 1609.344).toFixed(1)} mi away
-            </span>
+            {Number.isFinite(station.distanceMeters) ? (
+              <span
+                style={{ color: colors.mutedText, fontSize: 12, whiteSpace: 'nowrap' }}
+              >
+                {(station.distanceMeters / 1609.344).toFixed(1)} mi away
+              </span>
+            ) : null}
           </div>
           {(station.services ?? []).map((service) => (
             <NearbyService key={service.key} service={service} />

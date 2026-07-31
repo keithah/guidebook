@@ -25,9 +25,13 @@ export function useNearbyTransit({ origin, enabled }) {
   const originRef = useRef(null);
   const enabledRef = useRef(enabled);
 
-  originKeyRef.current = originKey;
-  originRef.current = originKey ? { lat: origin.lat, lng: origin.lng } : null;
-  enabledRef.current = enabled;
+  useEffect(() => {
+    originKeyRef.current = originKey;
+    originRef.current = originKey
+      ? { lat: origin.lat, lng: origin.lng }
+      : null;
+    enabledRef.current = enabled;
+  }, [enabled, origin?.lat, origin?.lng, originKey]);
 
   const clearRefreshTimer = useCallback(() => {
     if (timerRef.current !== null) {
@@ -100,7 +104,9 @@ export function useNearbyTransit({ origin, enabled }) {
     return nextResult;
   }, [clearRefreshTimer, scheduleRefresh]);
 
-  requestRef.current = requestNearby;
+  useEffect(() => {
+    requestRef.current = requestNearby;
+  }, [requestNearby]);
 
   useEffect(() => {
     controllerRef.current?.abort();

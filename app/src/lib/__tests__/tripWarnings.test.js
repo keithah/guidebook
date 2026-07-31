@@ -455,6 +455,17 @@ describe('warningsForTrip', () => {
       },
       {
         ...trip.sections[0],
+        id: 'third-k-section',
+        incidents: [
+          {
+            id: 'text-group-warning',
+            summary: 'Second shared warning copy',
+            description: 'Second shared warning details.',
+          },
+        ],
+      },
+      {
+        ...trip.sections[0],
         id: 'section-43',
         transport: { shortName: '43', name: '43 service' },
         incidents: [],
@@ -463,6 +474,12 @@ describe('warningsForTrip', () => {
         ...trip.sections[0],
         id: 'section-44',
         transport: { shortName: '44', name: '44 service' },
+        incidents: [],
+      },
+      {
+        ...trip.sections[0],
+        id: 'section-45',
+        transport: { shortName: '45', name: '45 service' },
         incidents: [],
       },
     );
@@ -487,15 +504,32 @@ describe('warningsForTrip', () => {
       header: 'Later warning copy',
       description: 'Later warning details.',
     };
+    const removedTextAliasAlert = {
+      ...bridgeAlert,
+      id: 'second-text-alias',
+      informedEntities: [
+        { agencyId: 'SF', routeId: '45', stopId: '', directionId: '' },
+      ],
+      header: 'Second shared warning copy',
+      description: 'Second shared warning details.',
+    };
 
-    expect(warningsForTrip(trip, [bridgeAlert, removedAliasAlert])).toEqual([
+    expect(
+      warningsForTrip(trip, [
+        bridgeAlert,
+        removedAliasAlert,
+        removedTextAliasAlert,
+      ]),
+    ).toEqual([
       expect.objectContaining({
         id: 'bridging-warning',
         sectionIds: [
           'section-K',
           'second-k-section',
+          'third-k-section',
           'section-43',
           'section-44',
+          'section-45',
         ],
       }),
     ]);

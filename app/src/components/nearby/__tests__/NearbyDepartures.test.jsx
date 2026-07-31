@@ -125,6 +125,26 @@ describe('NearbyDepartures', () => {
     expect(within(bartService).getByText('Scheduled')).toBeVisible();
   });
 
+  it.each([null, Number.NaN, Number.POSITIVE_INFINITY])(
+    'omits an unavailable station distance for %s',
+    (distanceMeters) => {
+      render(
+        <NearbyDepartures
+          result={{
+            ...result,
+            stations: [{ ...result.stations[0], distanceMeters }],
+          }}
+          onRetry={() => {}}
+        />,
+      );
+
+      expect(
+        screen.getByRole('heading', { name: 'Mission Street Station' }),
+      ).toBeVisible();
+      expect(screen.queryByText(/mi away$/)).not.toBeInTheDocument();
+    },
+  );
+
   it('labels a zero-second delay Live and a missing delay Scheduled', () => {
     render(<NearbyDepartures result={result} onRetry={() => {}} />);
 

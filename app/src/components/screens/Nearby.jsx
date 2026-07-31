@@ -57,16 +57,19 @@ export default function Nearby() {
   });
   const mapStops = nearby.result?.ok
     ? nearby.result.stations.map((station) => {
-        const firstService = station.services[0];
+        const services = Array.isArray(station.services)
+          ? station.services
+          : [];
+        const firstService = services[0];
         const agency = [firstService?.agency?.id, firstService?.agency?.name]
           .filter(Boolean)
           .join(' ');
         return {
           name: station.name,
-          sub: station.services
+          sub: services
             .map(
               (service) =>
-                service.transport.shortName || service.transport.name,
+                service.transport?.shortName || service.transport?.name,
             )
             .filter(Boolean)
             .join(' · '),

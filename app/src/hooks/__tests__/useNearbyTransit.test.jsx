@@ -131,6 +131,32 @@ describe('useNearbyTransit', () => {
     expect(hook.result.current.result).toEqual(cottageResult);
   });
 
+  it('keeps refresh stable and requests the latest committed origin', async () => {
+    fetchHereNearbyTransit.mockResolvedValue(successfulResult);
+    const hook = renderHook(
+      ({ origin }) => useNearbyTransit({ origin, enabled: true }),
+      { initialProps: { origin: howard } },
+    );
+    await waitForHook(() =>
+      expect(fetchHereNearbyTransit).toHaveBeenCalledTimes(1),
+    );
+    const refresh = hook.result.current.refresh;
+
+    hook.rerender({ origin: cottage });
+    await waitForHook(() =>
+      expect(fetchHereNearbyTransit).toHaveBeenCalledTimes(2),
+    );
+    expect(hook.result.current.refresh).toBe(refresh);
+
+    await act(async () => {
+      await refresh();
+    });
+    expect(fetchHereNearbyTransit).toHaveBeenLastCalledWith(
+      cottage,
+      expect.objectContaining({ signal: expect.any(AbortSignal) }),
+    );
+  });
+
   it.each(['disable', 'unmount'])(
     'aborts pending work and ignores late settlement without a timer on %s',
     async (action) => {
