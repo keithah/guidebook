@@ -1,0 +1,122 @@
+{
+  "stations": [
+    {
+      "place": {
+        "id": "3516_3408",
+        "name": "Mission St & South Van Ness Ave",
+        "location": { "lat": 37.772994, "lng": -122.418485 }
+      },
+      "transports": [
+        {
+          "mode": "bus",
+          "shortName": "14",
+          "name": "14 Mission",
+          "headsign": "Ferry Plaza",
+          "color": "#C9413D"
+        }
+      ]
+    },
+    {
+      "place": {
+        "id": "platform-a",
+        "parent": { "id": "civic-center" },
+        "name": "Civic Center",
+        "location": { "lat": 37.7795, "lng": -122.4137 }
+      },
+      "transports": [
+        {
+          "mode": "subway",
+          "shortName": "Yellow",
+          "name": "Yellow Line"
+        }
+      ]
+    },
+    {
+      "place": {
+        "id": "platform-b",
+        "parent": { "id": "civic-center" },
+        "name": "Civic Center",
+        "location": { "lat": 37.7796, "lng": -122.4138 }
+      },
+      "transport": {
+        "mode": "metro",
+        "shortName": "K",
+        "name": "K Ingleside",
+        "color": "#005B95",
+        "wheelchairAccessible": true
+      }
+    },
+    {
+      "place": {
+        "id": "same-name-east",
+        "name": "Market Street",
+        "location": { "lat": 37.7748, "lng": -122.4164 }
+      },
+      "transport": [
+        { "mode": "bus", "shortName": "9", "name": "9 San Bruno" }
+      ]
+    },
+    {
+      "place": {
+        "id": "same-name-west",
+        "name": "Market Street",
+        "location": { "lat": 37.7762, "lng": -122.4201 }
+      },
+      "transports": [
+        { "mode": "bus", "shortName": "6", "name": "6 Haight-Parnassus" }
+      ]
+    },
+    {
+      "place": {
+        "id": "empty-board",
+        "name": "Howard St",
+        "location": { "lat": 37.7709, "lng": -122.4175 }
+      },
+      "transports": [
+        { "mode": "bus", "shortName": "12", "name": "12 Folsom/Pacific" }
+      ]
+    },
+    {
+      "place": {
+        "id": "sixth-nearest",
+        "name": "Sixth Nearest",
+        "location": { "lat": 37.783, "lng": -122.424 }
+      },
+      "transports": [
+        { "mode": "bus", "shortName": "27", "name": "27 Bryant" }
+      ]
+    },
+    {
+      "place": {
+        "id": "invalid-location",
+        "name": "Invalid Location",
+        "location": { "lat": null, "lng": -122.41 }
+      },
+      "transports": [{ "mode": "bus", "shortName": "1" }]
+    },
+    {
+      "place": {
+        "id": "",
+        "name": "Invalid ID",
+        "location": { "lat": 37.77, "lng": -122.41 }
+      },
+      "transports": [{ "mode": "bus", "shortName": "2" }]
+    },
+    {
+      "place": {
+        "id": "invalid-name",
+        "name": "   ",
+        "location": { "lat": 37.77, "lng": -122.41 }
+      },
+      "transports": [{ "mode": "bus", "shortName": "3" }]
+    },
+    {
+      "place": {
+        "id": "invalid-transport",
+        "name": "Invalid Transport",
+        "location": { "lat": 37.77, "lng": -122.41 }
+      },
+      "transports": [{ "color": "#000000" }]
+    }
+  ]
+}
