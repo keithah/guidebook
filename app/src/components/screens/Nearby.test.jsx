@@ -15,6 +15,7 @@ import {
 } from '../../lib/hereTransit.js';
 import { searchHereDestinations } from '../../lib/hereSearch.js';
 import { useTransitAlerts } from '../../hooks/useTransitAlerts.js';
+import { useSavedDestinations } from '../../hooks/useSavedDestinations.js';
 import { useWalkingRoute } from '../../hooks/useWalkingRoute.js';
 import { AppProvider } from '../../context/AppContext.jsx';
 import { encodeStay } from '../../lib/stayHash.js';
@@ -55,6 +56,10 @@ vi.mock('../../hooks/useLiveDepartures.js', () => ({
 
 vi.mock('../../hooks/useTransitAlerts.js', () => ({
   useTransitAlerts: vi.fn(),
+}));
+
+vi.mock('../../hooks/useSavedDestinations.js', () => ({
+  useSavedDestinations: vi.fn(),
 }));
 
 vi.mock('../../hooks/useWalkingRoute.js', () => ({
@@ -127,6 +132,12 @@ describe('Nearby', () => {
     useWalkingRoute.mockReturnValue({
       routeResult: walkingResult,
       retryWalking: vi.fn(),
+    });
+    useSavedDestinations.mockReturnValue({
+      savedDestinations: [],
+      loading: false,
+      isSaved: vi.fn().mockReturnValue(false),
+      toggleSaved: vi.fn(),
     });
     useTransitAlerts.mockReturnValue({
       alerts: [
@@ -325,7 +336,7 @@ describe('Nearby', () => {
     fireEvent.change(input, { target: { value: 'Union Square' } });
     fireEvent.click(screen.getByRole('button', { name: 'Go' }));
     expect(
-      await screen.findByText(/place search needs a connection/i),
+      await screen.findByText(/address search needs a connection/i),
     ).toBeVisible();
 
     fireEvent.click(
@@ -486,6 +497,38 @@ describe('Nearby', () => {
     expect(
       await screen.findByRole('button', { name: /choose union square/i }),
     ).toBeVisible();
+  });
+
+  it('shows saved addresses while leaving saved POIs hidden', () => {
+    const savedAddress = {
+      ...unionSquare,
+      id: 'here:saved-address',
+      title: 'Saved address',
+      resultType: 'address',
+      categories: [],
+    };
+    const savedPoi = {
+      ...unionSquare,
+      id: 'here:saved-poi',
+      title: 'Saved coffee shop',
+      resultType: 'place',
+      categories: ['Coffee/Tea'],
+    };
+    useSavedDestinations.mockReturnValue({
+      savedDestinations: [savedAddress, savedPoi],
+      loading: false,
+      isSaved: vi.fn().mockReturnValue(true),
+      toggleSaved: vi.fn(),
+    });
+
+    renderNearby();
+
+    expect(
+      screen.getByRole('button', { name: /choose saved address/i }),
+    ).toBeVisible();
+    expect(
+      screen.queryByRole('button', { name: /choose saved coffee shop/i }),
+    ).not.toBeInTheDocument();
   });
 
   it('disables route-alert fetching and renders no alert status when routing fails', async () => {
@@ -703,54 +746,6 @@ describe('Nearby', () => {
       'aria-pressed',
       'true',
     );
-    useWalkingRoute.mockClear();
-
-    fireEvent.change(input, { target: { value: 'Union Square' } });
-    fireEvent.click(screen.getByRole('button', { name: 'Go' }));
-    fireEvent.click(
-      await screen.findByRole('button', { name: /choose union square/i }),
-    );
-
-    expect(screen.getByRole('button', { name: 'Transit' })).toHaveAttribute(
-      'aria-pressed',
-      'true',
-    );
-    expect(
-      screen.queryByRole('region', { name: 'Walking directions' }),
-    ).not.toBeInTheDocument();
-    expect(
-      useWalkingRoute.mock.calls.filter(
-        ([options]) =>
-          options.destination?.lng === unionSquare.position.lng &&
-          options.enabled,
-      ),
-    ).toHaveLength(0);
-
-    fireEvent.click(screen.getByRole('button', { name: 'Walk' }));
-    expect(screen.getByRole('region', { name: 'Walking directions' })).toBeVisible();
-    expect(useWalkingRoute).toHaveBeenLastCalledWith(
-      expect.objectContaining({
-        destination: unionSquare.position,
-        enabled: true,
-      }),
-    );
-  });
-
-  it('requires a fresh Walk selection after clearing and reselecting a destination', async () => {
-    renderNearby();
-    const input = screen.getByRole('searchbox', { name: /destination/i });
-    fireEvent.change(input, { target: { value: 'Union Square' } });
-    fireEvent.click(screen.getByRole('button', { name: 'Go' }));
-    fireEvent.click(
-      await screen.findByRole('button', { name: /choose union square/i }),
-    );
-    fireEvent.click(screen.getByRole('button', { name: 'Walk' }));
-    expect(screen.getByText('Head west on Harold Avenue.')).toBeVisible();
-
-    fireEvent.click(screen.getByRole('button', { name: 'Clear destination' }));
-    expect(
-      screen.queryByRole('group', { name: 'Travel mode' }),
-    ).not.toBeInTheDocument();
     useWalkingRoute.mockClear();
 
     fireEvent.change(input, { target: { value: 'Union Square' } });

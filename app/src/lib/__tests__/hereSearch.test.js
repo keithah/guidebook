@@ -1,8 +1,9 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
-import fixture from '../../test/fixtures/here-discover.json';
+import fixture from '../../test/fixtures/here-geocode.json';
 import {
   buildHereSearchUrl,
+  isAddressDestination,
   normalizeHereCandidates,
   searchHereDestinations,
 } from '../hereSearch.js';
@@ -23,42 +24,68 @@ function hereResponse(payload = fixture, options = {}) {
 }
 
 describe('normalizeHereCandidates', () => {
-  it('normalizes HERE places and addresses and omits non-numeric coordinates', () => {
-    expect(normalizeHereCandidates(fixture)).toEqual([
-      {
-        id: 'here:af:streetsection:union-square',
-        title: 'Union Square',
-        address: 'Union Square, San Francisco, CA 94108, United States',
-        position: { lat: 37.7879, lng: -122.4075 },
-        resultType: 'place',
-        categories: [],
-        distanceMeters: 7900,
-      },
-      {
-        id: 'here:af:streetsection:market-street',
-        title: '1 Market Street',
-        address: '1 Market Street, San Francisco, CA 94105, United States',
-        position: { lat: 37.7936, lng: -122.3958 },
-        resultType: 'address',
-        categories: ['Restaurant'],
-        distanceMeters: 1250,
-      },
+  it('keeps only address and locality result types with valid coordinates', () => {
+    const candidates = normalizeHereCandidates(fixture);
+
+    expect(candidates.map(({ resultType }) => resultType)).toEqual([
+      'houseNumber',
+      'street',
+      'intersection',
+      'postalCodePoint',
+      'locality',
+      'administrativeArea',
     ]);
+    expect(candidates.map(({ id }) => id)).not.toContain(
+      'here:pds:place:coffee-shop',
+    );
+    expect(candidates.every(({ categories }) => categories.length === 0)).toBe(
+      true,
+    );
+    expect(candidates[0]).toEqual({
+      id: 'here:af:houseNumber:1620-howard',
+      title: '1620 Howard St',
+      address: '1620 Howard St, San Francisco, CA 94103, United States',
+      position: { lat: 37.77154, lng: -122.41761 },
+      resultType: 'houseNumber',
+      categories: [],
+      distanceMeters: 25,
+    });
+    expect(candidates[1].distanceMeters).toBeNull();
+  });
+
+  it.each([
+    ['address', true],
+    ['houseNumber', true],
+    ['street', true],
+    ['intersection', true],
+    ['postalCodePoint', true],
+    ['locality', true],
+    ['administrativeArea', true],
+    ['place', false],
+    ['airport', false],
+    [undefined, false],
+  ])('classifies %s as an address destination: %s', (resultType, accepted) => {
+    expect(isAddressDestination({ resultType })).toBe(accepted);
   });
 });
 
 describe('buildHereSearchUrl', () => {
-  it('builds a bounded, limited English HERE Discover request', () => {
-    const url = buildHereSearchUrl('coffee & tea', center, apiKey);
+  it('builds a centered, limited English HERE Geocode request', () => {
+    const url = buildHereSearchUrl(
+      'Mission District, San Francisco, CA',
+      { lat: 37.77154, lng: -122.41761 },
+      apiKey,
+    );
 
-    expect(url.origin).toBe('https://discover.search.hereapi.com');
-    expect(url.pathname).toBe('/v1/discover');
-    expect(url.searchParams.get('q')).toBe('coffee & tea');
-    expect(url.searchParams.get('in')).toBe('circle:37.7879,-122.4075;r=80000');
+    expect(url.origin).toBe('https://geocode.search.hereapi.com');
+    expect(url.pathname).toBe('/v1/geocode');
+    expect(url.searchParams.get('q')).toBe(
+      'Mission District, San Francisco, CA',
+    );
+    expect(url.searchParams.get('at')).toBe('37.77154,-122.41761');
     expect(url.searchParams.get('limit')).toBe('5');
     expect(url.searchParams.get('lang')).toBe('en-US');
     expect(url.searchParams.get('apiKey')).toBe(apiKey);
-    expect(url.toString()).toContain('q=coffee+%26+tea');
   });
 });
 
@@ -88,7 +115,7 @@ describe('searchHereDestinations', () => {
 
     expect(result).toEqual({
       ok: true,
-      candidates: normalizeHereCandidates(fixture),
+      candidates: normalizeHereCandidates(fixture).slice(0, 5),
       source: 'network',
       fetchedAt,
       expiresAt: null,
@@ -256,7 +283,7 @@ describe('searchHereDestinations', () => {
 
     expect(result).toEqual({
       ok: true,
-      candidates: normalizeHereCandidates(fixture),
+      candidates: normalizeHereCandidates(fixture).slice(0, 5),
       source: 'network',
       fetchedAt,
       expiresAt: null,
@@ -266,7 +293,7 @@ describe('searchHereDestinations', () => {
 
   it('uses the network when deleting an expired cache entry fails', async () => {
     vi.spyOn(providerResponseStore, 'get').mockResolvedValue({
-      key: 'here-discover:coffee:37.788,-122.408',
+      key: 'here-geocode:coffee:37.788,-122.408',
       data: { candidates: [] },
       fetchedAt: 1_000,
       expiresAt: 2_000,
@@ -289,7 +316,7 @@ describe('searchHereDestinations', () => {
 
     expect(result).toEqual({
       ok: true,
-      candidates: normalizeHereCandidates(fixture),
+      candidates: normalizeHereCandidates(fixture).slice(0, 5),
       source: 'network',
       fetchedAt,
       expiresAt: null,
@@ -315,7 +342,7 @@ describe('searchHereDestinations', () => {
 
     expect(result).toEqual({
       ok: true,
-      candidates: normalizeHereCandidates(fixture),
+      candidates: normalizeHereCandidates(fixture).slice(0, 5),
       source: 'network',
       fetchedAt,
       expiresAt: 70_000,
@@ -337,7 +364,7 @@ describe('searchHereDestinations', () => {
     expect(first.source).toBe('network');
     expect(second).toEqual({
       ok: true,
-      candidates: normalizeHereCandidates(fixture),
+      candidates: normalizeHereCandidates(fixture).slice(0, 5),
       source: 'cache',
       fetchedAt,
       expiresAt: 70_000,
@@ -345,10 +372,10 @@ describe('searchHereDestinations', () => {
     expect(fetchImpl).toHaveBeenCalledTimes(1);
     expect(put).toHaveBeenCalledTimes(1);
     const entry = put.mock.calls[0][0];
-    expect(entry.key).toBe('here-discover:coffee:37.788,-122.408');
+    expect(entry.key).toBe('here-geocode:coffee:37.788,-122.408');
     expect(entry.key).not.toContain(apiKey);
     expect(entry.data).toEqual({
-      candidates: normalizeHereCandidates(fixture),
+      candidates: normalizeHereCandidates(fixture).slice(0, 5),
     });
     expect(entry).not.toHaveProperty('rawUrl');
   });

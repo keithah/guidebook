@@ -14,8 +14,8 @@ const unionSquare = {
   title: 'Union Square',
   address: '333 Post St, San Francisco, CA',
   position: { lat: 37.7879, lng: -122.4075 },
-  resultType: 'place',
-  categories: ['Landmark'],
+  resultType: 'locality',
+  categories: [],
   distanceMeters: 8_100,
 };
 
@@ -70,14 +70,14 @@ describe('DestinationSearch', () => {
   });
 
   it.each([
-    [{ status: 'loading' }, 'Looking for places…'],
+    [{ status: 'loading' }, 'Looking for addresses…'],
     [
       { status: 'empty' },
-      'No nearby matches. Try adding a street or neighborhood.',
+      'No matching address or neighborhood…',
     ],
     [
       { status: 'error', reason: 'network' },
-      'Place search needs a connection. Saved places and nearby transit are still available.',
+      'Address search needs a connection…',
     ],
   ])('shows calm %s feedback', (searchStatus, copy) => {
     renderSearch({ searchStatus, candidates: [] });
@@ -92,7 +92,7 @@ describe('DestinationSearch', () => {
     });
 
     fireEvent.click(
-      screen.getByRole('button', { name: /retry place search/i }),
+      screen.getByRole('button', { name: /retry address search/i }),
     );
     expect(props.onSubmit).toHaveBeenCalledWith('Ocean Beach');
     expect(props.onQueryChange).not.toHaveBeenCalled();
@@ -128,6 +128,18 @@ describe('DestinationSearch', () => {
     const onlineProps = renderSearch();
     fireEvent.click(screen.getByRole('button', { name: /save union square/i }));
     expect(onlineProps.onToggleSaved).toHaveBeenCalledWith(unionSquare);
+  });
+
+  it('keeps candidate selection state on the row without owning a selected summary', () => {
+    renderSearch({ selectedDestination: unionSquare });
+
+    expect(
+      screen.getByRole('button', { name: /choose union square/i }),
+    ).toHaveAttribute('aria-pressed', 'true');
+    expect(screen.queryByText(/going to/i)).not.toBeInTheDocument();
+    expect(
+      screen.queryByRole('button', { name: /clear destination/i }),
+    ).not.toBeInTheDocument();
   });
 
   it('omits a missing address from the candidate accessible name', () => {

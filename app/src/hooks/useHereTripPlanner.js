@@ -105,6 +105,18 @@ export function useHereTripPlanner({ origin }) {
     [candidates.length, requestRoutes],
   );
 
+  const selectDirectDestination = useCallback(
+    async (destination) => {
+      searchAbortRef.current?.abort();
+      setQuery(destination.title);
+      setCandidates([]);
+      setSearchStatus({ status: 'idle' });
+      setSelectedDestination(destination);
+      return requestRoutes(destination);
+    },
+    [requestRoutes],
+  );
+
   const clearDestination = useCallback(() => {
     searchAbortRef.current?.abort();
     routeAbortRef.current?.abort();
@@ -143,6 +155,7 @@ export function useHereTripPlanner({ origin }) {
     routeResult,
     search,
     selectDestination,
+    selectDirectDestination,
     clearDestination,
     retryRoutes,
   };

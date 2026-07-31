@@ -13,6 +13,7 @@ import RideshareOptions from '../nearby/RideshareOptions.jsx';
 import { distanceMiles, stopHeadsToward } from '../../lib/geocode.js';
 import { googleMapsDirectionsUrl } from '../../lib/mapsDirections.js';
 import { isFinitePosition } from '../../lib/providerFetch.js';
+import { isAddressDestination } from '../../lib/hereSearch.js';
 import { useHereTripPlanner } from '../../hooks/useHereTripPlanner.js';
 import { useLiveDepartures } from '../../hooks/useLiveDepartures.js';
 import { useSavedDestinations } from '../../hooks/useSavedDestinations.js';
@@ -108,15 +109,8 @@ export default function Nearby() {
         (a, b) => Number(Boolean(b.toward)) - Number(Boolean(a.toward)),
       )
     : stopRows;
-  const cottageDestination = {
-    id: `property:${property.id}`,
-    title: property.name,
-    address: `${property.address.street}, ${property.address.city}`,
-    position: cottage,
-    resultType: 'property',
-    categories: [],
-    distanceMeters: 0,
-  };
+  const [cottageDestination, ...legacyQuickDestinations] =
+    property.transit.quickDestinations;
   const tripKey = [
     planner.selectedDestination?.id,
     planner.routeResult?.trips?.[0]?.plannedAt,
@@ -280,7 +274,9 @@ export default function Nearby() {
             candidates={planner.candidates}
             selectedDestination={planner.selectedDestination}
             searchStatus={planner.searchStatus}
-            savedDestinations={saved.savedDestinations}
+            savedDestinations={saved.savedDestinations.filter(
+              isAddressDestination,
+            )}
             isSaved={saved.isSaved}
             onToggleSaved={saved.toggleSaved}
             onSubmit={(query) => {
@@ -288,10 +284,6 @@ export default function Nearby() {
               void planner.search(query);
             }}
             onSelect={planner.selectDestination}
-            onClear={() => {
-              setBackOpen(false);
-              planner.clearDestination();
-            }}
           />
 
           {canLinkToExternalDirections && (
@@ -369,14 +361,14 @@ export default function Nearby() {
               >
                 ⌂ Take me back to the cottage
               </button>
-              {property.transit.destSuggestions.map((destination) => (
+              {legacyQuickDestinations.map((destination) => (
                 <button
-                  key={destination}
+                  key={destination.id}
                   type="button"
                   onClick={() => {
                     setBackOpen(false);
-                    planner.setQuery(destination);
-                    void planner.search(destination);
+                    planner.setQuery(destination.buttonLabel);
+                    void planner.search(destination.buttonLabel);
                   }}
                   style={{
                     border: `1px solid ${colors.border}`,
@@ -389,7 +381,7 @@ export default function Nearby() {
                     whiteSpace: 'nowrap',
                   }}
                 >
-                  {destination}
+                  {destination.buttonLabel}
                 </button>
               ))}
             </div>

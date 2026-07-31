@@ -7,25 +7,39 @@ import {
 } from './providerFetch.js';
 import { providerResponseStore } from './responseStore.js';
 
-const HERE_DISCOVER_URL = 'https://discover.search.hereapi.com/v1/discover';
-const SEARCH_RADIUS_METERS = 80_000;
+const HERE_GEOCODE_URL = 'https://geocode.search.hereapi.com/v1/geocode';
 const CANDIDATE_LIMIT = 5;
 const REQUEST_TIMEOUT_MS = 10_000;
+const ADDRESS_RESULT_TYPES = new Set([
+  'address',
+  'houseNumber',
+  'street',
+  'intersection',
+  'postalCodePoint',
+  'locality',
+  'administrativeArea',
+]);
 
 /**
- * Builds a HERE Discover search URL for a query centered on a map position.
+ * Determine whether a destination is an address or locality result.
+ * @param {*} candidate - Candidate with an optional HERE result type.
+ * @return {boolean} Whether the candidate belongs in address search.
+ */
+export function isAddressDestination(candidate) {
+  return ADDRESS_RESULT_TYPES.has(String(candidate?.resultType ?? ''));
+}
+
+/**
+ * Builds a HERE Geocode search URL for a query centered on a map position.
  * @param {string} query - The search text.
  * @param {{lat: number, lng: number}} center - The search center coordinates.
  * @param {string} apiKey - The HERE API key.
- * @return {URL} The configured HERE Discover search URL.
+ * @return {URL} The configured HERE Geocode search URL.
  */
 export function buildHereSearchUrl(query, center, apiKey) {
-  const url = new URL(HERE_DISCOVER_URL);
+  const url = new URL(HERE_GEOCODE_URL);
   url.searchParams.set('q', query.trim());
-  url.searchParams.set(
-    'in',
-    `circle:${center.lat},${center.lng};r=${SEARCH_RADIUS_METERS}`,
-  );
+  url.searchParams.set('at', `${center.lat},${center.lng}`);
   url.searchParams.set('limit', String(CANDIDATE_LIMIT));
   url.searchParams.set('lang', 'en-US');
   url.searchParams.set('apiKey', apiKey);
@@ -43,6 +57,7 @@ export function normalizeHereCandidates(payload) {
   return payload.items
     .filter(
       (item) =>
+        isAddressDestination(item) &&
         Number.isFinite(item?.position?.lat) &&
         Number.isFinite(item?.position?.lng),
     )
@@ -55,11 +70,7 @@ export function normalizeHereCandidates(payload) {
         lng: item.position.lng,
       },
       resultType: item.resultType,
-      categories: Array.isArray(item.categories)
-        ? item.categories
-            .map((category) => category?.name)
-            .filter((name) => typeof name === 'string')
-        : [],
+      categories: [],
       distanceMeters: Number.isFinite(item.distance) ? item.distance : null,
     }));
 }
@@ -82,7 +93,7 @@ function cacheKey(query, center) {
     return rounded.toFixed(3);
   };
 
-  return `here-discover:${encodeURIComponent(query.toLowerCase())}:${roundCoordinate(center.lat)},${roundCoordinate(center.lng)}`;
+  return `here-geocode:${encodeURIComponent(query.toLowerCase())}:${roundCoordinate(center.lat)},${roundCoordinate(center.lng)}`;
 }
 
 /**
