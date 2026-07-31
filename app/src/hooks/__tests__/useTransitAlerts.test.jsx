@@ -3,8 +3,17 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
 import alertFixture from '../../test/fixtures/511-alerts.json';
 import { useTransitAlerts } from '../useTransitAlerts.js';
+import { fetchServiceAlerts } from '../../lib/transit511.js';
 import { resetRequestCoordinatorForTests } from '../../lib/requestCoordinator.js';
 import { providerResponseStore } from '../../lib/responseStore.js';
+
+vi.mock('../../lib/transit511.js', async (importOriginal) => {
+  const actual = await importOriginal();
+  return {
+    ...actual,
+    fetchServiceAlerts: vi.fn(actual.fetchServiceAlerts),
+  };
+});
 
 const startTime = Date.parse('2026-07-28T19:00:00.000Z');
 const originalFetch = globalThis.fetch;
@@ -43,6 +52,59 @@ describe('useTransitAlerts', () => {
     vi.useRealTimers();
     vi.restoreAllMocks();
     globalThis.fetch = originalFetch;
+  });
+
+  it('does not fetch or poll while disabled and aborts when disabled', async () => {
+    let requestSignal;
+    fetchServiceAlerts.mockImplementationOnce((_agency, { signal }) => {
+      requestSignal = signal;
+      return new Promise(() => {});
+    });
+    const hook = renderHook(
+      ({ enabled }) => useTransitAlerts('SF', { enabled }),
+      { initialProps: { enabled: false } },
+    );
+
+    expect(fetchServiceAlerts).not.toHaveBeenCalled();
+    expect(hook.result.current).toMatchObject({ alerts: [], status: 'idle' });
+
+    hook.rerender({ enabled: true });
+    await waitForHook(() => expect(fetchServiceAlerts).toHaveBeenCalledTimes(1));
+    expect(requestSignal.aborted).toBe(false);
+
+    hook.rerender({ enabled: false });
+    await waitForHook(() => expect(requestSignal.aborted).toBe(true));
+    expect(hook.result.current).toMatchObject({
+      alerts: [],
+      status: 'idle',
+      updatedAt: null,
+      error: null,
+    });
+
+    await act(async () => {
+      await vi.advanceTimersByTimeAsync(20 * 60_000);
+    });
+    expect(fetchServiceAlerts).toHaveBeenCalledTimes(1);
+    hook.unmount();
+  });
+
+  it('cancels a scheduled poll when disabled after a resolved request', async () => {
+    globalThis.fetch = vi.fn().mockResolvedValue(alertResponse());
+    const hook = renderHook(
+      ({ enabled }) => useTransitAlerts('SF', { enabled }),
+      { initialProps: { enabled: true } },
+    );
+    await waitForHook(() => expect(hook.result.current.status).toBe('live'));
+    expect(globalThis.fetch).toHaveBeenCalledTimes(1);
+
+    hook.rerender({ enabled: false });
+    await act(async () => {
+      await vi.advanceTimersByTimeAsync(20 * 60_000);
+    });
+
+    expect(globalThis.fetch).toHaveBeenCalledTimes(1);
+    expect(hook.result.current.status).toBe('idle');
+    hook.unmount();
   });
 
   it('shares a ten-minute alert cache and exposes refresh metadata', async () => {

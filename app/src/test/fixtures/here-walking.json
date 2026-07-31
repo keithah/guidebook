@@ -1,0 +1,94 @@
+{
+  "routes": [
+    {
+      "id": "walking-route-mission-dolores",
+      "sections": [
+        {
+          "id": "walk-section-1",
+          "type": "pedestrian",
+          "departure": {
+            "time": "2026-07-30T10:00:00-07:00",
+            "place": {
+              "type": "place",
+              "name": "The SF Cottage",
+              "location": { "lat": 37.77154, "lng": -122.41761 }
+            }
+          },
+          "arrival": {
+            "time": "2026-07-30T10:07:00-07:00",
+            "place": {
+              "type": "place",
+              "name": "Market Street crossing",
+              "location": { "lat": 37.7652, "lng": -122.4218 }
+            }
+          },
+          "summary": { "duration": 420, "length": 600 },
+          "polyline": "BFoz5xJ67i1B1B7PzIhaxL7Y",
+          "actions": [
+            {
+              "action": "depart",
+              "duration": 80,
+              "length": 110,
+              "instruction": "Head southwest on Howard Street.",
+              "offset": 0
+            },
+            {
+              "action": "turn",
+              "duration": 340,
+              "length": 490,
+              "instruction": "Turn right onto 16th Street.",
+              "direction": "right",
+              "offset": 12
+            }
+          ],
+          "notices": [
+            {
+              "code": "pedestrian.multiPurposeOnly",
+              "title": "Part of this route uses a multi-use path",
+              "severity": "info"
+            }
+          ]
+        },
+        {
+          "id": "walk-section-2",
+          "type": "pedestrian",
+          "departure": {
+            "time": "2026-07-30T10:07:00-07:00",
+            "place": {
+              "type": "place",
+              "name": "Market Street crossing",
+              "location": { "lat": 37.7652, "lng": -122.4218 }
+            }
+          },
+          "arrival": {
+            "time": "2026-07-30T10:12:00-07:00",
+            "place": {
+              "type": "place",
+              "name": "Mission Dolores Park",
+              "location": { "lat": 37.7596, "lng": -122.4269 }
+            }
+          },
+          "summary": { "duration": 300, "length": 450 },
+          "polyline": "BG05xJk9i1B7PzIxaxL7YvH",
+          "actions": [
+            {
+              "action": "stairsUp",
+              "duration": 45,
+              "length": 25,
+              "instruction": "Take the stairs up to Dolores Street.",
+              "offset": 0
+            },
+            {
+              "action": "arrive",
+              "duration": 255,
+              "length": 425,
+              "instruction": "Arrive at Mission Dolores Park on your left.",
+              "offset": 8
+            }
+          ],
+          "notices": []
+        }
+      ]
+    }
+  ]
+}

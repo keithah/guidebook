@@ -21,6 +21,31 @@ input {
   outline: none;
 }
 
+.trip-mode-button,
+.journey-text-button,
+.journey-external-link {
+  transition:
+    color 160ms ease,
+    background-color 160ms ease,
+    border-color 160ms ease,
+    box-shadow 160ms ease;
+}
+
+.trip-mode-button:focus-visible,
+.journey-text-button:focus-visible,
+.journey-external-link:focus-visible {
+  outline: 3px solid #e8a03c;
+  outline-offset: 2px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .trip-mode-button,
+  .journey-text-button,
+  .journey-external-link {
+    transition: none;
+  }
+}
+
 ::-webkit-scrollbar {
   width: 0;
   height: 0;

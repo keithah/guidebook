@@ -17,9 +17,23 @@ describe('ItinerarySteps', () => {
     render(<ItinerarySteps trip={trip} />);
 
     expect(screen.getByRole('list', { name: /full itinerary/i })).toBeVisible();
-    expect(screen.getAllByTestId('itinerary-section')).toHaveLength(
-      trip.sections.length,
-    );
+    const itinerarySections = screen.getAllByTestId('itinerary-section');
+    expect(itinerarySections).toHaveLength(trip.sections.length);
+    expect(
+      within(itinerarySections[0]).getByRole('heading', {
+        name: /walk to west portal station/i,
+      }),
+    ).toBeVisible();
+    expect(
+      within(itinerarySections[1]).getByRole('img', {
+        name: 'Muni K train',
+      }),
+    ).toBeVisible();
+    expect(
+      within(itinerarySections[2]).getByRole('heading', {
+        name: /walk to union square/i,
+      }),
+    ).toBeVisible();
     expect(
       screen.getByRole('heading', { name: /walk to west portal station/i }),
     ).toBeVisible();
@@ -27,6 +41,9 @@ describe('ItinerarySteps', () => {
       screen.getByRole('heading', {
         name: /k ingleside toward embarcadero/i,
       }),
+    ).toBeVisible();
+    expect(
+      screen.getByRole('img', { name: 'Muni K train' }),
     ).toBeVisible();
     expect(
       screen.getByRole('heading', { name: /walk to union square/i }),

@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import { useApp } from '../../context/AppContext.jsx';
 import { colors, fonts, screenPad, card, backLink } from '../../theme.js';
 import MuniLogo from '../MuniLogo.jsx';
@@ -6,29 +6,23 @@ import LineBadge from '../LineBadge.jsx';
 import NeighborhoodMap from '../nearby/NeighborhoodMap.jsx';
 import DestinationSearch from '../nearby/DestinationSearch.jsx';
 import LiveStatus from '../nearby/LiveStatus.jsx';
-import TransitAlerts from '../nearby/TransitAlerts.jsx';
 import TripOptions from '../nearby/TripOptions.jsx';
+import TripModeSelector from '../nearby/TripModeSelector.jsx';
+import WalkingJourney from '../nearby/WalkingJourney.jsx';
+import RideshareOptions from '../nearby/RideshareOptions.jsx';
 import { distanceMiles, stopHeadsToward } from '../../lib/geocode.js';
+import { googleMapsDirectionsUrl } from '../../lib/mapsDirections.js';
+import { isFinitePosition } from '../../lib/providerFetch.js';
 import { useHereTripPlanner } from '../../hooks/useHereTripPlanner.js';
 import { useLiveDepartures } from '../../hooks/useLiveDepartures.js';
 import { useSavedDestinations } from '../../hooks/useSavedDestinations.js';
 import { useTransitAlerts } from '../../hooks/useTransitAlerts.js';
+import { useWalkingRoute } from '../../hooks/useWalkingRoute.js';
 
 const BACK_HOME_ICON = {
   walk: { glyph: '○', style: { background: colors.sage, color: colors.teal } },
   ride: { glyph: '→', style: { background: colors.sage, color: colors.teal } },
 };
-
-/**
- * Build a Google Maps transit directions URL between two positions.
- * @param {{lat: number, lng: number}} origin - The starting geographic position.
- * @param {{lat: number, lng: number}} destination - The destination geographic position.
- * @return {string} A URL for transit directions between the positions.
- */
-function mapsUrl(origin, destination) {
-  const formatPosition = (position) => `${position.lat},${position.lng}`;
-  return `https://www.google.com/maps/dir/?api=1&origin=${encodeURIComponent(formatPosition(origin))}&destination=${encodeURIComponent(formatPosition(destination))}&travelmode=transit`;
-}
 
 /**
  * Render the nearby transit, trip-planning, and rideshare interface.
@@ -61,17 +55,44 @@ export default function Nearby() {
     coords?.source === 'stay-override' ? coords.label : null;
   const planner = useHereTripPlanner({ origin });
   const saved = useSavedDestinations();
+  const [modeSelection, setModeSelection] = useState({
+    journeyKey: '',
+    mode: 'transit',
+  });
   const { times: liveTimes, meta: departureMeta } = useLiveDepartures(
     property.transit.nearbyStops,
   );
-  const {
-    alerts,
-    status: alertStatus,
-    updatedAt: alertsUpdatedAt,
-    error: alertError,
-  } = useTransitAlerts('SF');
-  const [expandedAlertLineIds, setExpandedAlertLineIds] = useState([]);
   const selectedPosition = planner.selectedDestination?.position ?? null;
+  const journeyKey = selectedPosition
+    ? `${origin.lat},${origin.lng}:${selectedPosition.lat},${selectedPosition.lng}`
+    : '';
+  if (modeSelection.journeyKey !== journeyKey) {
+    setModeSelection({ journeyKey, mode: 'transit' });
+  }
+  const activeMode =
+    modeSelection.journeyKey === journeyKey
+      ? modeSelection.mode
+      : 'transit';
+  const selectMode = (mode) => setModeSelection({ journeyKey, mode });
+  const walking = useWalkingRoute({
+    origin,
+    destination: selectedPosition,
+    enabled: activeMode === 'walk',
+  });
+  const alertsEnabled = Boolean(
+    activeMode === 'transit' &&
+      planner.routeResult?.ok &&
+      planner.routeResult.trips?.length,
+  );
+  const { alerts } = useTransitAlerts('SF', { enabled: alertsEnabled });
+  const canLinkToExternalDirections =
+    isFinitePosition(origin) && isFinitePosition(selectedPosition);
+  const transitExternalUrl = canLinkToExternalDirections
+    ? googleMapsDirectionsUrl(origin, selectedPosition, 'transit')
+    : undefined;
+  const walkingExternalUrl = canLinkToExternalDirections
+    ? googleMapsDirectionsUrl(origin, selectedPosition, 'walking')
+    : undefined;
   const nearBase =
     showMe && distanceMiles(coords, cottage) < 60
       ? { point: coords, label: 'you' }
@@ -104,10 +125,6 @@ export default function Nearby() {
   ]
     .filter(Boolean)
     .join(':');
-
-  useEffect(() => {
-    setExpandedAlertLineIds([]);
-  }, [tripKey]);
 
   const chooseCottage = () => {
     planner.setQuery(property.address.street);
@@ -277,43 +294,60 @@ export default function Nearby() {
             }}
           />
 
-          {selectedPosition && (
+          {canLinkToExternalDirections && (
             <div style={{ marginTop: -8, color: colors.muted, fontSize: 12 }}>
               {distanceMiles(nearBase.point, selectedPosition).toFixed(1)} mi
               from {nearBase.label}
             </div>
           )}
 
-          <div>
-            <TripOptions
-              key={tripKey}
-              result={planner.routeResult}
-              alerts={alerts}
-              externalUrlForTrip={() =>
-                selectedPosition ? mapsUrl(origin, selectedPosition) : undefined
-              }
-              onExpandedLineIdsChange={setExpandedAlertLineIds}
+          {selectedPosition && (
+            <TripModeSelector value={activeMode} onChange={selectMode} />
+          )}
+
+          {selectedPosition && activeMode === 'transit' && (
+            <div>
+              <TripOptions
+                key={tripKey}
+                result={planner.routeResult}
+                alerts={alerts}
+                externalUrlForTrip={() => transitExternalUrl}
+              />
+              {planner.routeResult && !planner.routeResult.ok && (
+                <button
+                  type="button"
+                  className="journey-text-button"
+                  onClick={planner.retryRoutes}
+                  style={{
+                    minHeight: 44,
+                    marginTop: 2,
+                    border: 0,
+                    padding: '8px 0',
+                    background: 'transparent',
+                    color: colors.teal,
+                    cursor: 'pointer',
+                    font: 'inherit',
+                    fontSize: 12,
+                    fontWeight: 600,
+                  }}
+                >
+                  Retry transit directions
+                </button>
+              )}
+            </div>
+          )}
+
+          {selectedPosition && activeMode === 'walk' && (
+            <WalkingJourney
+              result={walking.routeResult}
+              onRetry={walking.retryWalking}
+              externalUrl={walkingExternalUrl}
             />
-            {planner.routeResult && !planner.routeResult.ok && (
-              <button
-                type="button"
-                onClick={planner.retryRoutes}
-                style={{
-                  marginTop: 7,
-                  border: 0,
-                  padding: 0,
-                  background: 'transparent',
-                  color: colors.teal,
-                  cursor: 'pointer',
-                  font: 'inherit',
-                  fontSize: 12,
-                  fontWeight: 600,
-                }}
-              >
-                Retry transit directions
-              </button>
-            )}
-          </div>
+          )}
+
+          {selectedPosition && activeMode === 'rideshare' && (
+            <RideshareOptions rides={property.transit.rides} />
+          )}
 
           <div>
             <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6 }}>
@@ -449,14 +483,6 @@ export default function Nearby() {
             )}
           </div>
 
-          <TransitAlerts
-            alerts={alerts}
-            status={alertStatus}
-            updatedAt={alertsUpdatedAt}
-            error={alertError}
-            excludeLineIds={expandedAlertLineIds}
-          />
-
           <section aria-label="Nearby departures">
             <div
               style={{
@@ -576,64 +602,6 @@ export default function Nearby() {
             })}
             <div style={{ marginTop: 7, color: colors.faint, fontSize: 11 }}>
               Data provided by 511.org
-            </div>
-          </section>
-
-          <section aria-label="Rideshare options">
-            <div
-              style={{
-                marginBottom: 7,
-                color: colors.muted,
-                fontSize: 11,
-                letterSpacing: '.16em',
-                textTransform: 'uppercase',
-              }}
-            >
-              Or get a ride
-            </div>
-            <div style={{ display: 'flex', gap: 8 }}>
-              {property.transit.rides.map((ride) => (
-                <div
-                  key={ride.name}
-                  style={{
-                    flex: 1,
-                    border: `1px solid ${colors.border}`,
-                    borderRadius: 16,
-                    padding: '13px 12px',
-                    background: colors.white,
-                  }}
-                >
-                  <div
-                    style={{ color: ride.color, fontSize: 15, fontWeight: 600 }}
-                  >
-                    {ride.name}
-                  </div>
-                  <div
-                    style={{
-                      marginTop: 3,
-                      color: colors.muted,
-                      fontSize: 11,
-                      lineHeight: 1.4,
-                    }}
-                  >
-                    {ride.note}
-                  </div>
-                </div>
-              ))}
-            </div>
-            <div
-              style={{
-                marginTop: 8,
-                color: colors.muted,
-                fontSize: 12,
-                lineHeight: 1.6,
-              }}
-            >
-              No account yet?{' '}
-              <a href={property.transit.rides[0].referralUrl}>
-                Grab a sign-up link
-              </a>{' '}
-              — first ride is usually discounted.
             </div>
           </section>
 

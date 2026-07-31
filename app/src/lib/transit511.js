@@ -90,37 +90,14 @@ function translationText(translated) {
 }
 
 /**
- * Finds the period that is active at the specified time.
- * @param {Array<Object>} periods - The periods to evaluate.
- * @param {number} now - The current time in GTFS milliseconds.
- * @return {{start: string|null, end: string|null}|null} The active period with ISO timestamps, `null` if no period is active, or an object with null boundaries when no periods are provided.
- */
-function currentActivePeriod(periods, now) {
-  if (!Array.isArray(periods) || periods.length === 0) {
-    return { start: null, end: null };
-  }
-
-  const current = periods.find((period) => {
-    const start = gtfsTime(period?.Start);
-    const end = gtfsTime(period?.End);
-    return (start === null || start <= now) && (end === null || now < end);
-  });
-  if (!current) return null;
-  return {
-    start: isoGtfsTime(current.Start),
-    end: isoGtfsTime(current.End),
-  };
-}
-
-/**
- * Normalize active service alerts into a consistent alert representation.
+ * Normalize service alerts into a consistent, matchable representation.
  * @param {Object} payload - The service alerts response payload.
- * @param {Date|number} [now=Date.now()] - The reference time used to determine active periods.
+ * @param {Date|number} [now=Date.now()] - Retained for adapter-call compatibility.
  * @param {string} [agency] - Fallback agency identifier when an alert does not specify one.
- * @returns {Array<Object>} The normalized active alerts with translated text, affected routes, severity, and timing information.
+ * @returns {Array<Object>} The normalized alerts with translated text, informed entities, severity, and timing information.
  */
 export function normalizeServiceAlerts(payload, now = Date.now(), agency) {
-  const currentTime = asTime(now);
+  void now;
   const entities = payload?.Entities;
   if (!Array.isArray(entities)) return [];
   const updatedAt = isoGtfsTime(payload?.Header?.Timestamp);
@@ -130,37 +107,36 @@ export function normalizeServiceAlerts(payload, now = Date.now(), agency) {
     const header = translationText(alert?.HeaderText);
     if (!alert || typeof entity?.Id !== 'string' || !header) return [];
 
-    const activePeriod = currentActivePeriod(alert.ActivePeriods, currentTime);
-    if (!activePeriod) return [];
-
-    const informedEntities = Array.isArray(alert.InformedEntities)
-      ? alert.InformedEntities
-      : [];
-    const affectedLines = [
-      ...new Set(
-        informedEntities
-          .map((informed) => informed?.RouteId)
-          .filter((routeId) => typeof routeId === 'string' && routeId),
-      ),
-    ];
+    const activePeriods = (
+      Array.isArray(alert.ActivePeriods) ? alert.ActivePeriods : []
+    )
+      .map((period) => ({
+        start: isoGtfsTime(period?.Start),
+        end: isoGtfsTime(period?.End),
+      }))
+      .filter((period) => period.start || period.end);
+    const informedEntities = (
+      Array.isArray(alert.InformedEntities) ? alert.InformedEntities : []
+    ).map((informed) => ({
+      agencyId: String(informed?.AgencyId ?? agency ?? '').trim(),
+      routeId: String(informed?.RouteId ?? '').trim(),
+      stopId: String(informed?.StopId ?? '').trim(),
+      directionId: String(informed?.DirectionId ?? '').trim(),
+    }));
     const alertAgency =
-      informedEntities.find(
-        (informed) =>
-          typeof informed?.AgencyId === 'string' && informed.AgencyId,
-      )?.AgencyId ??
-      agency ??
-      '';
+      informedEntities.find((informed) => informed.agencyId)?.agencyId ??
+      String(agency ?? '').trim();
 
     return [
       {
         id: entity.Id,
         agency: alertAgency,
-        affectedLines,
         severity:
           typeof alert.Effect === 'string' ? alert.Effect : 'UNKNOWN_EFFECT',
         header,
         description: translationText(alert.DescriptionText),
-        activePeriod,
+        activePeriods,
+        informedEntities,
         url: translationText(alert.Url),
         updatedAt,
       },

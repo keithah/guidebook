@@ -309,22 +309,19 @@
         "name": "Uber",
         "note": "Usually 3–6 min away",
         "color": "#14201D",
-        "referralUrl": "#",
-        "_todo": "add real Uber referral link"
+        "launchUrl": "https://m.uber.com/"
       },
       {
         "name": "Lyft",
-        "note": "Similar wait, often cheaper here",
+        "note": "Usually 4–8 min away",
         "color": "#7A2E8E",
-        "referralUrl": "#",
-        "_todo": "add real Lyft referral link"
+        "launchUrl": "https://ride.lyft.com/"
       },
       {
         "name": "Waymo",
-        "note": "Driverless · covers Ingleside",
+        "note": "Usually 5–12 min away",
         "color": "#0B7A5A",
-        "referralUrl": "#",
-        "_todo": "add real Waymo referral link"
+        "launchUrl": "https://waymo.com/waymo-one/"
       }
     ],
     "apps": "Real-time: 511.org / Transit app / UMO (ex-NextBus). Google Maps isn't always accurate for Muni.",
