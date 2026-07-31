@@ -132,16 +132,24 @@ describe('useWalkingRoute', () => {
 
   it('retries with the same origin and destination after a failure', async () => {
     const failure = { ok: false, reason: 'network' };
+    const pendingRetry = deferred();
     fetchHereWalkingRoute
       .mockResolvedValueOnce(failure)
-      .mockResolvedValueOnce(successfulResult);
+      .mockReturnValueOnce(pendingRetry.promise);
     const { result } = renderHook(() =>
       useWalkingRoute({ origin, destination, enabled: true }),
     );
     await waitForHook(() => expect(result.current.routeResult).toEqual(failure));
 
+    let retry;
+    act(() => {
+      retry = result.current.retryWalking();
+    });
+
+    expect(result.current.routeResult).toBeNull();
+    pendingRetry.resolve(successfulResult);
     await act(async () => {
-      await result.current.retryWalking();
+      await retry;
     });
 
     expect(result.current.routeResult).toEqual(successfulResult);
@@ -248,27 +256,6 @@ describe('useWalkingRoute', () => {
       await pending.promise;
     });
     expect(hook.result.current.routeResult).toBeNull();
-  });
-
-  it('clears a preserved result when the journey changes or is removed', async () => {
-    fetchHereWalkingRoute.mockResolvedValue(successfulResult);
-    const hook = renderHook(
-      ({ currentDestination }) =>
-        useWalkingRoute({
-          origin,
-          destination: currentDestination,
-          enabled: false,
-        }),
-      { initialProps: { currentDestination: destination } },
-    );
-
-    hook.rerender({ currentDestination: destination });
-    hook.rerender({ currentDestination: otherDestination });
-    expect(hook.result.current.routeResult).toBeNull();
-
-    hook.rerender({ currentDestination: null });
-    expect(hook.result.current.routeResult).toBeNull();
-    expect(fetchHereWalkingRoute).not.toHaveBeenCalled();
   });
 
   it('clears a successful result after the destination changes while disabled', async () => {

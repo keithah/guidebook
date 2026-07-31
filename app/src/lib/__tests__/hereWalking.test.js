@@ -352,6 +352,31 @@ describe('fetchHereWalkingRoute', () => {
     expect(put.mock.calls[0][0].key).not.toContain(apiKey);
   });
 
+  it('deletes an expired cache entry and fetches a fresh route', async () => {
+    const remove = vi.spyOn(providerResponseStore, 'delete');
+    const fetchImpl = vi.fn().mockResolvedValue(
+      hereResponse(walkingFixture, {
+        headers: { 'cache-control': 'max-age=60' },
+      }),
+    );
+
+    const first = await fetchHereWalkingRoute(origin, destination, {
+      apiKey,
+      fetchImpl,
+      now: () => fetchedAt,
+    });
+    const second = await fetchHereWalkingRoute(origin, destination, {
+      apiKey,
+      fetchImpl,
+      now: () => fetchedAt + 60_001,
+    });
+
+    expect(first.source).toBe('network');
+    expect(second.source).toBe('network');
+    expect(remove).toHaveBeenCalledWith(cacheKey);
+    expect(fetchImpl).toHaveBeenCalledTimes(2);
+  });
+
   it.each([
     ['marked no-store', { 'cache-control': 'no-store' }],
     ['missing positive cache headers', undefined],

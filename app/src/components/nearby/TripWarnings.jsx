@@ -3,6 +3,11 @@ import { colors } from '../../theme.js';
 const HIGH_IMPACT = /(SIGNIFICANT|SEVERE|NO[_\s-]?SERVICE|STOPPED)/i;
 const SERVICE_CHANGE = /(MODIFIED|DETOUR|REDUCED|ADDITIONAL|CHANGE)/i;
 
+/**
+ * Select visual warning treatment for a provider severity value.
+ * @param {string} severity - Provider warning severity.
+ * @returns {Object} Warning presentation.
+ */
 function presentationFor(severity) {
   const value = String(severity ?? '').trim();
   if (HIGH_IMPACT.test(value)) {

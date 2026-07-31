@@ -56,6 +56,15 @@ function ExternalDirections({ externalUrl }) {
   );
 }
 
+/**
+ * Render one endpoint in the walking journey summary.
+ * @param {Object} props - Endpoint properties.
+ * @param {string} props.label - Endpoint type label.
+ * @param {Object|null} props.place - Normalized route place.
+ * @param {string|null} props.time - Provider timestamp.
+ * @param {string} props.fallbackPlace - Label used when the place is unavailable.
+ * @returns {JSX.Element} The endpoint summary.
+ */
 function Endpoint({ label, place, time, fallbackPlace }) {
   const placeName =
     typeof place?.name === 'string' && place.name.trim()
@@ -276,7 +285,7 @@ export default function WalkingJourney({ result, onRetry, externalUrl }) {
           )}
 
           {notices.length > 0 && (
-            <div
+            <section
               aria-label="Walking route notices"
               style={{
                 marginTop: 11,
@@ -293,7 +302,7 @@ export default function WalkingJourney({ result, onRetry, externalUrl }) {
                   {notice.title || 'Walking route notice'}
                 </div>
               ))}
-            </div>
+            </section>
           )}
         </>
       )}

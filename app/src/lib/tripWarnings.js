@@ -33,17 +33,33 @@ function canonicalAgency(...values) {
   return agencies[0] ?? '';
 }
 
+/**
+ * Normalize a value for exact provider identifier comparisons.
+ * @param {*} value - Provider identifier.
+ * @returns {string} Trimmed uppercase identifier.
+ */
 function comparable(value) {
   return String(value ?? '')
     .trim()
     .toUpperCase();
 }
 
+/**
+ * Parse a provider timestamp when it is valid.
+ * @param {*} value - Timestamp value.
+ * @returns {number|null} Milliseconds since the epoch, or null.
+ */
 function timeValue(value) {
   const time = Date.parse(value ?? '');
   return Number.isFinite(time) ? time : null;
 }
 
+/**
+ * Determine whether any alert period overlaps a transit leg.
+ * @param {Array<Object>} periods - Alert active periods.
+ * @param {Object} leg - Transit leg.
+ * @returns {boolean} Whether the alert can be active during the leg.
+ */
 function periodsOverlapLeg(periods, leg) {
   const legStart = timeValue(leg.departureTime) ?? Number.NEGATIVE_INFINITY;
   const legEnd = timeValue(leg.arrivalTime) ?? Number.POSITIVE_INFINITY;
@@ -56,6 +72,11 @@ function periodsOverlapLeg(periods, leg) {
   });
 }
 
+/**
+ * Collect comparable stop identifiers visited by a transit leg.
+ * @param {Object} leg - Transit leg.
+ * @returns {Set<string>} Stop IDs and public stop codes.
+ */
 function stopIdsFor(leg) {
   const places = [
     leg.departure,
@@ -70,6 +91,11 @@ function stopIdsFor(leg) {
   );
 }
 
+/**
+ * Read the first available direction identifier from a transit leg.
+ * @param {Object} leg - Transit leg.
+ * @returns {string} Comparable direction identifier.
+ */
 function directionFor(leg) {
   return comparable(
     leg.directionId ??
@@ -79,10 +105,24 @@ function directionFor(leg) {
   );
 }
 
+/**
+ * Read the most conservative available route identifier from a transit leg.
+ * @param {Object} leg - Transit leg.
+ * @returns {string} Comparable route identifier.
+ */
 function routeFor(leg) {
-  return comparable(leg.transport?.shortName ?? leg.transport?.routeId);
+  return comparable(
+    leg.transport?.shortName ?? leg.transport?.routeId ?? leg.transport?.name,
+  );
 }
 
+/**
+ * Determine whether one informed entity applies to a transit leg.
+ * @param {Object} entity - Normalized informed entity.
+ * @param {Object} alert - Parent service alert.
+ * @param {Object} leg - Candidate transit leg.
+ * @returns {boolean} Whether the entity applies to the leg.
+ */
 function entityMatchesLeg(entity, alert, leg) {
   const alertRoute = comparable(entity?.routeId);
   if (!alertRoute || alertRoute !== routeFor(leg)) return false;
@@ -105,12 +145,22 @@ function entityMatchesLeg(entity, alert, leg) {
   return true;
 }
 
+/**
+ * Normalize provider warning copy for display and deduplication.
+ * @param {*} value - Provider warning value.
+ * @returns {string} Single-spaced warning text.
+ */
 function warningText(value) {
   return String(value ?? '')
     .trim()
     .replace(/\s+/g, ' ');
 }
 
+/**
+ * Collect HERE incidents and notices attached to a trip.
+ * @param {Object} trip - Normalized HERE trip.
+ * @returns {Array<Object>} Normalized HERE warnings.
+ */
 function hereWarnings(trip) {
   const sections = Array.isArray(trip?.sections) ? trip.sections : [];
   const incidents = sections.flatMap((section, sectionIndex) =>
@@ -156,6 +206,12 @@ function hereWarnings(trip) {
   return [...incidents, ...notices];
 }
 
+/**
+ * Collect 511 alerts that match at least one transit leg in a trip.
+ * @param {Object} trip - Normalized HERE trip.
+ * @param {Array<Object>} alerts - Normalized 511 alerts.
+ * @returns {Array<Object>} Route-relevant 511 warnings.
+ */
 function alertWarnings(trip, alerts) {
   const legs = (Array.isArray(trip?.sections) ? trip.sections : []).filter(
     (section) => section?.type === 'transit',
@@ -184,6 +240,11 @@ function alertWarnings(trip, alerts) {
   });
 }
 
+/**
+ * Remove warnings with duplicate IDs or normalized copy.
+ * @param {Array<Object>} warnings - Candidate warnings.
+ * @returns {Array<Object>} Deduplicated warnings.
+ */
 function deduplicateWarnings(warnings) {
   const ids = new Set();
   const text = new Set();

@@ -12,6 +12,7 @@ import WalkingJourney from '../nearby/WalkingJourney.jsx';
 import RideshareOptions from '../nearby/RideshareOptions.jsx';
 import { distanceMiles, stopHeadsToward } from '../../lib/geocode.js';
 import { googleMapsDirectionsUrl } from '../../lib/mapsDirections.js';
+import { isFinitePosition } from '../../lib/providerFetch.js';
 import { useHereTripPlanner } from '../../hooks/useHereTripPlanner.js';
 import { useLiveDepartures } from '../../hooks/useLiveDepartures.js';
 import { useSavedDestinations } from '../../hooks/useSavedDestinations.js';
@@ -84,10 +85,12 @@ export default function Nearby() {
       planner.routeResult.trips?.length,
   );
   const { alerts } = useTransitAlerts('SF', { enabled: alertsEnabled });
-  const transitExternalUrl = selectedPosition
+  const canLinkToExternalDirections =
+    isFinitePosition(origin) && isFinitePosition(selectedPosition);
+  const transitExternalUrl = canLinkToExternalDirections
     ? googleMapsDirectionsUrl(origin, selectedPosition, 'transit')
     : undefined;
-  const walkingExternalUrl = selectedPosition
+  const walkingExternalUrl = canLinkToExternalDirections
     ? googleMapsDirectionsUrl(origin, selectedPosition, 'walking')
     : undefined;
   const nearBase =
@@ -291,7 +294,7 @@ export default function Nearby() {
             }}
           />
 
-          {selectedPosition && (
+          {canLinkToExternalDirections && (
             <div style={{ marginTop: -8, color: colors.muted, fontSize: 12 }}>
               {distanceMiles(nearBase.point, selectedPosition).toFixed(1)} mi
               from {nearBase.label}
@@ -313,6 +316,7 @@ export default function Nearby() {
               {planner.routeResult && !planner.routeResult.ok && (
                 <button
                   type="button"
+                  className="journey-text-button"
                   onClick={planner.retryRoutes}
                   style={{
                     minHeight: 44,

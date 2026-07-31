@@ -7,13 +7,35 @@ const BART_COLORS = {
   GREEN: '#4DB848', ORANGE: '#F7931D',
 };
 
+/**
+ * Normalize a provider value into trimmed text.
+ * @param {*} value - Provider value.
+ * @returns {string} Trimmed text.
+ */
 const token = (value) => String(value ?? '').trim();
+
+/**
+ * Normalize a transit mode for conservative comparisons.
+ * @param {*} value - Provider transit mode.
+ * @returns {string} Lowercase mode without separators.
+ */
 const modeToken = (value) => token(value).replace(/[-_\s]/g, '').toLowerCase();
 
+/**
+ * Accept only full six-digit hexadecimal transit colors.
+ * @param {*} value - Provider color value.
+ * @param {string} [fallback='#5A6B65'] - Color returned for invalid input.
+ * @returns {string} Safe color value.
+ */
 export function safeTransitColor(value, fallback = '#5A6B65') {
   return /^#[0-9a-f]{6}$/i.test(token(value)) ? token(value) : fallback;
 }
 
+/**
+ * Calculate the WCAG relative luminance of a six-digit hex color.
+ * @param {string} color - Six-digit hexadecimal color.
+ * @returns {number} Relative luminance.
+ */
 function relativeLuminance(color) {
   const channels = color
     .slice(1)
@@ -27,6 +49,12 @@ function relativeLuminance(color) {
   return 0.2126 * channels[0] + 0.7152 * channels[1] + 0.0722 * channels[2];
 }
 
+/**
+ * Calculate the WCAG contrast ratio between two colors.
+ * @param {string} first - First six-digit hexadecimal color.
+ * @param {string} second - Second six-digit hexadecimal color.
+ * @returns {number} Contrast ratio.
+ */
 function contrastRatio(first, second) {
   const firstLuminance = relativeLuminance(first);
   const secondLuminance = relativeLuminance(second);
@@ -35,6 +63,12 @@ function contrastRatio(first, second) {
   return (lighter + 0.05) / (darker + 0.05);
 }
 
+/**
+ * Choose a contrast-safe foreground for a transit line background.
+ * @param {string} background - Safe line background color.
+ * @param {*} providerColor - Optional provider foreground color.
+ * @returns {string} Contrast-safe foreground color.
+ */
 function readableForeground(background, providerColor) {
   const safeProviderColor = safeTransitColor(providerColor, '');
   if (
@@ -50,6 +84,11 @@ function readableForeground(background, providerColor) {
     : '#FFFFFF';
 }
 
+/**
+ * Classify a normalized transit section into operator, vehicle, and colors.
+ * @param {Object} section - Normalized transit section.
+ * @returns {Object} Display identity for the transit leg.
+ */
 export function classifyTransitLeg(section) {
   const agencyText = [section?.agency?.id, section?.agency?.name].filter(Boolean).join(' ');
   const transport = section?.transport ?? {};

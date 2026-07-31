@@ -88,6 +88,20 @@ describe('warningsForTrip', () => {
     );
   });
 
+  it('uses an exact transport name only when route identifiers are absent', () => {
+    const exactNameTrip = transitTrip();
+    delete exactNameTrip.sections[0].transport.shortName;
+    delete exactNameTrip.sections[0].transport.routeId;
+    exactNameTrip.sections[0].transport.name = 'K';
+
+    expect(
+      warningsForTrip(exactNameTrip, alerts).map((warning) => warning.header),
+    ).toContain('K Ingleside delay');
+
+    exactNameTrip.sections[0].transport.name = 'K Ingleside';
+    expect(warningsForTrip(exactNameTrip, alerts)).toEqual([]);
+  });
+
   it('excludes a matching route outside every active period', () => {
     expect(
       warningsForTrip(

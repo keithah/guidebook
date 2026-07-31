@@ -420,6 +420,7 @@ describe('Nearby', () => {
     const retryButton = screen.getByRole('button', {
       name: 'Retry transit directions',
     });
+    expect(retryButton).toHaveClass('journey-text-button');
 
     fireEvent.click(retryButton);
     expect(fetchHereTransitRoutes).toHaveBeenCalledTimes(2);
@@ -429,6 +430,44 @@ describe('Nearby', () => {
     ).not.toBeInTheDocument();
     expect(
       screen.queryByRole('button', { name: 'Retry transit directions' }),
+    ).not.toBeInTheDocument();
+  });
+
+  it('keeps the journey UI readable when a selected result has invalid coordinates', async () => {
+    searchHereDestinations.mockResolvedValueOnce({
+      ok: true,
+      candidates: [
+        {
+          ...unionSquare,
+          id: 'here:invalid-position',
+          position: { lat: Number.NaN, lng: Number.POSITIVE_INFINITY },
+        },
+      ],
+      source: 'network',
+    });
+    renderNearby();
+
+    fireEvent.change(screen.getByRole('searchbox', { name: /destination/i }), {
+      target: { value: 'Invalid destination' },
+    });
+    fireEvent.click(screen.getByRole('button', { name: 'Go' }));
+    fireEvent.click(
+      await screen.findByRole('button', { name: /choose union square/i }),
+    );
+
+    expect(screen.getByRole('group', { name: 'Travel mode' })).toBeVisible();
+    expect(screen.queryByText(/NaN|Infinity/)).not.toBeInTheDocument();
+    expect(
+      screen.queryByRole('link', {
+        name: /open transit directions in google maps/i,
+      }),
+    ).not.toBeInTheDocument();
+    fireEvent.click(screen.getByRole('button', { name: 'Walk' }));
+    expect(screen.getByRole('region', { name: 'Walking directions' })).toBeVisible();
+    expect(
+      screen.queryByRole('link', {
+        name: /open walking directions in google maps/i,
+      }),
     ).not.toBeInTheDocument();
   });
 

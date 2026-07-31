@@ -72,6 +72,9 @@ describe('WalkingJourney', () => {
     expect(
       within(region).getByText('Part of this route may be private.'),
     ).toBeVisible();
+    expect(
+      within(region).getByRole('region', { name: 'Walking route notices' }),
+    ).toBeVisible();
     expect(within(region).getByRole('status', { name: /live/i })).toBeVisible();
     expect(
       within(region).getByRole('link', {

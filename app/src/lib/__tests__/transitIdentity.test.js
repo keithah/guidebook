@@ -29,15 +29,23 @@ describe('classifyTransitLeg', () => {
   });
 
   it('classifies every BART color line as a train and keeps its name', () => {
-    for (const line of ['Blue', 'Yellow', 'Red', 'Green', 'Orange']) {
+    const colors = {
+      Blue: '#009BDA',
+      Yellow: '#F9DF3A',
+      Red: '#ED1C24',
+      Green: '#4DB848',
+      Orange: '#F7931D',
+    };
+    for (const [line, color] of Object.entries(colors)) {
       expect(classifyTransitLeg(section(
         { id: 'BART', name: 'Bay Area Rapid Transit' },
         { mode: 'subway', shortName: line, name: `${line} Line` },
       ))).toMatchObject({
         operator: 'bart', operatorLabel: 'BART', vehicle: 'train',
-        lineLabel: line, accessibleLabel: `BART ${line} train`,
+        lineLabel: line, color, accessibleLabel: `BART ${line} train`,
       });
     }
+    expect(new Set(Object.values(colors))).toHaveLength(5);
   });
 
   it('uses the explicit rail mode before the digit-leading fallback', () => {

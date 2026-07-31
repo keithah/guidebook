@@ -38,6 +38,11 @@ export function useWalkingRoute({ origin, destination, enabled }) {
   const requestWalking = useCallback(async () => {
     if (!journeyKey) return null;
 
+    setPublishedResult((current) =>
+      current.journeyKey === journeyKey && current.result?.ok === false
+        ? { journeyKey, result: null }
+        : current,
+    );
     controllerRef.current?.abort();
     const controller = new AbortController();
     controllerRef.current = controller;

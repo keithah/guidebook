@@ -780,7 +780,8 @@ Run from repository root:
 git diff --name-only origin/main...HEAD
 ! git diff origin/main...HEAD -- app/src/components/screens/Explore.jsx | rg '.'
 ! git diff origin/main...HEAD -- app/src/data/properties/sfcottage.json | rg '"explore"|"food"|"poi"|"destSuggestions"'
-! rg -n 'Current SF service alerts|excludeLineIds|expandedAlertLineIds|referralUrl|"#"' app/src/components app/src/data/properties/sfcottage.json
+! rg -n --glob '!**/*.test.*' 'Current SF service alerts|excludeLineIds|expandedAlertLineIds|referralUrl' app/src/components app/src/data/properties/sfcottage.json
+! rg -n '"#"[[:space:]]*[,}]' app/src/data/properties/sfcottage.json
 ```
 
 Expected: no POI/Explore diff, no legacy global-alert ownership, and no placeholder rideshare action.

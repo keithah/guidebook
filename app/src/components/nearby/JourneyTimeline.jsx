@@ -4,6 +4,11 @@ import JourneyIcon from './JourneyIcon.jsx';
 import TransitIdentity from './TransitIdentity.jsx';
 import { formatDuration } from './itineraryFormat.jsx';
 
+/**
+ * Build a readable summary for a transit journey section.
+ * @param {Object} section - Normalized transit section.
+ * @returns {string} Route and destination summary.
+ */
 function transitDescription(section) {
   const line =
     section.transport?.name ?? section.transport?.shortName ?? 'Transit';
