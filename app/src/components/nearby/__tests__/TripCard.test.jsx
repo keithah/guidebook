@@ -26,13 +26,24 @@ const transitTrip = {
     {
       id: 's2',
       type: 'transit',
-      transport: { shortName: 'K', name: 'K Ingleside', headsign: 'Embarcadero' },
+      agency: { id: 'SFMTA', name: 'Muni' },
+      transport: {
+        mode: 'lightRail',
+        shortName: 'K',
+        name: 'K Ingleside',
+        headsign: 'Embarcadero',
+      },
     },
     {
       id: 's3',
       type: 'transit',
+      agency: { id: 'SFMTA', name: 'Muni' },
       // no shortName — line id must derive from the first word of `name`
-      transport: { name: '38R Geary Rapid', headsign: 'Transit Center' },
+      transport: {
+        mode: 'bus',
+        name: '38R Geary Rapid',
+        headsign: 'Transit Center',
+      },
     },
   ],
 };
@@ -46,6 +57,20 @@ const walkingOnlyTrip = {
   transferCount: 0,
   lines: [],
   sections: [{ type: 'pedestrian', label: 'Walking directions' }],
+};
+
+const bartTrip = {
+  ...transitTrip,
+  id: 'trip-bart',
+  lines: [{ name: 'BART Yellow' }],
+  sections: [
+    {
+      id: 'bart-yellow',
+      type: 'transit',
+      agency: { id: 'BART', name: 'Bay Area Rapid Transit' },
+      transport: { mode: 'train', shortName: 'Yellow' },
+    },
+  ],
 };
 
 function renderCard(overrides = {}) {
@@ -91,6 +116,18 @@ describe('TripCard', () => {
     expect(
       screen.getByText('38R Geary Rapid toward Transit Center'),
     ).toBeVisible();
+  });
+
+  it('renders one accessible BART identity with a decorative bundled logo', () => {
+    renderCard({ trip: bartTrip });
+
+    const identities = screen.getAllByRole('img', {
+      name: 'BART Yellow train',
+    });
+    expect(identities).toHaveLength(1);
+    const logo = identities[0].querySelector('img[src$="bart-logo.svg"]');
+    expect(logo).toHaveAttribute('alt', '');
+    expect(logo).toHaveAttribute('aria-hidden', 'true');
   });
 
   it('falls back to the first section label when a trip has no transit sections', () => {
@@ -210,7 +247,7 @@ describe('TripCard', () => {
     ).toHaveAttribute('href', 'https://example.test/directions');
   });
 
-  it('shows compact warnings before the toggle and detailed warnings above the itinerary', () => {
+  it('marks only affected lines while collapsed and shows warning details once when expanded', () => {
     const warnings = [
       {
         id: 'k-alert',
@@ -219,6 +256,7 @@ describe('TripCard', () => {
         severity: 'SIGNIFICANT_DELAYS',
         source: '511',
         url: 'https://example.test/k-alert',
+        sectionIds: ['s2'],
       },
     ];
     const { rerender } = render(
@@ -230,12 +268,21 @@ describe('TripCard', () => {
         warnings={warnings}
       />,
     );
-    const toggle = screen.getByRole('button', { name: /view full itinerary/i });
-    expect(screen.getByText('K service delay')).toBeVisible();
+    expect(screen.queryByText('K service delay')).not.toBeInTheDocument();
+    const advisory = screen.getByLabelText('Service advisory in full itinerary');
+    expect(advisory).toHaveTextContent('!');
+    expect(advisory).not.toHaveAttribute('aria-live');
+    expect(advisory).not.toHaveAttribute('role', 'alert');
+    expect(screen.getAllByLabelText(/Muni .* (train|bus)/)).toHaveLength(2);
     expect(
-      screen.getByRole('region', { name: 'Warnings for this trip' }),
-    ).toBe(toggle.previousElementSibling);
+      screen.getByLabelText(/^Muni 38R.* bus$/).parentElement,
+    ).not.toContainElement(advisory);
     expect(screen.queryByText('Allow extra travel time.')).not.toBeInTheDocument();
+    expect(screen.queryByText('High impact')).not.toBeInTheDocument();
+    expect(screen.queryByText('511')).not.toBeInTheDocument();
+    expect(
+      screen.queryByRole('link', { name: 'Read K service delay warning' }),
+    ).not.toBeInTheDocument();
 
     rerender(
       <TripCard
@@ -247,11 +294,37 @@ describe('TripCard', () => {
       />,
     );
 
-    expect(screen.getAllByText('K service delay')).toHaveLength(2);
+    expect(screen.getAllByText('K service delay')).toHaveLength(1);
     expect(screen.getByText('Allow extra travel time.')).toBeVisible();
+    expect(screen.getByText('High impact')).toBeVisible();
+    expect(screen.getByText('511')).toBeVisible();
+    expect(
+      screen.getByRole('link', { name: 'Read K service delay warning' }),
+    ).toHaveAttribute('href', 'https://example.test/k-alert');
     const itinerary = screen.getByTestId('itinerary-steps-stub');
     expect(
-      screen.getAllByRole('region', { name: 'Warnings for this trip' })[1],
+      screen.getByRole('region', { name: 'Warnings for this trip' }),
     ).toBe(itinerary.previousElementSibling);
+  });
+
+  it('does not mark any line for an unscoped trip warning', () => {
+    renderCard({
+      warnings: [
+        {
+          id: 'trip-notice',
+          header: 'Trip notice',
+          description: 'Read the full itinerary.',
+          severity: 'info',
+          source: 'HERE',
+          url: '',
+          sectionIds: [],
+        },
+      ],
+    });
+
+    expect(
+      screen.queryByLabelText('Service advisory in full itinerary'),
+    ).not.toBeInTheDocument();
+    expect(screen.queryByText('Trip notice')).not.toBeInTheDocument();
   });
 });

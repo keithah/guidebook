@@ -1,0 +1,93 @@
+{
+  "boards": [
+    {
+      "place": { "id": "3516_3408" },
+      "departures": [
+        {
+          "time": "2026-07-30T10:08:00-07:00",
+          "delay": 30,
+          "transport": {
+            "mode": "bus",
+            "shortName": "14",
+            "name": "14 Mission",
+            "headsign": "Ferry Plaza",
+            "color": "#C9413D"
+          },
+          "agency": { "id": "SFMTA", "name": "Muni" }
+        },
+        {
+          "time": "2026-07-30T10:03:00-07:00",
+          "delay": 0,
+          "transport": {
+            "mode": "bus",
+            "shortName": "14",
+            "name": "14 Mission",
+            "headsign": "Ferry Plaza",
+            "color": "#C9413D"
+          },
+          "agency": { "id": "SFMTA", "name": "Muni" }
+        },
+        {
+          "time": "2026-07-30T10:13:00-07:00",
+          "transport": {
+            "mode": "bus",
+            "shortName": "14",
+            "name": "14 Mission",
+            "headsign": "Ferry Plaza",
+            "color": "#C9413D"
+          },
+          "agency": { "id": "SFMTA", "name": "Muni" }
+        },
+        {
+          "time": "not-a-time",
+          "delay": 5,
+          "transport": { "mode": "bus", "shortName": "14" },
+          "agency": { "id": "SFMTA", "name": "Muni" }
+        },
+        {
+          "time": "2026-07-30T10:20:00-07:00",
+          "agency": { "id": "SFMTA", "name": "Muni" }
+        }
+      ]
+    },
+    {
+      "place": { "id": "platform-a" },
+      "departures": [
+        {
+          "time": "2026-07-30T10:06:00-07:00",
+          "delay": 90,
+          "transport": {
+            "mode": "subway",
+            "shortName": "Yellow",
+            "name": "Yellow Line",
+            "headsign": "Antioch"
+          },
+          "agency": { "id": "BART", "name": "Bay Area Rapid Transit" }
+        }
+      ]
+    },
+    {
+      "place": { "id": "platform-b" },
+      "departures": [
+        {
+          "time": "2026-07-30T10:04:00-07:00",
+          "transport": {
+            "mode": "metro",
+            "shortName": "K",
+            "name": "K Ingleside",
+            "headsign": "Balboa Park",
+            "color": "#005B95"
+          },
+          "agency": {
+            "id": "SFMTA",
+            "name": "San Francisco Municipal Transportation Agency"
+          }
+        }
+      ]
+    },
+    {
+      "place": { "id": "empty-board" },
+      "departures": []
+    }
+  ]
+}

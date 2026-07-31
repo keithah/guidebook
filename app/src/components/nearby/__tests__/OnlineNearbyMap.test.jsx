@@ -27,12 +27,13 @@ vi.mock('react-leaflet', () => ({
       </button>
     </div>
   ),
-  Marker: ({ position, icon, children }) => (
+  Marker: ({ position, icon, title, children }) => (
     <div
       data-testid="marker"
       data-position={JSON.stringify(position)}
       data-icon-class={icon?.className}
-      data-icon-html={icon?.html}
+      data-icon-html={icon?.html?.outerHTML ?? icon?.html}
+      data-title={title}
     >
       {children}
     </div>
@@ -41,6 +42,7 @@ vi.mock('react-leaflet', () => ({
   useMap: vi.fn(),
 }));
 
+import L from 'leaflet';
 import { useMap } from 'react-leaflet';
 import OnlineNearbyMap from '../OnlineNearbyMap.jsx';
 
@@ -59,6 +61,7 @@ function getMarkers() {
 
 afterEach(() => {
   cleanup();
+  vi.mocked(L.divIcon).mockClear();
   vi.mocked(useMap).mockReset();
 });
 
@@ -117,7 +120,7 @@ describe('OnlineNearbyMap', () => {
     );
   });
 
-  it('renders a "you are here" marker only when showMe is true', () => {
+  it('renders an exact "You" marker only when showMe is true', () => {
     useMap.mockReturnValue({ fitBounds: vi.fn() });
     const { rerender } = render(
       <OnlineNearbyMap
@@ -151,30 +154,10 @@ describe('OnlineNearbyMap', () => {
       'data-position',
       JSON.stringify([center.lat, center.lng]),
     );
-    expect(within(meMarker).getByTestId('popup')).toHaveTextContent(
-      'You are here',
-    );
-  });
-
-  it('adds a stay location label when the user and cottage positions match', () => {
-    useMap.mockReturnValue({ fitBounds: vi.fn() });
-    render(
-      <OnlineNearbyMap
-        center={cottage}
-        cottage={cottage}
-        stops={[]}
-        showMe
-        locationLabel="1620 Howard St, San Francisco"
-        dest={null}
-        onTileFailure={vi.fn()}
-      />,
-    );
-
-    const meMarker = getMarkers().find(
-      (marker) => marker.getAttribute('data-icon-class') === 'sfc-me-pin',
-    );
-    expect(within(meMarker).getByTestId('popup')).toHaveTextContent(
-      'You are here · 1620 Howard St, San Francisco',
+    expect(meMarker).toHaveAttribute('data-title', 'You');
+    expect(within(meMarker).getByTestId('popup')).toHaveTextContent(/^You$/);
+    expect(within(meMarker).getByTestId('popup')).not.toHaveTextContent(
+      '1620 Howard',
     );
   });
 
@@ -205,7 +188,10 @@ describe('OnlineNearbyMap', () => {
       'data-position',
       JSON.stringify([stops[0].lat, stops[0].lng]),
     );
-    expect(kMarker.getAttribute('data-icon-html')).toContain('#569BBE'); // K line color
+    const lineIcons = vi.mocked(L.divIcon).mock.calls
+      .map(([options]) => options)
+      .filter(({ className }) => className === 'sfc-line-pin');
+    expect(lineIcons[0].html).toHaveStyle({ background: '#569BBE' });
     expect(within(kMarker).getByTestId('popup')).toHaveTextContent(
       'Church St & 22nd',
     );
@@ -213,16 +199,52 @@ describe('OnlineNearbyMap', () => {
       'Muni K, inbound',
     );
 
-    const bartMarker = stopMarkers[1];
-    expect(bartMarker.getAttribute('data-icon-html')).toContain('#0077C0');
-    expect(bartMarker.getAttribute('data-icon-html')).toContain('>ba<');
+    expect(lineIcons[1].html).toHaveStyle({ background: '#0077C0' });
+    expect(lineIcons[1].html.querySelector('img')).toHaveAttribute(
+      'src',
+      expect.stringMatching(/bart-logo\.svg$/),
+    );
+    expect(lineIcons[1].html.textContent).toBe('');
 
     const busMarker = stopMarkers[2];
-    expect(busMarker.getAttribute('data-icon-html')).toContain('>29<');
+    expect(busMarker).toBeVisible();
+    expect(lineIcons[2].html.textContent).toBe('29');
 
     // Unknown lines fall back to the default gray pin color.
     const unknownMarker = stopMarkers[3];
-    expect(unknownMarker.getAttribute('data-icon-html')).toContain('#5A6B65');
+    expect(unknownMarker).toBeVisible();
+    expect(lineIcons[3].html).toHaveStyle({ background: '#5A6B65' });
+  });
+
+  it('escapes provider-controlled line labels before passing icon HTML to Leaflet', () => {
+    useMap.mockReturnValue({ fitBounds: vi.fn() });
+    const hostileLine = `<img src="x&y" onerror='alert(1)'>`;
+    render(
+      <OnlineNearbyMap
+        center={center}
+        cottage={cottage}
+        stops={[
+          {
+            name: 'Hostile label stop',
+            sub: 'Provider supplied',
+            lat: 37.74,
+            lng: -122.41,
+            line: hostileLine,
+          },
+        ]}
+        showMe={false}
+        dest={null}
+        onTileFailure={vi.fn()}
+      />,
+    );
+
+    const icon = vi.mocked(L.divIcon).mock.calls
+      .map(([options]) => options)
+      .find(({ className }) => className === 'sfc-line-pin');
+    expect(icon.html).toBeInstanceOf(HTMLElement);
+    expect(icon.html.textContent).toBe(hostileLine);
+    expect(icon.html.querySelector('img')).toBeNull();
+    expect(icon.html.querySelector('[onerror]')).toBeNull();
   });
 
   it('renders a destination marker only when dest is supplied', () => {

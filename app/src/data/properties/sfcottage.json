@@ -297,12 +297,67 @@
         "detail": "Ask for 251 Harold Ave. Drivers can pull into the driveway."
       }
     ],
-    "destSuggestions": [
-      "Downtown / Union Square",
-      "SFO",
-      "Golden Gate Park",
-      "The Mission",
-      "Ocean Beach"
+    "quickDestinations": [
+      {
+        "id": "cottage",
+        "buttonLabel": "⌂ Take me back to the cottage",
+        "title": "The SF Cottage",
+        "address": "251 Harold Ave, San Francisco, CA",
+        "position": { "lat": 37.7226, "lng": -122.4547 },
+        "resultType": "property",
+        "categories": [],
+        "distanceMeters": null
+      },
+      {
+        "id": "union-square",
+        "buttonLabel": "Downtown / Union Square",
+        "title": "Union Square",
+        "address": "Union Square, San Francisco, CA",
+        "position": { "lat": 37.78782, "lng": -122.40748 },
+        "resultType": "locality",
+        "categories": [],
+        "distanceMeters": null
+      },
+      {
+        "id": "sfo",
+        "buttonLabel": "SFO",
+        "title": "San Francisco International Airport",
+        "address": "San Francisco International Airport, CA",
+        "position": { "lat": 37.62131, "lng": -122.37896 },
+        "resultType": "airport",
+        "categories": [],
+        "distanceMeters": null
+      },
+      {
+        "id": "golden-gate-park",
+        "buttonLabel": "Golden Gate Park",
+        "title": "Golden Gate Park",
+        "address": "Golden Gate Park, San Francisco, CA",
+        "position": { "lat": 37.77181, "lng": -122.48088 },
+        "resultType": "locality",
+        "categories": [],
+        "distanceMeters": null
+      },
+      {
+        "id": "mission-district",
+        "buttonLabel": "The Mission",
+        "title": "Mission District",
+        "address": "Mission District, San Francisco, CA",
+        "position": { "lat": 37.75993, "lng": -122.41808 },
+        "resultType": "locality",
+        "categories": [],
+        "distanceMeters": null
+      },
+      {
+        "id": "ocean-beach",
+        "buttonLabel": "Ocean Beach",
+        "title": "Ocean Beach",
+        "address": "Ocean Beach, San Francisco, CA",
+        "position": { "lat": 37.75975, "lng": -122.51016 },
+        "resultType": "locality",
+        "categories": [],
+        "distanceMeters": null
+      }
     ],
     "rides": [
       {

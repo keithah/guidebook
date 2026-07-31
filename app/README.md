@@ -23,11 +23,11 @@ VITE_HERE_API_KEY=
 VITE_API_511_KEY=
 ```
 
-- `VITE_HERE_API_KEY` is a browser key for HERE Discover and HERE Public
-  Transit Routing. In HERE Access Manager, restrict it to the origins used by
-  this app: `https://keithah.github.io`, `http://localhost:5173`, and
-  `http://127.0.0.1:4173`. Add another exact local origin only when intentionally
-  running Vite on a different host or port.
+- `VITE_HERE_API_KEY` is a browser key for HERE Geocoding and HERE Public
+  Transit routing, station, and departure APIs. In HERE Access Manager,
+  restrict it to the origins used by this app: `https://keithah.github.io`,
+  `http://localhost:5173`, and `http://127.0.0.1:4173`. Add another exact local
+  origin only when intentionally running Vite on a different host or port.
 - `VITE_API_511_KEY` is a 511 Open Data token from
   <https://511.org/open-data/token>.
 
@@ -37,14 +37,21 @@ Start the development server with `npm run dev` and open
 
 ## Provider responsibilities
 
-- HERE Discover returns up to five destination candidates. A guest must choose
-  the intended candidate; the app never silently selects the first result.
+- HERE Geocoding returns up to five address or locality candidates. Business
+  and other POI results are excluded, and a guest must choose the intended
+  candidate; the app never silently selects the first result.
 - HERE Public Transit Routing returns up to three complete door-to-door
   itineraries, including walking, transit, transfers, intermediate stops, and
   the final arrival.
-- 511 supplies authoritative nearby departure boards and San Francisco service
-  alerts. Curated times and instructions in
-  `src/data/properties/sfcottage.json` remain available when live data fails.
+- HERE Public Transit supplies stations and departure boards near the active,
+  consented origin. Nearby refreshes no sooner than every five minutes and
+  renders `Nearby departures unavailable` when no usable provider response is
+  available; it never substitutes the property's static stop rows or curated
+  times for another location.
+- 511 supplies San Francisco service alerts.
+- Quick destinations are canonical, property-controlled waypoints in
+  `src/data/properties/sfcottage.json`; they select a destination directly
+  without running a search or presenting a candidate list.
 
 The UI labels a network response `Live`, an unexpired stored response `Cached`,
 and a stored 511 response shown after a failed refresh `Last known`. Departure
@@ -53,8 +60,15 @@ minutes from retrieval. Alert data is fresh for ten minutes and may be shown as
 last known for at most 60 minutes from retrieval.
 
 HERE responses are persisted only when HERE's HTTP caching headers explicitly
-allow it. Current HERE `no-store` responses remain in application memory only
-for the active session and do not enter IndexedDB or Cache Storage.
+allow it, and only after they have been normalized to the application's route,
+station, or departure model. Current HERE `no-store` responses remain in
+application memory only for the active session and do not enter IndexedDB or
+Cache Storage.
+
+The bundled BART mark is used for provider identity without a remote image
+request. Its source and public-domain text-logo status are documented in
+[`src/assets/bart-logo.LICENSE.md`](src/assets/bart-logo.LICENSE.md); BART's
+trademark is not presented as an endorsement of this app.
 
 ## Storage and offline boundaries
 

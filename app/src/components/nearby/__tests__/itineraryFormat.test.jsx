@@ -14,10 +14,15 @@ describe('itinerary formatting', () => {
     expect(formatDuration(seconds)).toBe(expected);
   });
 
-  it('formats valid times and returns null for invalid values', () => {
-    expect(formatTime('2026-07-28T18:00:00.000Z')).toEqual(
-      expect.any(String),
-    );
+  it('formats valid times in San Francisco regardless of the process time zone', () => {
+    const previousTimeZone = process.env.TZ;
+    process.env.TZ = 'UTC';
+    try {
+      expect(formatTime('2026-07-28T10:00:00-07:00')).toBe('10:00 AM');
+    } finally {
+      if (previousTimeZone === undefined) delete process.env.TZ;
+      else process.env.TZ = previousTimeZone;
+    }
     expect(formatTime('garbage')).toBeNull();
   });
 

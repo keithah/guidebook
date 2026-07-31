@@ -1,0 +1,67 @@
+{
+  "items": [
+    {
+      "id": "here:af:houseNumber:1620-howard",
+      "title": "1620 Howard St",
+      "address": { "label": "1620 Howard St, San Francisco, CA 94103, United States" },
+      "position": { "lat": 37.77154, "lng": -122.41761 },
+      "resultType": "houseNumber",
+      "categories": [{ "name": "POI copy must not survive" }],
+      "distance": 25
+    },
+    {
+      "id": "here:af:street:valencia",
+      "title": "Valencia St",
+      "address": { "label": "Valencia St, San Francisco, CA, United States" },
+      "position": { "lat": 37.75986, "lng": -122.42118 },
+      "resultType": "street"
+    },
+    {
+      "id": "here:af:intersection:market-castro",
+      "title": "Market St & Castro St",
+      "address": { "label": "Market St & Castro St, San Francisco, CA 94114, United States" },
+      "position": { "lat": 37.76271, "lng": -122.43512 },
+      "resultType": "intersection",
+      "distance": 4100
+    },
+    {
+      "id": "here:af:postalCodePoint:94110",
+      "title": "94110",
+      "address": { "label": "San Francisco, CA 94110, United States" },
+      "position": { "lat": 37.74891, "lng": -122.41531 },
+      "resultType": "postalCodePoint"
+    },
+    {
+      "id": "here:af:locality:mission-district",
+      "title": "Mission District",
+      "address": { "label": "Mission District, San Francisco, CA, United States" },
+      "position": { "lat": 37.75993, "lng": -122.41808 },
+      "resultType": "locality",
+      "distance": 1700
+    },
+    {
+      "id": "here:af:administrativeArea:san-francisco",
+      "title": "San Francisco",
+      "address": { "label": "San Francisco, CA, United States" },
+      "position": { "lat": 37.77493, "lng": -122.41942 },
+      "resultType": "administrativeArea"
+    },
+    {
+      "id": "here:pds:place:coffee-shop",
+      "title": "Mission Coffee Shop",
+      "address": { "label": "Mission Coffee Shop, San Francisco, CA, United States" },
+      "position": { "lat": 37.771, "lng": -122.418 },
+      "resultType": "place",
+      "categories": [{ "name": "Coffee/Tea" }],
+      "distance": 50
+    },
+    {
+      "id": "here:af:houseNumber:malformed",
+      "title": "Malformed address",
+      "address": { "label": "San Francisco, CA, United States" },
+      "position": { "lat": "37.78", "lng": null },
+      "resultType": "houseNumber",
+      "distance": 10
+    }
+  ]
+}

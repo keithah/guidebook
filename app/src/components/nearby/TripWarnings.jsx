@@ -41,10 +41,9 @@ function presentationFor(severity) {
  * Displays warnings already matched to one trip.
  * @param {Object} props - Component properties.
  * @param {Array<Object>} [props.warnings=[]] - Relevant normalized warnings.
- * @param {boolean} [props.compact=false] - Whether to show card-summary content only.
  * @returns {JSX.Element|null} The warning block, or null when no warnings exist.
  */
-export default function TripWarnings({ warnings = [], compact = false }) {
+export default function TripWarnings({ warnings = [] }) {
   if (!Array.isArray(warnings) || warnings.length === 0) return null;
 
   return (
@@ -54,7 +53,7 @@ export default function TripWarnings({ warnings = [], compact = false }) {
         marginTop: 12,
         border: `1px solid ${colors.border}`,
         borderRadius: 12,
-        padding: compact ? '9px 11px' : '3px 12px',
+        padding: '3px 12px',
         background: colors.cream,
       }}
     >
@@ -69,7 +68,7 @@ export default function TripWarnings({ warnings = [], compact = false }) {
       >
         {warnings.length === 1 ? 'Service warning' : 'Service warnings'}
       </div>
-      <ul style={{ margin: compact ? '5px 0 0' : 0, padding: 0, listStyle: 'none' }}>
+      <ul style={{ margin: 0, padding: 0, listStyle: 'none' }}>
         {warnings.map((warning, index) => {
           const presentation = presentationFor(warning.severity);
           return (
@@ -80,7 +79,7 @@ export default function TripWarnings({ warnings = [], compact = false }) {
                 marginTop: index === 0 ? 0 : 5,
                 borderLeft: `4px solid ${presentation.border}`,
                 borderRadius: 8,
-                padding: compact ? '6px 8px' : '9px 10px',
+                padding: '9px 10px',
                 background: presentation.background,
               }}
             >
@@ -106,34 +105,32 @@ export default function TripWarnings({ warnings = [], compact = false }) {
                 <span aria-hidden="true">{presentation.icon} </span>
                 {warning.header}
               </div>
-              {!compact && (
-                <div
-                  style={{
-                    marginTop: 4,
-                    color: colors.mutedText,
-                    fontSize: 12,
-                    lineHeight: 1.5,
-                  }}
-                >
-                  {warning.description && <div>{warning.description}</div>}
-                  <div style={{ marginTop: warning.description ? 3 : 0 }}>
-                    <span>{warning.source}</span>
-                    {warning.url && (
-                      <>
-                        {' · '}
-                        <a
-                          href={warning.url}
-                          target="_blank"
-                          rel="noreferrer"
-                          aria-label={`Read ${warning.header} warning`}
-                        >
-                          Read warning ↗
-                        </a>
-                      </>
-                    )}
-                  </div>
+              <div
+                style={{
+                  marginTop: 4,
+                  color: colors.mutedText,
+                  fontSize: 12,
+                  lineHeight: 1.5,
+                }}
+              >
+                {warning.description && <div>{warning.description}</div>}
+                <div style={{ marginTop: warning.description ? 3 : 0 }}>
+                  <span>{warning.source}</span>
+                  {warning.url && (
+                    <>
+                      {' · '}
+                      <a
+                        href={warning.url}
+                        target="_blank"
+                        rel="noreferrer"
+                        aria-label={`Read ${warning.header} warning`}
+                      >
+                        Read warning ↗
+                      </a>
+                    </>
+                  )}
                 </div>
-              )}
+              </div>
             </li>
           );
         })}

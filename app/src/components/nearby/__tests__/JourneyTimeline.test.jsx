@@ -56,7 +56,9 @@ describe('JourneyTimeline', () => {
       name: 'BART Blue train',
     });
     expect(bartIdentity).toBeVisible();
-    expect(within(bartIdentity).getByText('ba')).toBeVisible();
+    const logo = bartIdentity.querySelector('img[src$="bart-logo.svg"]');
+    expect(logo).toHaveAttribute('alt', '');
+    expect(logo).toHaveAttribute('aria-hidden', 'true');
   });
 
   it('exposes robust list semantics and a visible keyboard focus indicator', () => {
@@ -130,5 +132,39 @@ describe('JourneyTimeline', () => {
       background: '#005B95',
       color: '#FFFFFF',
     });
+  });
+
+  it('marks only the affected transit identity with a non-live advisory', () => {
+    render(
+      <JourneyTimeline
+        sections={[
+          {
+            id: 'muni-k',
+            type: 'transit',
+            agency: { id: 'SFMTA' },
+            transport: { mode: 'lightRail', shortName: 'K' },
+          },
+          {
+            id: 'muni-38r',
+            type: 'transit',
+            agency: { id: 'SFMTA' },
+            transport: { mode: 'bus', shortName: '38R' },
+          },
+        ]}
+        advisorySectionIds={new Set(['muni-k'])}
+      />,
+    );
+
+    expect(screen.getAllByRole('img', { name: /Muni .* (train|bus)/ })).toHaveLength(2);
+    const advisory = screen.getByRole('img', {
+      name: 'Service advisory in full itinerary',
+    });
+    expect(advisory).toHaveTextContent('!');
+    expect(advisory).toHaveStyle({ background: '#F4C84A' });
+    expect(advisory).not.toHaveAttribute('aria-live');
+    expect(advisory).not.toHaveAttribute('role', 'alert');
+    expect(screen.getByRole('img', { name: 'Muni 38R bus' }).parentElement).not.toContainElement(
+      advisory,
+    );
   });
 });

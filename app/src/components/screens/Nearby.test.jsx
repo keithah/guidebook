@@ -15,17 +15,21 @@ import {
 } from '../../lib/hereTransit.js';
 import { searchHereDestinations } from '../../lib/hereSearch.js';
 import { useTransitAlerts } from '../../hooks/useTransitAlerts.js';
+import { useSavedDestinations } from '../../hooks/useSavedDestinations.js';
+import { useNearbyTransit } from '../../hooks/useNearbyTransit.js';
 import { useWalkingRoute } from '../../hooks/useWalkingRoute.js';
 import { AppProvider } from '../../context/AppContext.jsx';
 import { encodeStay } from '../../lib/stayHash.js';
 import Nearby from './Nearby.jsx';
 
 vi.mock('../nearby/NeighborhoodMap.jsx', () => ({
-  default: ({ locationLabel, showMe }) => (
+  default: ({ center, stops, showMe, ...props }) => (
     <div
       aria-label="Neighborhood map"
-      data-location-label={locationLabel ?? ''}
+      data-center={JSON.stringify(center)}
+      data-location-label={props.locationLabel ?? ''}
       data-show-me={showMe}
+      data-stops={JSON.stringify(stops)}
     />
   ),
 }));
@@ -55,6 +59,14 @@ vi.mock('../../hooks/useLiveDepartures.js', () => ({
 
 vi.mock('../../hooks/useTransitAlerts.js', () => ({
   useTransitAlerts: vi.fn(),
+}));
+
+vi.mock('../../hooks/useSavedDestinations.js', () => ({
+  useSavedDestinations: vi.fn(),
+}));
+
+vi.mock('../../hooks/useNearbyTransit.js', () => ({
+  useNearbyTransit: vi.fn(),
 }));
 
 vi.mock('../../hooks/useWalkingRoute.js', () => ({
@@ -97,6 +109,62 @@ const walkingResult = {
   source: 'network',
   fetchedAt: Date.parse('2026-07-28T19:00:00.000Z'),
 };
+const howardNearbyResult = {
+  ok: true,
+  source: 'network',
+  fetchedAt: Date.parse('2026-07-30T10:00:00-07:00'),
+  expiresAt: null,
+  stations: [
+    {
+      id: 'mission-south-van-ness',
+      memberIds: ['mission-south-van-ness-platform'],
+      name: 'Mission St & South Van Ness Ave',
+      position: { lat: 37.77315, lng: -122.41859 },
+      distanceMeters: 190,
+      services: [
+        {
+          key: 'sf-14-downtown',
+          agency: { id: 'SF', name: 'Muni' },
+          transport: {
+            mode: 'bus',
+            shortName: '14',
+            name: '14 Mission',
+            color: '#C9413D',
+          },
+          headsign: 'Downtown',
+          departures: [
+            {
+              scheduledTime: '2026-07-30T10:03:00-07:00',
+              delaySeconds: 0,
+              isRealtime: true,
+            },
+          ],
+        },
+      ],
+    },
+    {
+      id: 'sixteenth-street-bart',
+      memberIds: ['sixteenth-street-bart-platform'],
+      name: '16th St Mission',
+      position: { lat: 37.76487, lng: -122.41948 },
+      distanceMeters: 920,
+      services: [
+        {
+          key: 'bart-yellow-antioch',
+          agency: { id: 'BART', name: 'Bay Area Rapid Transit' },
+          transport: {
+            mode: 'subway',
+            shortName: 'Yellow',
+            name: 'Yellow Line',
+          },
+          headsign: 'Antioch',
+          departures: [],
+        },
+      ],
+    },
+  ],
+};
+const refreshNearby = vi.fn();
 
 afterEach(cleanup);
 
@@ -127,6 +195,16 @@ describe('Nearby', () => {
     useWalkingRoute.mockReturnValue({
       routeResult: walkingResult,
       retryWalking: vi.fn(),
+    });
+    useSavedDestinations.mockReturnValue({
+      savedDestinations: [],
+      loading: false,
+      isSaved: vi.fn().mockReturnValue(false),
+      toggleSaved: vi.fn(),
+    });
+    useNearbyTransit.mockReturnValue({
+      result: howardNearbyResult,
+      refresh: refreshNearby,
     });
     useTransitAlerts.mockReturnValue({
       alerts: [
@@ -181,7 +259,7 @@ describe('Nearby', () => {
     });
   });
 
-  it('shows and propagates the active stay location label', async () => {
+  it('keeps the active stay label outside the map and maps current stations', async () => {
     window.location.hash = encodeStay({
       guestName: 'Jamie',
       checkin: '2026-07-30',
@@ -205,10 +283,86 @@ describe('Nearby', () => {
         'Using location: 1620 Howard St, San Francisco',
       ),
     ).toBeVisible();
-    expect(screen.getByLabelText('Neighborhood map')).toHaveAttribute(
-      'data-location-label',
-      '1620 Howard St, San Francisco',
+    const map = screen.getByLabelText('Neighborhood map');
+    expect(map).toHaveAttribute(
+      'data-center',
+      JSON.stringify({
+        lat: 37.77154,
+        lng: -122.41761,
+      }),
     );
+    expect(map).toHaveAttribute('data-show-me', 'true');
+    expect(map).toHaveAttribute('data-location-label', '');
+    expect(JSON.parse(map.getAttribute('data-stops'))).toEqual([
+      {
+        name: 'Mission St & South Van Ness Ave',
+        sub: '14',
+        line: '14',
+        lat: 37.77315,
+        lng: -122.41859,
+      },
+      {
+        name: '16th St Mission',
+        sub: 'Yellow',
+        line: 'BART',
+        lat: 37.76487,
+        lng: -122.41948,
+      },
+    ]);
+  });
+
+  it('builds safe map stops when station services or transports are absent', () => {
+    useNearbyTransit.mockReturnValue({
+      result: {
+        ...howardNearbyResult,
+        stations: [
+          {
+            ...howardNearbyResult.stations[0],
+            id: 'no-services',
+            name: 'No Services Station',
+            services: undefined,
+          },
+          {
+            ...howardNearbyResult.stations[1],
+            id: 'no-transport',
+            name: 'No Transport Station',
+            services: [
+              {
+                key: 'missing-transport',
+                agency: null,
+                transport: null,
+                headsign: '',
+                departures: [],
+              },
+            ],
+          },
+        ],
+      },
+      refresh: refreshNearby,
+    });
+
+    renderNearby();
+
+    expect(
+      JSON.parse(
+        screen.getByLabelText('Neighborhood map').getAttribute('data-stops'),
+      ),
+    ).toEqual([
+      {
+        name: 'No Services Station',
+        sub: '',
+        line: 'TRANSIT',
+        lat: 37.77315,
+        lng: -122.41859,
+      },
+      {
+        name: 'No Transport Station',
+        sub: '',
+        line: 'TRANSIT',
+        lat: 37.76487,
+        lng: -122.41948,
+      },
+    ]);
   });
 
   it('shows the labeled user marker when a stay override matches the cottage coordinates', async () => {
@@ -237,7 +391,7 @@ describe('Nearby', () => {
     ).toBeVisible();
     expect(screen.getByLabelText('Neighborhood map')).toHaveAttribute(
       'data-location-label',
-      '251 Harold Ave, San Francisco',
+      '',
     );
     expect(screen.getByLabelText('Neighborhood map')).toHaveAttribute(
       'data-show-me',
@@ -284,39 +438,154 @@ describe('Nearby', () => {
     );
   });
 
-  it('promotes stops that head toward the selected destination', async () => {
-    const balboaPark = {
-      ...unionSquare,
-      id: 'here:balboa-park',
-      title: 'Balboa Park Station',
-      address: '401 Geneva Ave, San Francisco, CA',
-      position: { lat: 37.7216, lng: -122.443 },
+  it('renders the approved destination, journey, map, and departures hierarchy', async () => {
+    renderNearby();
+
+    fireEvent.click(
+      screen.getByRole('button', { name: /take me back to the cottage/i }),
+    );
+    await screen.findByRole('region', { name: 'Transit options' });
+
+    const destinationForm = screen.getByRole('region', {
+      name: 'Destination search',
+    });
+    const shortcuts = screen
+      .getByRole('button', { name: /take me back to the cottage/i })
+      .parentElement;
+    const backHome = screen.getByText(/Suggestions · back to 251 Harold Ave/i);
+    const selectedSummary = screen.getByRole('region', {
+      name: 'Selected destination',
+    });
+    expect(
+      within(selectedSummary).getByRole('button', { name: 'Clear destination' }),
+    ).toBeVisible();
+    const modeSelector = screen.getByRole('group', { name: 'Travel mode' });
+    const routes = screen.getByRole('region', { name: 'Transit options' });
+    const map = screen.getByLabelText('Neighborhood map');
+    const departures = screen.getByRole('region', { name: 'Nearby departures' });
+
+    const expectBefore = (earlier, later) => {
+      expect(
+        earlier.compareDocumentPosition(later) &
+          Node.DOCUMENT_POSITION_FOLLOWING,
+      ).toBeTruthy();
     };
-    searchHereDestinations.mockResolvedValue({
-      ok: true,
-      candidates: [balboaPark],
-      source: 'network',
+    expectBefore(destinationForm, shortcuts);
+    expectBefore(shortcuts, backHome);
+    expectBefore(backHome, selectedSummary);
+    expectBefore(selectedSummary, modeSelector);
+    expectBefore(modeSelector, routes);
+    expectBefore(routes, map);
+    expectBefore(map, departures);
+
+    expect(
+      within(shortcuts).getAllByRole('button').map((button) => button.textContent),
+    ).toEqual([
+      '⌂ Take me back to the cottage',
+      'Downtown / Union Square',
+      'SFO',
+      'Golden Gate Park',
+      'The Mission',
+      'Ocean Beach',
+    ]);
+  });
+
+  it('never renders the static cottage stop board or curated fallback copy', () => {
+    renderNearby();
+
+    expect(screen.getByText('Mission St & South Van Ness Ave')).toBeVisible();
+    for (const staleCopy of [
+      'Ocean Ave & Lee St',
+      'Plymouth Ave & Ocean',
+      'Balboa Park',
+      'Curated schedule',
+    ]) {
+      expect(document.body.textContent).not.toContain(staleCopy);
+      expect(
+        screen.getByLabelText('Neighborhood map').getAttribute('data-stops'),
+      ).not.toContain(staleCopy);
+    }
+  });
+
+  it('passes no map stops and renders only an unavailable board on provider failure', () => {
+    refreshNearby.mockClear();
+    useNearbyTransit.mockReturnValue({
+      result: { ok: false, reason: 'network' },
+      refresh: refreshNearby,
     });
     renderNearby();
 
-    fireEvent.change(screen.getByRole('searchbox', { name: /destination/i }), {
-      target: { value: 'Balboa Park' },
-    });
-    fireEvent.click(screen.getByRole('button', { name: 'Go' }));
-    fireEvent.click(
-      await screen.findByRole('button', {
-        name: /choose balboa park station/i,
-      }),
+    expect(screen.getByLabelText('Neighborhood map')).toHaveAttribute(
+      'data-stops',
+      '[]',
     );
-    await screen.findAllByRole('button', { name: /view full itinerary/i });
-
-    const departures = screen.getByRole('region', {
-      name: 'Nearby departures',
-    });
-    expect(departures.children[1]).toHaveTextContent('outbound to Balboa Park');
+    const board = screen.getByRole('region', { name: 'Nearby departures' });
+    expect(
+      within(board).getByText('Nearby departures unavailable'),
+    ).toBeVisible();
+    expect(within(board).queryByTestId('nearby-station')).not.toBeInTheDocument();
+    expect(
+      within(board).queryByText(/Ocean|Plymouth|Balboa|Curated/i),
+    ).not.toBeInTheDocument();
+    fireEvent.click(within(board).getByRole('button', { name: 'Retry' }));
+    expect(refreshNearby).toHaveBeenCalledTimes(1);
   });
 
-  it('keeps local and 511 guidance usable when HERE is unavailable', async () => {
+  it('does not expose the earlier location result after active coordinates change', async () => {
+    window.location.hash = encodeStay({
+      guestName: 'Jamie',
+      checkin: '2026-07-30',
+      checkout: '2026-08-03',
+      fakeLocation: {
+        label: '1620 Howard St, San Francisco',
+        lat: 37.77154,
+        lng: -122.41761,
+      },
+    });
+    useNearbyTransit.mockImplementation(({ origin }) => ({
+      result:
+        origin?.lat === 37.77154 && origin?.lng === -122.41761
+          ? howardNearbyResult
+          : null,
+      refresh: refreshNearby,
+    }));
+    render(
+      <AppProvider>
+        <Nearby />
+      </AppProvider>,
+    );
+    fireEvent.click(screen.getByRole('button', { name: 'Allow location' }));
+    expect(
+      await screen.findByText('Mission St & South Van Ness Ave'),
+    ).toBeVisible();
+
+    await act(async () => {
+      window.location.hash = encodeStay({
+        guestName: 'Jamie',
+        checkin: '2026-07-30',
+        checkout: '2026-08-03',
+        fakeLocation: {
+          label: 'Ferry Building, San Francisco',
+          lat: 37.7955,
+          lng: -122.3937,
+        },
+      });
+      window.dispatchEvent(new HashChangeEvent('hashchange'));
+    });
+
+    expect(
+      await screen.findByText('Using location: Ferry Building, San Francisco'),
+    ).toBeVisible();
+    expect(
+      screen.queryByText('Mission St & South Van Ness Ave'),
+    ).not.toBeInTheDocument();
+    expect(screen.getByLabelText('Neighborhood map')).toHaveAttribute(
+      'data-stops',
+      '[]',
+    );
+  });
+
+  it('keeps dynamic nearby, walking, and rideshare guidance usable when route lookup is unavailable', async () => {
     searchHereDestinations.mockResolvedValue({ ok: false, reason: 'network' });
     fetchHereTransitRoutes.mockResolvedValue({ ok: false, reason: 'network' });
     renderNearby();
@@ -325,7 +594,7 @@ describe('Nearby', () => {
     fireEvent.change(input, { target: { value: 'Union Square' } });
     fireEvent.click(screen.getByRole('button', { name: 'Go' }));
     expect(
-      await screen.findByText(/place search needs a connection/i),
+      await screen.findByText(/address search needs a connection/i),
     ).toBeVisible();
 
     fireEvent.click(
@@ -338,18 +607,16 @@ describe('Nearby', () => {
     expect(
       screen.getByRole('button', { name: 'Downtown / Union Square' }),
     ).toBeVisible();
-    expect(screen.getAllByText('Ocean Ave & Lee St')).toHaveLength(2);
-    expect(
-      screen.getAllByRole('status', { name: /live/i }).length,
-    ).toBeGreaterThan(0);
-    expect(screen.getByText('Data provided by 511.org')).toBeVisible();
+    expect(screen.getByText('Mission St & South Van Ness Ave')).toBeVisible();
+    expect(screen.queryByText('Ocean Ave & Lee St')).not.toBeInTheDocument();
+    expect(screen.queryByText('Curated schedule')).not.toBeInTheDocument();
     expect(screen.queryByText('Uber')).not.toBeInTheDocument();
     fireEvent.click(screen.getByRole('button', { name: 'Rideshare' }));
     expect(screen.getByText('Uber')).toBeVisible();
     expect(screen.getByText('First time on Muni or BART?')).toBeVisible();
   });
 
-  it('shows only route-relevant warnings on collapsed trips and never a global alert surface', async () => {
+  it('marks only route-relevant collapsed lines and never shows a global alert surface', async () => {
     renderNearby();
     expect(useTransitAlerts).toHaveBeenCalledWith('SF', { enabled: false });
     const input = screen.getByRole('searchbox', { name: /destination/i });
@@ -361,16 +628,19 @@ describe('Nearby', () => {
 
     await screen.findAllByRole('button', { name: /view full itinerary/i });
     expect(useTransitAlerts).toHaveBeenLastCalledWith('SF', { enabled: true });
-    expect(screen.getByText('K service delay')).toBeVisible();
+    expect(screen.queryByText('K service delay')).not.toBeInTheDocument();
+    expect(
+      screen.getByLabelText('Service advisory in full itinerary'),
+    ).toBeVisible();
     expect(screen.queryByText('Systemwide service notice')).not.toBeInTheDocument();
     expect(screen.queryByText('43 Masonic reroute')).not.toBeInTheDocument();
     expect(screen.queryByText('Current SF service alerts')).not.toBeInTheDocument();
-    expect(screen.getAllByText(/curated schedule/i).length).toBeGreaterThan(0);
+    expect(screen.queryByText(/curated schedule/i)).not.toBeInTheDocument();
 
     fireEvent.click(
       screen.getAllByRole('button', { name: /view full itinerary/i })[0],
     );
-    expect(screen.getAllByText('K service delay')).toHaveLength(2);
+    expect(screen.getAllByText('K service delay')).toHaveLength(1);
 
     const ferryBuilding = {
       ...unionSquare,
@@ -404,7 +674,10 @@ describe('Nearby', () => {
     replacementToggles.forEach((toggle) =>
       expect(toggle).toHaveAttribute('aria-expanded', 'false'),
     );
-    expect(screen.getByText('K service delay')).toBeVisible();
+    expect(screen.queryByText('K service delay')).not.toBeInTheDocument();
+    expect(
+      screen.getByLabelText('Service advisory in full itinerary'),
+    ).toBeVisible();
   });
 
   it('retries a failed route lookup and clears the failure once it succeeds', async () => {
@@ -471,21 +744,64 @@ describe('Nearby', () => {
     ).not.toBeInTheDocument();
   });
 
-  it('lets a destination quick-suggestion button search without typing in the box', async () => {
+  it('routes The Mission shortcut directly without search candidates', async () => {
     renderNearby();
 
-    fireEvent.click(screen.getByRole('button', { name: 'SFO' }));
-    expect(searchHereDestinations).toHaveBeenCalledWith(
-      'SFO',
-      expect.anything(),
+    fireEvent.click(screen.getByRole('button', { name: 'The Mission' }));
+
+    expect(searchHereDestinations).not.toHaveBeenCalled();
+    expect(fetchHereTransitRoutes).toHaveBeenCalledWith(
+      { lat: 37.7226, lng: -122.4547, source: 'cottage' },
+      { lat: 37.75993, lng: -122.41808 },
       expect.objectContaining({ signal: expect.anything() }),
     );
     expect(
       screen.getByRole('searchbox', { name: /destination/i }),
-    ).toHaveValue('SFO');
+    ).toHaveValue('Mission District');
+    const summary = screen.getByRole('region', {
+      name: 'Selected destination',
+    });
     expect(
-      await screen.findByRole('button', { name: /choose union square/i }),
+      within(summary).getByText('Mission District, San Francisco, CA'),
     ).toBeVisible();
+    expect(
+      screen.queryByRole('button', { name: /choose union square/i }),
+    ).not.toBeInTheDocument();
+    expect(
+      await screen.findByRole('region', { name: 'Transit options' }),
+    ).toBeVisible();
+  });
+
+  it('shows saved addresses while leaving saved POIs hidden', () => {
+    const savedAddress = {
+      ...unionSquare,
+      id: 'here:saved-address',
+      title: 'Saved address',
+      resultType: 'address',
+      categories: [],
+    };
+    const savedPoi = {
+      ...unionSquare,
+      id: 'here:saved-poi',
+      title: 'Saved coffee shop',
+      resultType: 'place',
+      categories: ['Coffee/Tea'],
+    };
+    useSavedDestinations.mockReturnValue({
+      savedDestinations: [savedAddress, savedPoi],
+      loading: false,
+      isSaved: vi.fn().mockReturnValue(true),
+      toggleSaved: vi.fn(),
+    });
+
+    renderNearby();
+
+    expect(
+      screen.getByRole('button', { name: /choose saved address/i }),
+    ).toBeVisible();
+    expect(
+      screen.queryByRole('button', { name: /choose saved coffee shop/i }),
+    ).not.toBeInTheDocument();
   });
 
   it('disables route-alert fetching and renders no alert status when routing fails', async () => {
@@ -703,54 +1019,6 @@ describe('Nearby', () => {
       'aria-pressed',
       'true',
     );
-    useWalkingRoute.mockClear();
-
-    fireEvent.change(input, { target: { value: 'Union Square' } });
-    fireEvent.click(screen.getByRole('button', { name: 'Go' }));
-    fireEvent.click(
-      await screen.findByRole('button', { name: /choose union square/i }),
-    );
-
-    expect(screen.getByRole('button', { name: 'Transit' })).toHaveAttribute(
-      'aria-pressed',
-      'true',
-    );
-    expect(
-      screen.queryByRole('region', { name: 'Walking directions' }),
-    ).not.toBeInTheDocument();
-    expect(
-      useWalkingRoute.mock.calls.filter(
-        ([options]) =>
-          options.destination?.lng === unionSquare.position.lng &&
-          options.enabled,
-      ),
-    ).toHaveLength(0);
-
-    fireEvent.click(screen.getByRole('button', { name: 'Walk' }));
-    expect(screen.getByRole('region', { name: 'Walking directions' })).toBeVisible();
-    expect(useWalkingRoute).toHaveBeenLastCalledWith(
-      expect.objectContaining({
-        destination: unionSquare.position,
-        enabled: true,
-      }),
-    );
-  });
-
-  it('requires a fresh Walk selection after clearing and reselecting a destination', async () => {
-    renderNearby();
-    const input = screen.getByRole('searchbox', { name: /destination/i });
-    fireEvent.change(input, { target: { value: 'Union Square' } });
-    fireEvent.click(screen.getByRole('button', { name: 'Go' }));
-    fireEvent.click(
-      await screen.findByRole('button', { name: /choose union square/i }),
-    );
-    fireEvent.click(screen.getByRole('button', { name: 'Walk' }));
-    expect(screen.getByText('Head west on Harold Avenue.')).toBeVisible();
-
-    fireEvent.click(screen.getByRole('button', { name: 'Clear destination' }));
-    expect(
-      screen.queryByRole('group', { name: 'Travel mode' }),
-    ).not.toBeInTheDocument();
     useWalkingRoute.mockClear();
 
     fireEvent.change(input, { target: { value: 'Union Square' } });

@@ -2,6 +2,7 @@ import { useEffect, useMemo, useRef } from 'react';
 import { MapContainer, Marker, Popup, TileLayer, useMap } from 'react-leaflet';
 import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
+import bartLogoUrl from '../../assets/bart-logo.svg';
 import { lineColors, lineLabel } from '../../theme.js';
 
 /**
@@ -12,11 +13,41 @@ import { lineColors, lineLabel } from '../../theme.js';
  */
 function lineDivIcon(line, size = 30) {
   const bg = lineColors[line] || '#5A6B65';
-  const label = lineLabel(line);
+  const label = line === 'BART' ? '' : String(lineLabel(line) ?? '');
   const fontSize = label.length > 1 ? Math.round(size * 0.36) : Math.round(size * 0.5);
+  const contents = document.createElement('div');
+  Object.assign(contents.style, {
+    width: `${size}px`,
+    height: `${size}px`,
+    borderRadius: '50%',
+    background: bg,
+    color: '#fff',
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    fontFamily: "'Instrument Sans', sans-serif",
+    fontSize: `${fontSize}px`,
+    lineHeight: '1',
+    fontWeight: '700',
+    boxShadow: '0 2px 6px rgba(20,32,29,.35)',
+    border: '2px solid #fff',
+  });
+  if (line === 'BART') {
+    const image = document.createElement('img');
+    image.src = bartLogoUrl;
+    image.alt = '';
+    Object.assign(image.style, {
+      display: 'block',
+      width: 'auto',
+      height: `${size * 0.48}px`,
+    });
+    contents.append(image);
+  } else {
+    contents.textContent = label;
+  }
   return L.divIcon({
     className: 'sfc-line-pin',
-    html: `<div style="width:${size}px;height:${size}px;border-radius:50%;background:${bg};color:#fff;display:flex;align-items:center;justify-content:center;font:${fontSize}px/1 'Instrument Sans',sans-serif;font-weight:700;box-shadow:0 2px 6px rgba(20,32,29,.35);border:2px solid #fff;">${label}</div>`,
+    html: contents,
     iconSize: [size, size],
     iconAnchor: [size / 2, size / 2],
   });
@@ -111,7 +142,6 @@ function FollowCenter({ center, dest }) {
  * @param {Object} props.cottage - Cottage marker coordinates.
  * @param {Array<Object>} props.stops - Stops to display on the map.
  * @param {boolean} props.showMe - Whether to display the current-location marker.
- * @param {string} [props.locationLabel] - Optional label for the current-location marker.
  * @param {Object} [props.dest] - Optional destination to display and fit within the map view.
  * @param {Function} props.onTileFailure - Callback invoked when a map tile fails to load.
  * @returns {JSX.Element} The rendered Leaflet map.
@@ -121,7 +151,6 @@ export default function OnlineNearbyMap({
   cottage,
   stops,
   showMe,
-  locationLabel,
   dest,
   onTileFailure,
 }) {
@@ -145,10 +174,8 @@ export default function OnlineNearbyMap({
         <Popup>The SF Cottage</Popup>
       </Marker>
       {showMe && (
-        <Marker position={[center.lat, center.lng]} icon={meIcon}>
-          <Popup>
-            {locationLabel ? `You are here · ${locationLabel}` : 'You are here'}
-          </Popup>
+        <Marker title="You" position={[center.lat, center.lng]} icon={meIcon}>
+          <Popup>You</Popup>
         </Marker>
       )}
       {stops.map((stop, index) => (

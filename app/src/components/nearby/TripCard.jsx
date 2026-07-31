@@ -41,6 +41,11 @@ export default function TripCard({
     ? trip.transferCount
     : 0;
   const toggleLabel = `${expanded ? 'Hide' : 'View'} full itinerary for ${optionLabel(trip)}`;
+  const advisorySectionIds = new Set(
+    (Array.isArray(warnings) ? warnings : []).flatMap(
+      (warning) => warning.sectionIds ?? [],
+    ),
+  );
 
   return (
     <article
@@ -106,7 +111,10 @@ export default function TripCard({
         </div>
       </div>
 
-      <JourneyTimeline sections={trip.sections ?? []} />
+      <JourneyTimeline
+        sections={trip.sections ?? []}
+        advisorySectionIds={advisorySectionIds}
+      />
 
       <div
         style={{
@@ -130,8 +138,6 @@ export default function TripCard({
             : `${transfers} transfer${transfers === 1 ? '' : 's'}`}
         </span>
       </div>
-
-      <TripWarnings warnings={warnings} compact />
 
       <button
         type="button"

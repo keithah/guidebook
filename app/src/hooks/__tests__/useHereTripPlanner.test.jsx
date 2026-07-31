@@ -93,6 +93,53 @@ describe('useHereTripPlanner', () => {
     expect(fetchHereTransitRoutes).not.toHaveBeenCalled();
   });
 
+  it('clears search candidates and routes a direct structured destination without searching', async () => {
+    const mission = {
+      id: 'mission-district',
+      buttonLabel: 'The Mission',
+      title: 'Mission District',
+      address: 'Mission District, San Francisco, CA',
+      position: { lat: 37.75993, lng: -122.41808 },
+      resultType: 'locality',
+      categories: [],
+      distanceMeters: null,
+    };
+    const routeResult = {
+      ok: true,
+      trips: [{ id: 'mission-route' }],
+      source: 'network',
+      fetchedAt: 1,
+    };
+    searchHereDestinations.mockResolvedValue({
+      ok: true,
+      candidates: [unionSquare],
+    });
+    fetchHereTransitRoutes.mockResolvedValue(routeResult);
+    const { result } = renderHook(() => useHereTripPlanner({ origin }));
+
+    await act(async () => {
+      await result.current.search('Union Square');
+    });
+    expect(result.current.candidates).toEqual([unionSquare]);
+    vi.clearAllMocks();
+
+    await act(async () => {
+      await result.current.selectDirectDestination(mission);
+    });
+
+    expect(result.current.query).toBe('Mission District');
+    expect(result.current.candidates).toEqual([]);
+    expect(result.current.searchStatus).toEqual({ status: 'idle' });
+    expect(result.current.selectedDestination).toBe(mission);
+    expect(searchHereDestinations).not.toHaveBeenCalled();
+    expect(fetchHereTransitRoutes).toHaveBeenCalledTimes(1);
+    expect(fetchHereTransitRoutes).toHaveBeenCalledWith(
+      origin,
+      mission.position,
+      expect.objectContaining({ signal: expect.any(AbortSignal) }),
+    );
+  });
+
   it('settles search feedback when selecting a retained candidate during a pending search', async () => {
     const pending = deferred();
     searchHereDestinations

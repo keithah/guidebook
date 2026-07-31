@@ -1,10 +1,9 @@
 import { colors, fonts } from '../../theme.js';
 
 const SEARCH_MESSAGES = {
-  loading: 'Looking for places…',
-  empty: 'No nearby matches. Try adding a street or neighborhood.',
-  error:
-    'Place search needs a connection. Saved places and nearby transit are still available.',
+  loading: 'Looking for addresses…',
+  empty: 'No matching address or neighborhood…',
+  error: 'Address search needs a connection…',
 };
 
 /**
@@ -82,7 +81,7 @@ function PlaceRow({ candidate, selected, saved, onSelect, onToggleSaved }) {
 }
 
 /**
- * Render a destination search form with search results, saved places, and the selected destination.
+ * Render a destination search form with search results and saved places.
  * @param {Object} props - Destination search configuration and event handlers.
  * @param {string} props.query - Current search query.
  * @param {Function} props.onQueryChange - Handles changes to the search query.
@@ -94,7 +93,6 @@ function PlaceRow({ candidate, selected, saved, onSelect, onToggleSaved }) {
  * @param {Function} props.onToggleSaved - Toggles a destination's saved state.
  * @param {Function} props.onSubmit - Submits the current search query.
  * @param {Function} props.onSelect - Selects a destination.
- * @param {Function} props.onClear - Clears the selected destination.
  * @return {JSX.Element} The destination search interface.
  */
 export default function DestinationSearch({
@@ -108,7 +106,6 @@ export default function DestinationSearch({
   onToggleSaved,
   onSubmit,
   onSelect,
-  onClear,
 }) {
   const submit = (event) => {
     event?.preventDefault();
@@ -140,7 +137,7 @@ export default function DestinationSearch({
           onKeyDown={(event) => {
             if (event.key === 'Enter') submit(event);
           }}
-          placeholder="Type in address or place"
+          placeholder="Type in address or neighborhood"
           style={{
             minWidth: 0,
             flex: 1,
@@ -188,7 +185,7 @@ export default function DestinationSearch({
           {status === 'error' && (
             <button
               type="button"
-              aria-label="Retry place search"
+              aria-label="Retry address search"
               onClick={() => onSubmit(query)}
               style={{
                 marginLeft: 7,
@@ -204,38 +201,6 @@ export default function DestinationSearch({
               Retry
             </button>
           )}
-        </div>
-      )}
-
-      {selectedDestination && (
-        <div
-          style={{
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'space-between',
-            gap: 10,
-            marginTop: 10,
-            borderRadius: 12,
-            padding: '9px 11px',
-            background: colors.sage,
-          }}
-        >
-          <span style={{ fontSize: 13 }}>
-            Going to <strong>{selectedDestination.title}</strong>
-          </span>
-          <button
-            type="button"
-            aria-label="Clear destination"
-            onClick={onClear}
-            style={{
-              border: 0,
-              background: 'transparent',
-              color: colors.teal,
-              cursor: 'pointer',
-            }}
-          >
-            ✕
-          </button>
         </div>
       )}
 

@@ -1,4 +1,4 @@
-import { cleanup, render, screen, within } from '@testing-library/react';
+import { cleanup, render, screen } from '@testing-library/react';
 import { afterEach, describe, expect, it } from 'vitest';
 
 import TripWarnings from '../TripWarnings.jsx';
@@ -26,34 +26,8 @@ afterEach(cleanup);
 
 describe('TripWarnings', () => {
   it('renders nothing for an empty warning list', () => {
-    const { container } = render(<TripWarnings warnings={[]} compact />);
+    const { container } = render(<TripWarnings warnings={[]} />);
     expect(container).toBeEmptyDOMElement();
-  });
-
-  it('renders visible warning headers in compact mode without details or links', () => {
-    render(<TripWarnings warnings={warnings} compact />);
-
-    expect(
-      screen.getByRole('region', { name: 'Warnings for this trip' }),
-    ).toBeVisible();
-    expect(screen.getByText('K Ingleside delay')).toBeVisible();
-    expect(screen.getByText('Boarding platform changed')).toBeVisible();
-    expect(
-      screen.queryByText('Allow extra travel time on the K line.'),
-    ).not.toBeInTheDocument();
-    expect(screen.queryByRole('link')).not.toBeInTheDocument();
-
-    const highImpact = screen.getByRole('listitem', {
-      name: 'High impact: K Ingleside delay',
-    });
-    const serviceChange = screen.getByRole('listitem', {
-      name: 'Service change: Boarding platform changed',
-    });
-    expect(within(highImpact).getByText('High impact')).toBeVisible();
-    expect(within(serviceChange).getByText('Service change')).toBeVisible();
-    expect(highImpact).not.toHaveStyle({
-      background: serviceChange.style.background,
-    });
   });
 
   it('renders warning descriptions, sources, and safe links in expanded mode', () => {

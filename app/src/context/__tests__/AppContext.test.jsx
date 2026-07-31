@@ -82,6 +82,44 @@ afterEach(() => {
   latestContext = undefined;
 });
 
+describe('getCurrentPosition', () => {
+  it('publishes browser coordinates with device provenance', async () => {
+    const geolocationDescriptor = Object.getOwnPropertyDescriptor(
+      navigator,
+      'geolocation',
+    );
+    Object.defineProperty(navigator, 'geolocation', {
+      configurable: true,
+      value: {
+        getCurrentPosition: vi.fn((onSuccess) =>
+          onSuccess({
+            coords: { latitude: 37.78, longitude: -122.42 },
+          }),
+        ),
+      },
+    });
+    const actualGeo = await vi.importActual('../../lib/geo.js');
+
+    try {
+      await expect(actualGeo.getCurrentPosition()).resolves.toEqual({
+        lat: 37.78,
+        lng: -122.42,
+        source: 'device',
+      });
+    } finally {
+      if (geolocationDescriptor) {
+        Object.defineProperty(
+          navigator,
+          'geolocation',
+          geolocationDescriptor,
+        );
+      } else {
+        delete navigator.geolocation;
+      }
+    }
+  });
+});
+
 describe('AppContext', () => {
   it('uses a valid stay location override without calling browser geolocation', async () => {
     window.location.hash = encodeStay({
@@ -203,11 +241,19 @@ describe('AppContext', () => {
   });
 
   it('replaces consented browser coordinates when a valid stay location hash arrives', async () => {
-    getCurrentPosition.mockResolvedValue({ lat: 46.8797, lng: -110.3626 });
+    getCurrentPosition.mockResolvedValue({
+      lat: 46.8797,
+      lng: -110.3626,
+      source: 'device',
+    });
     renderProvider();
 
     await act(async () => latestContext.allowLocation());
-    expect(latestContext.coords).toEqual({ lat: 46.8797, lng: -110.3626 });
+    expect(latestContext.coords).toEqual({
+      lat: 46.8797,
+      lng: -110.3626,
+      source: 'device',
+    });
 
     await changeStayHash(howardStay);
 
@@ -266,6 +312,7 @@ describe('AppContext', () => {
     const cottageCoords = {
       lat: latestContext.property.address.lat,
       lng: latestContext.property.address.lng,
+      source: 'cottage',
     };
 
     act(() => latestContext.useCottageAsLocation());
@@ -281,10 +328,12 @@ describe('AppContext', () => {
     const cottageCoords = {
       lat: latestContext.property.address.lat,
       lng: latestContext.property.address.lng,
+      source: 'cottage',
     };
 
     await act(async () => latestContext.allowLocation());
     expect(latestContext.locateError).toBe('Location blocked.');
+    expect(latestContext.coords).toEqual(cottageCoords);
 
     act(() => latestContext.useCottageAsLocation());
 
@@ -312,6 +361,7 @@ describe('AppContext', () => {
     const cottageCoords = {
       lat: latestContext.property.address.lat,
       lng: latestContext.property.address.lng,
+      source: 'cottage',
     };
     let locationPromise;
 
@@ -345,13 +395,21 @@ describe('AppContext', () => {
         lng: -122.41761,
       },
     });
-    getCurrentPosition.mockResolvedValue({ lat: 37.78, lng: -122.42 });
+    getCurrentPosition.mockResolvedValue({
+      lat: 37.78,
+      lng: -122.42,
+      source: 'device',
+    });
     renderProvider();
 
     await act(async () => latestContext.allowLocation());
 
     expect(getCurrentPosition).toHaveBeenCalledTimes(1);
-    expect(latestContext.coords).toEqual({ lat: 37.78, lng: -122.42 });
+    expect(latestContext.coords).toEqual({
+      lat: 37.78,
+      lng: -122.42,
+      source: 'device',
+    });
   });
 
   it('clears a geolocation error when a valid stay override activates', async () => {
