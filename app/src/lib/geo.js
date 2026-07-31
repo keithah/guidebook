@@ -5,7 +5,11 @@ export function getCurrentPosition(options) {
       return;
     }
     navigator.geolocation.getCurrentPosition(
-      (pos) => resolve({ lat: pos.coords.latitude, lng: pos.coords.longitude }),
+      (pos) => resolve({
+        lat: pos.coords.latitude,
+        lng: pos.coords.longitude,
+        source: 'device',
+      }),
       (err) => reject(err),
       { enableHighAccuracy: false, timeout: 8000, maximumAge: 60000, ...options }
     );

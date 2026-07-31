@@ -115,7 +115,6 @@ function FollowCenter({ center, dest }) {
  * @param {Object} props.cottage - Cottage marker coordinates.
  * @param {Array<Object>} props.stops - Stops to display on the map.
  * @param {boolean} props.showMe - Whether to display the current-location marker.
- * @param {string} [props.locationLabel] - Optional label for the current-location marker.
  * @param {Object} [props.dest] - Optional destination to display and fit within the map view.
  * @param {Function} props.onTileFailure - Callback invoked when a map tile fails to load.
  * @returns {JSX.Element} The rendered Leaflet map.
@@ -125,7 +124,6 @@ export default function OnlineNearbyMap({
   cottage,
   stops,
   showMe,
-  locationLabel,
   dest,
   onTileFailure,
 }) {
@@ -149,10 +147,8 @@ export default function OnlineNearbyMap({
         <Popup>The SF Cottage</Popup>
       </Marker>
       {showMe && (
-        <Marker position={[center.lat, center.lng]} icon={meIcon}>
-          <Popup>
-            {locationLabel ? `You are here · ${locationLabel}` : 'You are here'}
-          </Popup>
+        <Marker title="You" position={[center.lat, center.lng]} icon={meIcon}>
+          <Popup>You</Popup>
         </Marker>
       )}
       {stops.map((stop, index) => (

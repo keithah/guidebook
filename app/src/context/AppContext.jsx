@@ -210,7 +210,11 @@ export function AppProvider({ children }) {
       if (isStale()) return;
       activeStayLocationHashRef.current = null;
       setLocateError(err.message || 'Could not get your location.');
-      setCoords({ lat: property.address.lat, lng: property.address.lng });
+      setCoords({
+        lat: property.address.lat,
+        lng: property.address.lng,
+        source: 'cottage',
+      });
       setLocated(true);
     } finally {
       if (locationAttemptRef.current === attempt) {
@@ -225,7 +229,11 @@ export function AppProvider({ children }) {
     setLocationConsentGranted(false);
     setLocating(false);
     setLocateError(null);
-    setCoords({ lat: property.address.lat, lng: property.address.lng });
+    setCoords({
+      lat: property.address.lat,
+      lng: property.address.lng,
+      source: 'cottage',
+    });
     setLocated(true);
   }, []);
 

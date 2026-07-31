@@ -27,12 +27,13 @@ vi.mock('react-leaflet', () => ({
       </button>
     </div>
   ),
-  Marker: ({ position, icon, children }) => (
+  Marker: ({ position, icon, title, children }) => (
     <div
       data-testid="marker"
       data-position={JSON.stringify(position)}
       data-icon-class={icon?.className}
       data-icon-html={icon?.html}
+      data-title={title}
     >
       {children}
     </div>
@@ -117,7 +118,7 @@ describe('OnlineNearbyMap', () => {
     );
   });
 
-  it('renders a "you are here" marker only when showMe is true', () => {
+  it('renders an exact "You" marker only when showMe is true', () => {
     useMap.mockReturnValue({ fitBounds: vi.fn() });
     const { rerender } = render(
       <OnlineNearbyMap
@@ -151,30 +152,10 @@ describe('OnlineNearbyMap', () => {
       'data-position',
       JSON.stringify([center.lat, center.lng]),
     );
-    expect(within(meMarker).getByTestId('popup')).toHaveTextContent(
-      'You are here',
-    );
-  });
-
-  it('adds a stay location label when the user and cottage positions match', () => {
-    useMap.mockReturnValue({ fitBounds: vi.fn() });
-    render(
-      <OnlineNearbyMap
-        center={cottage}
-        cottage={cottage}
-        stops={[]}
-        showMe
-        locationLabel="1620 Howard St, San Francisco"
-        dest={null}
-        onTileFailure={vi.fn()}
-      />,
-    );
-
-    const meMarker = getMarkers().find(
-      (marker) => marker.getAttribute('data-icon-class') === 'sfc-me-pin',
-    );
-    expect(within(meMarker).getByTestId('popup')).toHaveTextContent(
-      'You are here · 1620 Howard St, San Francisco',
+    expect(meMarker).toHaveAttribute('data-title', 'You');
+    expect(within(meMarker).getByTestId('popup')).toHaveTextContent(/^You$/);
+    expect(within(meMarker).getByTestId('popup')).not.toHaveTextContent(
+      '1620 Howard',
     );
   });
 
