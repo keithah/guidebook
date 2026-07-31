@@ -163,6 +163,16 @@ function warningText(value) {
 }
 
 /**
+ * Return the stable identifier used to associate warnings with trip sections.
+ * @param {Object} section - Trip section.
+ * @param {number} index - Section position within the trip.
+ * @returns {string} Provider section ID or a stable positional fallback.
+ */
+export function sectionId(section, index) {
+  return String(section?.id ?? `section:${index}`);
+}
+
+/**
  * Collect HERE incidents and notices attached to a trip.
  * @param {Object} trip - Normalized HERE trip.
  * @returns {Array<Object>} Normalized HERE warnings.
@@ -174,42 +184,57 @@ function hereWarnings(trip) {
       (incident, incidentIndex) => {
         const header = warningText(incident?.summary ?? incident?.description);
         if (!header) return [];
-        const sectionId = section?.id ?? sectionIndex;
+        const associatedSectionId = sectionId(section, sectionIndex);
         return [
           {
             id: warningText(incident?.id) ||
-              `here-incident:${sectionId}:${incidentIndex}`,
+              `here-incident:${associatedSectionId}:${incidentIndex}`,
             header,
             description: warningText(incident?.description),
             severity: warningText(incident?.effect ?? incident?.type),
             source: 'HERE',
             url: warningText(incident?.url),
+            sectionIds: [associatedSectionId],
           },
         ];
       },
     ),
   );
-  const notices = [
-    ...(Array.isArray(trip?.notices) ? trip.notices : []),
-    ...sections.flatMap((section) =>
-      Array.isArray(section?.notices) ? section.notices : [],
-    ),
-  ].flatMap((notice, noticeIndex) => {
+  const noticeWarning = (notice, noticeIndex, sectionIds, fallbackScope) => {
     const header = warningText(notice?.title);
     if (!header) return [];
     const code = warningText(notice?.code);
     return [
       {
-        id: code ? `here-notice:${code}` : `here-notice:${noticeIndex}`,
+        id: code
+          ? `here-notice:${code}`
+          : `here-notice:${fallbackScope}:${noticeIndex}`,
         header,
         description: warningText(notice?.description),
         severity: warningText(notice?.severity),
         source: 'HERE',
         url: warningText(notice?.url),
+        sectionIds,
       },
     ];
+  };
+  const tripNotices = (Array.isArray(trip?.notices) ? trip.notices : []).flatMap(
+    (notice, noticeIndex) =>
+      noticeWarning(notice, noticeIndex, [], 'trip'),
+  );
+  const sectionNotices = sections.flatMap((section, sectionIndex) => {
+    const associatedSectionId = sectionId(section, sectionIndex);
+    return (Array.isArray(section?.notices) ? section.notices : []).flatMap(
+      (notice, noticeIndex) =>
+        noticeWarning(
+          notice,
+          noticeIndex,
+          [associatedSectionId],
+          associatedSectionId,
+        ),
+    );
   });
-  return [...incidents, ...notices];
+  return [...incidents, ...tripNotices, ...sectionNotices];
 }
 
 /**
@@ -219,20 +244,22 @@ function hereWarnings(trip) {
  * @returns {Array<Object>} Route-relevant 511 warnings.
  */
 function alertWarnings(trip, alerts) {
-  const legs = (Array.isArray(trip?.sections) ? trip.sections : []).filter(
-    (section) => section?.type === 'transit',
-  );
+  const legs = (Array.isArray(trip?.sections) ? trip.sections : [])
+    .map((section, index) => ({ section, id: sectionId(section, index) }))
+    .filter(({ section }) => section?.type === 'transit');
   if (legs.length === 0) return [];
 
   return (Array.isArray(alerts) ? alerts : []).flatMap((alert) => {
     const entities = Array.isArray(alert?.informedEntities)
       ? alert.informedEntities
       : [];
-    const matches = entities.some((entity) =>
-      legs.some((leg) => entityMatchesLeg(entity, alert, leg)),
+    const sectionIds = legs.flatMap(({ section, id }) =>
+      entities.some((entity) => entityMatchesLeg(entity, alert, section))
+        ? [id]
+        : [],
     );
     const header = warningText(alert?.header);
-    if (!matches || !header) return [];
+    if (sectionIds.length === 0 || !header) return [];
     return [
       {
         id: warningText(alert?.id),
@@ -241,6 +268,7 @@ function alertWarnings(trip, alerts) {
         severity: warningText(alert?.severity),
         source: '511',
         url: warningText(alert?.url),
+        sectionIds: [...new Set(sectionIds)],
       },
     ];
   });
@@ -252,23 +280,38 @@ function alertWarnings(trip, alerts) {
  * @returns {Array<Object>} Deduplicated warnings.
  */
 function deduplicateWarnings(warnings) {
-  const ids = new Set();
-  const text = new Set();
-  return warnings.filter((warning) => {
+  const byId = new Map();
+  const byText = new Map();
+  return warnings.reduce((deduplicated, warning) => {
     const id = comparable(warning.id);
     const textKey = `${comparable(warning.header)}\u0000${comparable(warning.description)}`;
-    if ((id && ids.has(id)) || text.has(textKey)) return false;
-    if (id) ids.add(id);
-    text.add(textKey);
-    return true;
-  });
+    const existing = (id && byId.get(id)) || byText.get(textKey);
+    if (existing) {
+      existing.sectionIds = [...new Set([
+        ...(existing.sectionIds ?? []),
+        ...(warning.sectionIds ?? []),
+      ])];
+      if (id) byId.set(id, existing);
+      byText.set(textKey, existing);
+      return deduplicated;
+    }
+
+    const normalized = {
+      ...warning,
+      sectionIds: [...new Set(warning.sectionIds ?? [])],
+    };
+    if (id) byId.set(id, normalized);
+    byText.set(textKey, normalized);
+    deduplicated.push(normalized);
+    return deduplicated;
+  }, []);
 }
 
 /**
  * Returns provider and route warnings relevant to one normalized HERE trip.
  * @param {Object} trip - A normalized HERE trip.
  * @param {Array<Object>} alerts - Normalized 511 service alerts.
- * @returns {Array<{id: string, header: string, description: string, severity: string, source: string, url: string}>} Relevant, deduplicated warnings.
+ * @returns {Array<{id: string, header: string, description: string, severity: string, source: string, url: string, sectionIds: string[]}>} Relevant, deduplicated warnings.
  */
 export function warningsForTrip(trip, alerts) {
   return deduplicateWarnings([

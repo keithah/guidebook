@@ -133,4 +133,38 @@ describe('JourneyTimeline', () => {
       color: '#FFFFFF',
     });
   });
+
+  it('marks only the affected transit identity with a non-live advisory', () => {
+    render(
+      <JourneyTimeline
+        sections={[
+          {
+            id: 'muni-k',
+            type: 'transit',
+            agency: { id: 'SFMTA' },
+            transport: { mode: 'lightRail', shortName: 'K' },
+          },
+          {
+            id: 'muni-38r',
+            type: 'transit',
+            agency: { id: 'SFMTA' },
+            transport: { mode: 'bus', shortName: '38R' },
+          },
+        ]}
+        advisorySectionIds={new Set(['muni-k'])}
+      />,
+    );
+
+    expect(screen.getAllByRole('img', { name: /Muni .* (train|bus)/ })).toHaveLength(2);
+    const advisory = screen.getByRole('img', {
+      name: 'Service advisory in full itinerary',
+    });
+    expect(advisory).toHaveTextContent('!');
+    expect(advisory).toHaveStyle({ background: '#F4C84A' });
+    expect(advisory).not.toHaveAttribute('aria-live');
+    expect(advisory).not.toHaveAttribute('role', 'alert');
+    expect(screen.getByRole('img', { name: 'Muni 38R bus' }).parentElement).not.toContainElement(
+      advisory,
+    );
+  });
 });

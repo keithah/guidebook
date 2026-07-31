@@ -100,7 +100,7 @@ describe('TripOptions', () => {
     ).toHaveLength(1);
   });
 
-  it('shows warnings only on affected trip cards while collapsed and expanded', () => {
+  it('marks affected trip lines while collapsed and shows warning copy only when expanded', () => {
     const alerts = normalizeServiceAlerts(alertFixture, now, 'SF').map(
       (alert) => ({ ...alert, activePeriods: [] }),
     );
@@ -113,13 +113,16 @@ describe('TripOptions', () => {
       />,
     );
 
-    expect(screen.getByText('K Ingleside delay')).toBeVisible();
+    expect(screen.queryByText('K Ingleside delay')).not.toBeInTheDocument();
+    expect(
+      screen.getByLabelText('Service advisory in full itinerary'),
+    ).toBeVisible();
     expect(screen.queryByText('43 Masonic reroute')).not.toBeInTheDocument();
 
     fireEvent.click(
       screen.getAllByRole('button', { name: /view full itinerary/i })[0],
     );
-    expect(screen.getAllByText('K Ingleside delay')).toHaveLength(2);
+    expect(screen.getAllByText('K Ingleside delay')).toHaveLength(1);
     expect(screen.queryByText('43 Masonic reroute')).not.toBeInTheDocument();
   });
 

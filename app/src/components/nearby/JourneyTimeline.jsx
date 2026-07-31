@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { colors } from '../../theme.js';
+import { sectionId } from '../../lib/tripWarnings.js';
 import JourneyIcon from './JourneyIcon.jsx';
 import TransitIdentity from './TransitIdentity.jsx';
 import { formatDuration } from './itineraryFormat.jsx';
@@ -19,10 +20,10 @@ function transitDescription(section) {
 
 /**
  * Render every route section as an ordered, horizontally scrollable journey.
- * @param {{ sections?: Array<Object> }} props - Journey sections in route order.
+ * @param {{ sections?: Array<Object>, advisorySectionIds?: Set<string> }} props - Journey sections and affected section IDs.
  * @returns {JSX.Element} The accessible journey timeline.
  */
-export default function JourneyTimeline({ sections }) {
+export default function JourneyTimeline({ sections, advisorySectionIds }) {
   const routeSections = Array.isArray(sections) ? sections : [];
   const [isFocused, setIsFocused] = useState(false);
 
@@ -70,7 +71,11 @@ export default function JourneyTimeline({ sections }) {
             ) : null}
             {section.type === 'transit' ? (
               <>
-                <TransitIdentity section={section} compact />
+                <TransitIdentity
+                  section={section}
+                  compact
+                  hasAdvisory={advisorySectionIds?.has(sectionId(section, index))}
+                />
                 <span>{transitDescription(section)}</span>
               </>
             ) : null}

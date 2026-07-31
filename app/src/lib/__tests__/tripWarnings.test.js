@@ -41,6 +41,7 @@ function transitTrip({
   stopCode = '17217',
   incidents = [],
   notices = [],
+  sectionNotices = [],
 } = {}) {
   return {
     id: `trip-${routeId}`,
@@ -58,7 +59,7 @@ function transitTrip({
         intermediateStops: [{ id: 'midpoint', stopCode: 'MID' }],
         arrival: { id: 'terminal', stopCode: 'TERM' },
         incidents,
-        notices: [],
+        notices: sectionNotices,
       },
     ],
   };
@@ -66,9 +67,43 @@ function transitTrip({
 
 describe('warningsForTrip', () => {
   it('matches Muni aliases by exact route, overlapping time, direction, and stop', () => {
-    expect(
-      warningsForTrip(transitTrip(), alerts).map((warning) => warning.header),
-    ).toContain('K Ingleside delay');
+    const warning = warningsForTrip(transitTrip(), alerts).find(
+      ({ header }) => header === 'K Ingleside delay',
+    );
+
+    expect(warning).toMatchObject({ sectionIds: ['section-K'] });
+  });
+
+  it('associates a 511 route entity only with matching transit sections', () => {
+    const trip = transitTrip();
+    trip.sections.push({
+      ...trip.sections[0],
+      id: 'section-38R',
+      transport: { shortName: '38R', name: '38R service' },
+    });
+
+    const warning = warningsForTrip(trip, alerts).find(
+      ({ header }) => header === 'K Ingleside delay',
+    );
+
+    expect(warning).toMatchObject({ sectionIds: ['section-K'] });
+  });
+
+  it('associates one 511 alert with every matching transit section', () => {
+    const trip = transitTrip();
+    trip.sections.push({
+      ...trip.sections[0],
+      id: 'second-k-section',
+      departure: { id: 'west-portal', stopCode: '17217' },
+    });
+
+    const warning = warningsForTrip(trip, alerts).find(
+      ({ header }) => header === 'K Ingleside delay',
+    );
+
+    expect(warning).toMatchObject({
+      sectionIds: ['section-K', 'second-k-section'],
+    });
   });
 
   it('matches a route entity when optional stop and direction are absent', () => {
@@ -284,7 +319,7 @@ describe('warningsForTrip', () => {
     expect(warningsForTrip(transitTrip({ routeId: '43' }), [openEnded])).toHaveLength(1);
   });
 
-  it('gathers HERE incidents and notices into the warning model', () => {
+  it('associates HERE section incidents and notices with their section', () => {
     const trip = transitTrip({
       incidents: [
         {
@@ -295,7 +330,7 @@ describe('warningsForTrip', () => {
           url: 'https://example.test/platform',
         },
       ],
-      notices: [
+      sectionNotices: [
         {
           code: 'excessiveWaitingTime',
           title: 'Allow extra time',
@@ -312,6 +347,7 @@ describe('warningsForTrip', () => {
         severity: 'modifiedService',
         source: 'HERE',
         url: 'https://example.test/platform',
+        sectionIds: ['section-K'],
       },
       {
         id: 'here-notice:excessiveWaitingTime',
@@ -320,6 +356,31 @@ describe('warningsForTrip', () => {
         severity: 'info',
         source: 'HERE',
         url: '',
+        sectionIds: ['section-K'],
+      },
+    ]);
+  });
+
+  it('keeps trip-level HERE notices unscoped', () => {
+    const trip = transitTrip({
+      notices: [
+        {
+          code: 'trip-guidance',
+          title: 'Check trip details',
+          severity: 'info',
+        },
+      ],
+    });
+
+    expect(warningsForTrip(trip, [])).toEqual([
+      {
+        id: 'here-notice:trip-guidance',
+        header: 'Check trip details',
+        description: '',
+        severity: 'info',
+        source: 'HERE',
+        url: '',
+        sectionIds: [],
       },
     ]);
   });
@@ -339,5 +400,53 @@ describe('warningsForTrip', () => {
     expect(
       warnings.filter((warning) => warning.header.trim().toLowerCase() === 'k ingleside delay'),
     ).toHaveLength(1);
+  });
+
+  it('merges section associations while deduplicating by provider ID', () => {
+    const trip = transitTrip();
+    trip.sections.push({
+      ...trip.sections[0],
+      id: 'second-k-section',
+      incidents: [
+        {
+          id: 'shared-incident',
+          summary: 'Boarding change',
+          description: 'Use the marked platform.',
+        },
+      ],
+    });
+    trip.sections[0].incidents = [
+      {
+        id: 'shared-incident',
+        summary: 'Boarding change',
+        description: 'Use the marked platform.',
+      },
+    ];
+
+    expect(warningsForTrip(trip, [])).toEqual([
+      expect.objectContaining({
+        id: 'shared-incident',
+        sectionIds: ['section-K', 'second-k-section'],
+      }),
+    ]);
+  });
+
+  it('merges section associations while deduplicating normalized copy', () => {
+    const incident = {
+      summary: 'Boarding change',
+      description: 'Use the marked platform.',
+    };
+    const trip = transitTrip({ incidents: [incident] });
+    trip.sections.push({
+      ...trip.sections[0],
+      id: 'second-k-section',
+      incidents: [{ ...incident, summary: ' boarding   CHANGE ' }],
+    });
+
+    expect(warningsForTrip(trip, [])).toEqual([
+      expect.objectContaining({
+        sectionIds: ['section-K', 'second-k-section'],
+      }),
+    ]);
   });
 });

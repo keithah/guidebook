@@ -360,7 +360,7 @@ describe('Nearby', () => {
     expect(screen.getByText('First time on Muni or BART?')).toBeVisible();
   });
 
-  it('shows only route-relevant warnings on collapsed trips and never a global alert surface', async () => {
+  it('marks only route-relevant collapsed lines and never shows a global alert surface', async () => {
     renderNearby();
     expect(useTransitAlerts).toHaveBeenCalledWith('SF', { enabled: false });
     const input = screen.getByRole('searchbox', { name: /destination/i });
@@ -372,7 +372,10 @@ describe('Nearby', () => {
 
     await screen.findAllByRole('button', { name: /view full itinerary/i });
     expect(useTransitAlerts).toHaveBeenLastCalledWith('SF', { enabled: true });
-    expect(screen.getByText('K service delay')).toBeVisible();
+    expect(screen.queryByText('K service delay')).not.toBeInTheDocument();
+    expect(
+      screen.getByLabelText('Service advisory in full itinerary'),
+    ).toBeVisible();
     expect(screen.queryByText('Systemwide service notice')).not.toBeInTheDocument();
     expect(screen.queryByText('43 Masonic reroute')).not.toBeInTheDocument();
     expect(screen.queryByText('Current SF service alerts')).not.toBeInTheDocument();
@@ -381,7 +384,7 @@ describe('Nearby', () => {
     fireEvent.click(
       screen.getAllByRole('button', { name: /view full itinerary/i })[0],
     );
-    expect(screen.getAllByText('K service delay')).toHaveLength(2);
+    expect(screen.getAllByText('K service delay')).toHaveLength(1);
 
     const ferryBuilding = {
       ...unionSquare,
@@ -415,7 +418,10 @@ describe('Nearby', () => {
     replacementToggles.forEach((toggle) =>
       expect(toggle).toHaveAttribute('aria-expanded', 'false'),
     );
-    expect(screen.getByText('K service delay')).toBeVisible();
+    expect(screen.queryByText('K service delay')).not.toBeInTheDocument();
+    expect(
+      screen.getByLabelText('Service advisory in full itinerary'),
+    ).toBeVisible();
   });
 
   it('retries a failed route lookup and clears the failure once it succeeds', async () => {
