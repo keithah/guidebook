@@ -1,6 +1,6 @@
+import BartLogo from '../BartLogo.jsx';
 import MuniLogo from '../MuniLogo.jsx';
 import { classifyTransitLeg } from '../../lib/transitIdentity.js';
-import { lineBadgeStyle } from '../../theme.js';
 import JourneyIcon from './JourneyIcon.jsx';
 
 /**
@@ -23,12 +23,7 @@ export default function TransitIdentity({ section, compact = false }) {
         <MuniLogo height={compact ? 10 : 12} decorative />
       ) : null}
       {identity.operator === 'bart' ? (
-        <span
-          aria-hidden="true"
-          style={lineBadgeStyle('BART', { size: 20, fontSize: '8px' })}
-        >
-          ba
-        </span>
+        <BartLogo height={compact ? 10 : 12} decorative />
       ) : null}
       {identity.operator === 'other' ? (
         <span aria-hidden="true">{identity.operatorLabel}</span>

@@ -48,6 +48,20 @@ const walkingOnlyTrip = {
   sections: [{ type: 'pedestrian', label: 'Walking directions' }],
 };
 
+const bartTrip = {
+  ...transitTrip,
+  id: 'trip-bart',
+  lines: [{ name: 'BART Yellow' }],
+  sections: [
+    {
+      id: 'bart-yellow',
+      type: 'transit',
+      agency: { id: 'BART', name: 'Bay Area Rapid Transit' },
+      transport: { mode: 'train', shortName: 'Yellow' },
+    },
+  ],
+};
+
 function renderCard(overrides = {}) {
   const props = {
     trip: transitTrip,
@@ -91,6 +105,18 @@ describe('TripCard', () => {
     expect(
       screen.getByText('38R Geary Rapid toward Transit Center'),
     ).toBeVisible();
+  });
+
+  it('renders one accessible BART identity with a decorative bundled logo', () => {
+    renderCard({ trip: bartTrip });
+
+    const identities = screen.getAllByRole('img', {
+      name: 'BART Yellow train',
+    });
+    expect(identities).toHaveLength(1);
+    const logo = identities[0].querySelector('img[src$="bart-logo.svg"]');
+    expect(logo).toHaveAttribute('alt', '');
+    expect(logo).toHaveAttribute('aria-hidden', 'true');
   });
 
   it('falls back to the first section label when a trip has no transit sections', () => {

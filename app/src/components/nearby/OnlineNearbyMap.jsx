@@ -2,6 +2,7 @@ import { useEffect, useMemo, useRef } from 'react';
 import { MapContainer, Marker, Popup, TileLayer, useMap } from 'react-leaflet';
 import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
+import bartLogoUrl from '../../assets/bart-logo.svg';
 import { lineColors, lineLabel } from '../../theme.js';
 
 /**
@@ -12,11 +13,14 @@ import { lineColors, lineLabel } from '../../theme.js';
  */
 function lineDivIcon(line, size = 30) {
   const bg = lineColors[line] || '#5A6B65';
-  const label = lineLabel(line);
+  const label = line === 'BART' ? '' : lineLabel(line);
   const fontSize = label.length > 1 ? Math.round(size * 0.36) : Math.round(size * 0.5);
+  const contents = line === 'BART'
+    ? `<img src="${bartLogoUrl}" alt="" style="display:block;width:auto;height:${size * 0.48}px;">`
+    : label;
   return L.divIcon({
     className: 'sfc-line-pin',
-    html: `<div style="width:${size}px;height:${size}px;border-radius:50%;background:${bg};color:#fff;display:flex;align-items:center;justify-content:center;font:${fontSize}px/1 'Instrument Sans',sans-serif;font-weight:700;box-shadow:0 2px 6px rgba(20,32,29,.35);border:2px solid #fff;">${label}</div>`,
+    html: `<div style="width:${size}px;height:${size}px;border-radius:50%;background:${bg};color:#fff;display:flex;align-items:center;justify-content:center;font:${fontSize}px/1 'Instrument Sans',sans-serif;font-weight:700;box-shadow:0 2px 6px rgba(20,32,29,.35);border:2px solid #fff;">${contents}</div>`,
     iconSize: [size, size],
     iconAnchor: [size / 2, size / 2],
   });

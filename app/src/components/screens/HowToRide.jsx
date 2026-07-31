@@ -1,5 +1,6 @@
 import { useApp } from '../../context/AppContext.jsx';
 import { colors, fonts, screenPad, card, tip, backLink, lineBadgeStyle } from '../../theme.js';
+import BartLogo from '../BartLogo.jsx';
 import MuniLogo from '../MuniLogo.jsx';
 
 export default function HowToRide() {
@@ -42,7 +43,7 @@ export default function HowToRide() {
 
       <div style={card}>
         <div style={{ display: 'flex', alignItems: 'center', gap: 9, marginBottom: 6 }}>
-          <div style={lineBadgeStyle('BART', { size: 26 })}>ba</div>
+          <BartLogo height={18} />
           <div style={{ fontSize: 15, fontWeight: 600 }}>BART — the region</div>
         </div>
         <div style={{ fontSize: 13, color: colors.mutedText, lineHeight: 1.6 }}>{howToRide.bart.detail}</div>

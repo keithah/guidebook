@@ -215,7 +215,10 @@ describe('OnlineNearbyMap', () => {
 
     const bartMarker = stopMarkers[1];
     expect(bartMarker.getAttribute('data-icon-html')).toContain('#0077C0');
-    expect(bartMarker.getAttribute('data-icon-html')).toContain('>ba<');
+    expect(bartMarker.getAttribute('data-icon-html')).toContain('bart-logo.svg');
+    expect(bartMarker.getAttribute('data-icon-html')).not.toContain(
+      ['>', 'ba', '<'].join(''),
+    );
 
     const busMarker = stopMarkers[2];
     expect(busMarker.getAttribute('data-icon-html')).toContain('>29<');

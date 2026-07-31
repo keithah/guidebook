@@ -56,7 +56,9 @@ describe('JourneyTimeline', () => {
       name: 'BART Blue train',
     });
     expect(bartIdentity).toBeVisible();
-    expect(within(bartIdentity).getByText('ba')).toBeVisible();
+    const logo = bartIdentity.querySelector('img[src$="bart-logo.svg"]');
+    expect(logo).toHaveAttribute('alt', '');
+    expect(logo).toHaveAttribute('aria-hidden', 'true');
   });
 
   it('exposes robust list semantics and a visible keyboard focus indicator', () => {
