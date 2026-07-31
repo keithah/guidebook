@@ -4,6 +4,7 @@ import { fetchHereNearbyTransit } from '../lib/hereNearbyTransit.js';
 import { isFinitePosition } from '../lib/providerFetch.js';
 
 const MINIMUM_REFRESH_MS = 300_000;
+const MAXIMUM_TIMEOUT_MS = 2_147_483_647;
 
 /**
  * Load a departure board for the active location and refresh it after expiry.
@@ -33,6 +34,24 @@ export function useNearbyTransit({ origin, enabled }) {
       clearTimeout(timerRef.current);
       timerRef.current = null;
     }
+  }, []);
+
+  const scheduleRefresh = useCallback((refreshAt) => {
+    const scheduleNext = () => {
+      if (!enabledRef.current || !originKeyRef.current) return;
+      const remaining = Math.max(0, refreshAt - Date.now());
+      timerRef.current = setTimeout(() => {
+        timerRef.current = null;
+        if (!enabledRef.current || !originKeyRef.current) return;
+        if (Date.now() < refreshAt) {
+          scheduleNext();
+          return;
+        }
+        void requestRef.current?.();
+      }, Math.min(MAXIMUM_TIMEOUT_MS, remaining));
+    };
+
+    scheduleNext();
   }, []);
 
   const requestNearby = useCallback(async () => {
@@ -72,15 +91,14 @@ export function useNearbyTransit({ origin, enabled }) {
     }
 
     setPublished({ originKey: requestKey, result: nextResult });
-    const refreshDelay = Math.max(
-      MINIMUM_REFRESH_MS,
-      Number(nextResult?.expiresAt ?? 0) - Date.now(),
+    const expiresAt = Number(nextResult?.expiresAt ?? 0);
+    const refreshAt = Math.max(
+      Date.now() + MINIMUM_REFRESH_MS,
+      Number.isFinite(expiresAt) ? expiresAt : 0,
     );
-    timerRef.current = setTimeout(() => {
-      void requestRef.current?.();
-    }, refreshDelay);
+    scheduleRefresh(refreshAt);
     return nextResult;
-  }, [clearRefreshTimer]);
+  }, [clearRefreshTimer, scheduleRefresh]);
 
   requestRef.current = requestNearby;
 

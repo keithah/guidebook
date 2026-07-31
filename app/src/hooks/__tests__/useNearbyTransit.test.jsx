@@ -220,4 +220,45 @@ describe('useNearbyTransit', () => {
     await vi.advanceTimersByTimeAsync(1);
     expect(fetchHereNearbyTransit).toHaveBeenCalledTimes(2);
   });
+
+  it('chains bounded timers for an expiry beyond the platform timeout maximum', async () => {
+    vi.useFakeTimers();
+    vi.setSystemTime(1_000_000);
+    const maximumTimeout = 2_147_483_647;
+    const farExpiry = 1_000_000 + maximumTimeout * 2 + 420_000;
+    fetchHereNearbyTransit.mockResolvedValue({
+      ...successfulResult,
+      expiresAt: farExpiry,
+    });
+    const timeout = vi.spyOn(globalThis, 'setTimeout');
+    renderHook(() => useNearbyTransit({ origin: howard, enabled: true }));
+    await act(async () => {});
+
+    const initialHookDelay = timeout.mock.calls.at(-1)[1];
+    expect(initialHookDelay).toBe(maximumTimeout);
+    await vi.advanceTimersByTimeAsync(maximumTimeout);
+    expect(fetchHereNearbyTransit).toHaveBeenCalledTimes(1);
+    await vi.advanceTimersByTimeAsync(maximumTimeout);
+    expect(fetchHereNearbyTransit).toHaveBeenCalledTimes(1);
+    await vi.advanceTimersByTimeAsync(419_999);
+    expect(fetchHereNearbyTransit).toHaveBeenCalledTimes(1);
+    await vi.advanceTimersByTimeAsync(1);
+    expect(fetchHereNearbyTransit).toHaveBeenCalledTimes(2);
+  });
+
+  it('uses the five-minute floor when expiresAt is non-finite', async () => {
+    vi.useFakeTimers();
+    vi.setSystemTime(1_000_000);
+    fetchHereNearbyTransit.mockResolvedValue({
+      ...successfulResult,
+      expiresAt: Number.NaN,
+    });
+    renderHook(() => useNearbyTransit({ origin: howard, enabled: true }));
+    await act(async () => {});
+
+    await vi.advanceTimersByTimeAsync(299_999);
+    expect(fetchHereNearbyTransit).toHaveBeenCalledTimes(1);
+    await vi.advanceTimersByTimeAsync(1);
+    expect(fetchHereNearbyTransit).toHaveBeenCalledTimes(2);
+  });
 });
