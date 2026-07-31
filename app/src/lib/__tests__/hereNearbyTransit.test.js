@@ -527,6 +527,72 @@ describe('fetchHereNearbyTransit', () => {
     expect(fetchImpl).not.toHaveBeenCalled();
   });
 
+  it('rechecks cache expiry after an asynchronous response-store lookup', async () => {
+    let resolveCache;
+    vi.spyOn(providerResponseStore, 'get').mockImplementation(
+      () =>
+        new Promise((resolve) => {
+          resolveCache = resolve;
+        }),
+    );
+    let currentTime = 20_000;
+    const fetchImpl = successfulFetch({
+      stations: { headers: { 'cache-control': 'no-store' } },
+      departures: { headers: { 'cache-control': 'no-store' } },
+    });
+    const request = fetchHereNearbyTransit(origin, {
+      apiKey,
+      fetchImpl,
+      now: () => currentTime,
+    });
+    await vi.waitFor(() => expect(resolveCache).toEqual(expect.any(Function)));
+
+    currentTime = 80_000;
+    resolveCache({
+      key: 'here-nearby:37.772,-122.418',
+      data: { stations: [{ id: 'expired-during-lookup' }] },
+      fetchedAt,
+      expiresAt: 70_000,
+      staleUntil: 70_000,
+    });
+
+    const result = await request;
+    expect(result).toMatchObject({ ok: true, source: 'network' });
+    expect(result.stations).not.toContainEqual({ id: 'expired-during-lookup' });
+    expect(fetchImpl).toHaveBeenCalledTimes(2);
+  });
+
+  it('returns aborted when the caller cancels during a response-store lookup', async () => {
+    let resolveCache;
+    vi.spyOn(providerResponseStore, 'get').mockImplementation(
+      () =>
+        new Promise((resolve) => {
+          resolveCache = resolve;
+        }),
+    );
+    const controller = new AbortController();
+    const fetchImpl = vi.fn();
+    const request = fetchHereNearbyTransit(origin, {
+      apiKey,
+      fetchImpl,
+      signal: controller.signal,
+      now: () => 20_000,
+    });
+    await vi.waitFor(() => expect(resolveCache).toEqual(expect.any(Function)));
+
+    controller.abort();
+    resolveCache({
+      key: 'here-nearby:37.772,-122.418',
+      data: { stations: [{ id: 'still-fresh' }] },
+      fetchedAt,
+      expiresAt: 70_000,
+      staleUntil: 70_000,
+    });
+
+    await expect(request).resolves.toEqual({ ok: false, reason: 'aborted' });
+    expect(fetchImpl).not.toHaveBeenCalled();
+  });
+
   it('deletes an expired cache entry and never returns it', async () => {
     const staleStations = [{ id: 'stale-station' }];
     await providerResponseStore.put({

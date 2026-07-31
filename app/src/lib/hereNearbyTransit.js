@@ -514,7 +514,6 @@ export async function fetchHereNearbyTransit(
     return { ok: false, reason: 'invalid-request' };
   }
 
-  const currentTime = now();
   let cached;
   try {
     cached = await providerResponseStore.get(key);
@@ -522,6 +521,8 @@ export async function fetchHereNearbyTransit(
     // Persistent caching is best-effort; continue with the network.
   }
 
+  if (signal?.aborted) return { ok: false, reason: 'aborted' };
+  const currentTime = now();
   if (cached?.expiresAt > currentTime && Array.isArray(cached.data?.stations)) {
     return {
       ok: true,
